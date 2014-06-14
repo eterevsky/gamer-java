@@ -7,6 +7,7 @@ import gamer.Move;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class GomokuState implements GameState<Gomoku> {
   private enum CellState {
@@ -16,12 +17,24 @@ public class GomokuState implements GameState<Gomoku> {
   };
 
   private CellState field[] = new CellState[Gomoku.SIZE * Gomoku.SIZE];
-  private boolean firstPlayersTurn = true;
-  private boolean terminal = false;
+  private int movesCount = 0;
   private int result;
+  private boolean terminal = false;
+  private Random random = null;
 
   /* package */ GomokuState() {
     Arrays.fill(field, CellState.EMPTY);
+  }
+
+  private GomokuState(GomokuState other) {
+    field = other.field.clone();
+    movesCount = other.movesCount;
+    terminal = other.terminal;
+    result = other.result;
+  }
+
+  public GomokuState clone() {
+    return new GomokuState(this);
   }
 
   public void play(Move<Gomoku> moveInt) throws GameException {
@@ -29,9 +42,7 @@ public class GomokuState implements GameState<Gomoku> {
 
     if (isTerminal() ||
         field[move.cell] != CellState.EMPTY ||
-        move.player != firstPlayersTurn) {
-      System.out.println(move.player);
-      System.out.println(firstPlayersTurn);
+        move.player != isFirstPlayersTurn()) {
       throw new GameException("wrong move: " + move.toString());
     }
 
@@ -41,13 +52,12 @@ public class GomokuState implements GameState<Gomoku> {
       field[move.cell] = CellState.O;
     }
 
-    firstPlayersTurn = !firstPlayersTurn;
-
-    updateState();
+    movesCount += 1;
+    updateState(move.cell, move.player);
   }
 
   public boolean isFirstPlayersTurn() {
-    return firstPlayersTurn;
+    return movesCount % 2 == 0;
   }
 
   public boolean isTerminal() {
@@ -65,11 +75,26 @@ public class GomokuState implements GameState<Gomoku> {
     for (int i = 0; i < field.length; i++) {
       if (field[i] == CellState.EMPTY) {
         // Move<Gomoku> move = new GomokuMove(i, firstPlayersTurn);
-        moves.add(new GomokuMove(i, firstPlayersTurn));
+        moves.add(new GomokuMove(i, isFirstPlayersTurn()));
       }
     }
 
     return moves;
+  }
+
+  public GomokuMove getRandomMove() {
+    if (isTerminal())
+      return null;
+
+    if (random == null)
+      random = new Random();
+
+    int cell;
+    do {
+      cell = random.nextInt(field.length);
+    } while (field[cell] != CellState.EMPTY);
+
+    return new GomokuMove(cell, isFirstPlayersTurn());
   }
 
   public String toString() {
@@ -99,54 +124,55 @@ public class GomokuState implements GameState<Gomoku> {
     return builder.toString();
   }
 
-  private boolean checkLine(int start, int delta) {
-    int position = start;
-    for (int i = 0; i < 4; i++) {
-      int next = position + delta;
-      if (field[position] != field[next])
-        return false;
-      position = next;
+  private boolean checkLine(int from, int to, int delta, CellState cs) {
+    int filled = 0;
+    for (int i = from; i <= to; i += delta) {
+      if (field[i] == cs) {
+        filled += 1;
+        if (filled == 5)
+          return true;
+      } else {
+        filled = 0;
+      }
     }
-    return true;
+
+    return false;
   }
 
-  private void updateState() {
-    boolean foundEmpty = false;
-    terminal = false;
+  private void updateState(int cell, boolean player) {
+    int x = cell % Gomoku.SIZE;
+    int y = cell / Gomoku.SIZE;
 
-    for (int i = 0; i < field.length; i++) {
-      CellState cell = field[i];
-      if (cell == CellState.EMPTY) {
-        foundEmpty = true;
-        continue;
-      }
+    int left = Math.min(x, 4);
+    int right = Math.min(Gomoku.SIZE - x - 1, 4);
+    int top = Math.min(y, 4);
+    int bottom = Math.min(Gomoku.SIZE - y - 1, 4);
 
-      int x = i % Gomoku.SIZE;
-      int y = i / Gomoku.SIZE;
+    CellState cs = player ? CellState.X : CellState.O;
 
-      boolean won = false;
-      if (x <= Gomoku.SIZE - 5)
-        won = won || checkLine(i, 1);
+    boolean won = checkLine(cell - left, cell + right, 1, cs)
+               || checkLine(cell - top*Gomoku.SIZE,
+                            cell + bottom*Gomoku.SIZE,
+                            Gomoku.SIZE,
+                            cs)
+               || checkLine(cell - Math.min(left, top) * (Gomoku.SIZE + 1),
+                            cell + Math.min(right, bottom) * (Gomoku.SIZE + 1),
+                            Gomoku.SIZE + 1,
+                            cs)
+               || checkLine(cell - Math.min(right, top) * (Gomoku.SIZE - 1),
+                            cell + Math.min(left, bottom) * (Gomoku.SIZE - 1),
+                            Gomoku.SIZE - 1,
+                            cs);
 
-      if (y <= Gomoku.SIZE - 5)
-        won = won || checkLine(i, Gomoku.SIZE);
-
-      if (x <= Gomoku.SIZE - 5 && y <= Gomoku.SIZE - 5)
-        won = won || checkLine(i, Gomoku.SIZE + 1);
-
-      if (x >= 4 && y <= Gomoku.SIZE - 5)
-        won = won || checkLine(i, Gomoku.SIZE - 1);
-
-      if (won) {
-        terminal = true;
-        result = (cell == CellState.X) ? 1 : -1;
-        return;
-      }
-    }
-
-    if (!foundEmpty) {
+    if (won) {
+      terminal = true;
+      result = player ? 1 : -1;
+    } else if (movesCount == field.length) {
       terminal = true;
       result = 0;
+    } else {
+      terminal = false;
     }
   }
+
 }

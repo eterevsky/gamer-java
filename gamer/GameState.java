@@ -13,5 +13,9 @@ public interface GameState<G extends Game> extends Cloneable {
 
   public List<Move<G>> getAvailableMoves();
 
+  public Move<G> getRandomMove();
+
   public void play(Move<G> move) throws GameException;
+
+  public GameState<G> clone();
 }
