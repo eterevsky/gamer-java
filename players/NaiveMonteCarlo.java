@@ -8,40 +8,60 @@ import gamer.Player;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class NaiveMonteCarlo implements Player {
   private final long timeout;
+  private final int MAX_SAMPLERS = 32;
 
   public NaiveMonteCarlo(long timeout) {
     this.timeout = timeout;
   }
 
   public <T extends Game> Move<T> selectMove(GameState<T> state)
-      throws RuntimeException {
+      throws Exception {
     long startTime = System.currentTimeMillis();
 
-    Player randomPlayer = new RandomPlayer();
     List<Move<T>> moves = state.getAvailableMoves();
     int[] resultByMove = new int[moves.size()];
+    int[] totalByMove = new int[moves.size()];
     Arrays.fill(resultByMove, 0);
-    int total = 0;
+    Arrays.fill(totalByMove, 0);
     boolean iAmFirst = state.isFirstPlayersTurn();
 
+    ExecutorService executor = Executors.newFixedThreadPool(32);
+    CompletionService<Sample<Integer>> compService =
+        new ExecutorCompletionService<>(executor);
+
+    int imove = 0;
+    int runningSamplers = 0;
+
     while (System.currentTimeMillis() - startTime < timeout) {
-      total += 1;
-      for (int i = 0; i < moves.size(); i++) {
+      while (runningSamplers < MAX_SAMPLERS) {
         GameState<T> mcState = state.clone();
-        mcState.play(moves.get(i));
-        while (!mcState.isTerminal()) {
-          mcState.play(randomPlayer.selectMove(mcState));
-        }
-        if (iAmFirst) {
-          resultByMove[i] += mcState.getResult();
-        } else {
-          resultByMove[i] -= mcState.getResult();
-        }
+        mcState.play(moves.get(imove));
+        compService.submit(new RandomSampler<Integer>(imove, mcState, 10));
+        runningSamplers += 1;
+        imove = (imove + 1) % moves.size();
+      }
+
+      Sample<Integer> sample = compService.take().get();
+      runningSamplers -= 1;
+
+      totalByMove[sample.label] += sample.nsamples;
+      if (iAmFirst) {
+        resultByMove[sample.label] += sample.result;
+      } else {
+        resultByMove[sample.label] -= sample.result;
       }
     }
+
+    executor.shutdownNow();
 
     int bestMove = 0;
     for (int i = 1; i < moves.size(); i++) {
@@ -50,8 +70,8 @@ public class NaiveMonteCarlo implements Player {
     }
 
     System.out.format("%d of %d\n",
-                      (total + resultByMove[bestMove]) / 2,
-                      total);
+                      (totalByMove[bestMove] + resultByMove[bestMove]) / 2,
+                      totalByMove[bestMove]);
 
     return moves.get(bestMove);
   }
