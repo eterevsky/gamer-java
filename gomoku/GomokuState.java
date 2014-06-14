@@ -29,8 +29,11 @@ public class GomokuState implements GameState<Gomoku> {
 
     if (isTerminal() ||
         field[move.cell] != CellState.EMPTY ||
-        move.player != firstPlayersTurn)
-      throw new GameException();
+        move.player != firstPlayersTurn) {
+      System.out.println(move.player);
+      System.out.println(firstPlayersTurn);
+      throw new GameException("wrong move: " + move.toString());
+    }
 
     if (move.player) {
       field[move.cell] = CellState.X;
@@ -65,7 +68,35 @@ public class GomokuState implements GameState<Gomoku> {
         moves.add(new GomokuMove(i, firstPlayersTurn));
       }
     }
+
     return moves;
+  }
+
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < field.length; i++) {
+      switch (field[i]) {
+        case EMPTY:
+          builder.append('.');
+          break;
+
+        case X:
+          builder.append('X');
+          break;
+
+        case O:
+          builder.append('O');
+          break;
+      }
+
+      if (i % Gomoku.SIZE == Gomoku.SIZE - 1) {
+        builder.append('\n');
+      } else {
+        builder.append(' ');
+      }
+    }
+
+    return builder.toString();
   }
 
   private boolean checkLine(int start, int delta) {
@@ -109,7 +140,13 @@ public class GomokuState implements GameState<Gomoku> {
       if (won) {
         terminal = true;
         result = (cell == CellState.X) ? 1 : -1;
+        return;
       }
+    }
+
+    if (!foundEmpty) {
+      terminal = true;
+      result = 0;
     }
   }
 }
