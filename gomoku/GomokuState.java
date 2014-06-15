@@ -42,7 +42,7 @@ public class GomokuState implements GameState<Gomoku> {
 
     if (isTerminal() ||
         field[move.cell] != CellState.EMPTY ||
-        move.player != isFirstPlayersTurn()) {
+        move.player != getPlayer()) {
       throw new GameException("wrong move: " + move.toString());
     }
 
@@ -56,7 +56,7 @@ public class GomokuState implements GameState<Gomoku> {
     updateState(move.cell, move.player);
   }
 
-  public boolean isFirstPlayersTurn() {
+  public boolean getPlayer() {
     return movesCount % 2 == 0;
   }
 
@@ -75,7 +75,7 @@ public class GomokuState implements GameState<Gomoku> {
     for (int i = 0; i < field.length; i++) {
       if (field[i] == CellState.EMPTY) {
         // Move<Gomoku> move = new GomokuMove(i, firstPlayersTurn);
-        moves.add(new GomokuMove(i, isFirstPlayersTurn()));
+        moves.add(new GomokuMove(i, getPlayer()));
       }
     }
 
@@ -94,7 +94,7 @@ public class GomokuState implements GameState<Gomoku> {
       cell = random.nextInt(field.length);
     } while (field[cell] != CellState.EMPTY);
 
-    return new GomokuMove(cell, isFirstPlayersTurn());
+    return new GomokuMove(cell, getPlayer());
   }
 
   public String toString() {

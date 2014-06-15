@@ -24,25 +24,11 @@ public class MonteCarloUcb implements Player {
     this.timeout = timeout;
   }
 
-  private class QueuedItem implements Comparable<QueuedItem> {
-    int item;
-    Double priority;
-
-    QueuedItem(int item, double priority) {
-      this.item = item;
-      this.priority = priority;
-    }
-
-    public int compareTo(QueuedItem o) {
-      return priority.compareTo(o.priority);
-    }
-  }
-
-  public <T extends Game> Move<T> selectMove(GameState<T> state)
+  public <T extends Game> Move<G> selectMove(GameState<G> state)
       throws Exception {
     long startTime = System.currentTimeMillis();
     boolean iAmFirst = state.isFirstPlayersTurn();
-    List<Move<T>> moves = state.getAvailableMoves();
+    List<Move<G>> moves = state.getAvailableMoves();
 
     int[] winsByMove = new int[moves.size()];
     int[] samplesByMove = new int[moves.size()];
@@ -50,7 +36,7 @@ public class MonteCarloUcb implements Player {
     Arrays.fill(samplesByMove, 0);
     int total = 0;
 
-    PriorityQueue<QueuedItem> queue = new PriorityQueue<>();
+    PriorityQueue<QueueElement<Integer>> queue = new PriorityQueue<>();
     for (int i = 0; i < moves.size(); i++) {
       queue.add(new QueuedItem(i, -1));
     }
@@ -59,7 +45,6 @@ public class MonteCarloUcb implements Player {
     CompletionService<Sample<Integer>> compService =
         new ExecutorCompletionService<>(executor);
     int runningSamplers = 0;
-
 
     while (System.currentTimeMillis() - startTime < timeout) {
       while (runningSamplers < MAX_SAMPLERS) {
@@ -71,9 +56,9 @@ public class MonteCarloUcb implements Player {
             ((double) winsByMove[imove]) /
                 (samplesByMove[imove] * Math.sqrt(Math.log(total))) +
             Math.sqrt(2.0 / samplesByMove[imove]);
-        queue.add(new QueuedItem(imove, -newPriority));
+        queue.add(new QueuedElement<Integer>(imove, -newPriority));
 
-        GameState<T> mcState = state.clone();
+        GameState<G> mcState = state.clone();
         mcState.play(moves.get(imove));
         compService.submit(
             new RandomSampler<Integer>(imove, mcState, SAMPLES_BATCH));

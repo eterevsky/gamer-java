@@ -1,5 +1,7 @@
 #!/bin/sh
 
+rm -f *.jar *.class */*.class
+
 javac -Xlint:unchecked gamer/*.java && \
 javac -Xlint:unchecked gomoku/*.java && \
 javac -Xlint:unchecked players/*.java && \

@@ -5,8 +5,7 @@ import java.util.List;
 public interface GameState<G extends Game> extends Cloneable {
   public boolean isTerminal();
 
-  // True: first player's turn.
-  public boolean isFirstPlayersTurn();
+  public boolean getPlayer();
 
   // +1 / 0 / -1
   public int getResult() throws GameException;

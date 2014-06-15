@@ -17,4 +17,17 @@ public class GomokuMove implements Move<Gomoku> {
                          cell / Gomoku.SIZE,
                          cell % Gomoku.SIZE);
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof GomokuMove))
+      return false;
+    GomokuMove oMove = (GomokuMove) o;
+    return cell == oMove.cell && player == oMove.player;
+  }
+
+  @Override
+  public int hashCode() {
+    return (player ? Gomoku.SIZE : 0) + cell;
+  }
 }

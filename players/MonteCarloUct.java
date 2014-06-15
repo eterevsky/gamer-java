@@ -1,5 +1,6 @@
 package players;
 
+import gamer.Game;
 import gamer.GameState;
 import gamer.Move;
 import gamer.Player;
@@ -21,60 +22,48 @@ public class MonteCarloUct implements Player {
   private final int MAX_SAMPLERS = 32;
   private final int SAMPLES_BATCH = 10;
 
-  private class QueuedItem<T> implements Comparable<QueuedItem> {
-    T item;
-    Double priority;
+  private class PositionNode<G extends Game> {
+    int samples = 0;
+    int wins = 0;
+    final PositionNode parent;
+    final boolean player;
+    Map<Move<G>, PositionNode> children = new HashMap<>();
+    private PriorityQueue<QueueElement<Move<G>>> queue = new PriorityQueue<>();
 
-    QueuedItem(T item, double priority) {
-      this.item = item;
-      this.node = node;
-    }
-
-    public int compareTo(QueuedItem o) {
-      return priority.compareTo(o.priority);
+    PositionNode(PositionNode parent, boolean player, List<Move<G>> moves) {
+      this.parent = parent;
+      this.player = player;
+      for (Move<G> move : moves) {
+        this.children.put(move, null);
+        this.queue.add(new QueueElement<Move<G>>(move, -1));
+      }
     }
   }
 
-  private class PositionNode {
-    int samples = 0;
-    int wins = 0;
-    final PositionNode parent = null;
-    boolean player;
-    Map<Move, PositionNode> children = new HashMap<>();
-    PriorityQueue<QueuedItem<Move>> queue;
+  private class NodeAndState<G> {
+    PositionNode<G> node;
+    GameState<G> state;
   }
 
   public MonteCarloUct(long timeout) {
     this.timeout = timeout;
   }
 
-  public <T extends Game> Move<T> selectMove(GameState<T> state)
+  public <G extends Game> Move<G> selectMove(GameState<G> state)
       throws Exception {
     long startTime = System.currentTimeMillis();
-    boolean iAmFirst = state.isFirstPlayersTurn();
-    List<Move<T>> moves = state.getAvailableMoves();
 
-    int[] winsByMove = new int[moves.size()];
-    int[] samplesByMove = new int[moves.size()];
-    Arrays.fill(winsByMove, 0);
-    Arrays.fill(samplesByMove, 0);
-    int total = 0;
-
-    PriorityQueue<QueuedItem> queue = new PriorityQueue<>();
-    for (int i = 0; i < moves.size(); i++) {
-      queue.add(new QueuedItem(i, -1));
-    }
+    PositionNode root =
+        new PositionNode(null, state.getPlayer(), state.getAvailableMoves());
 
     ExecutorService executor = Executors.newFixedThreadPool(32);
     CompletionService<Sample<Integer>> compService =
         new ExecutorCompletionService<>(executor);
     int runningSamplers = 0;
 
-
-    while (System.currentTimeMillis() - startTime < timeout) {
-      while (runningSamplers < MAX_SAMPLERS) {
-
-...
+/*    while (System.currentTimeMillis() - startTime < timeout) {
+      if (runningSamplers < MAX_SAMPLERS) {
+        NodeAndState<G> = getNodeFromQueue(root, state);
 
       }
 
@@ -84,7 +73,7 @@ public class MonteCarloUct implements Player {
 
     executor.shutdownNow();
 
-...
+... */
 
     System.out.format("%d of %d\n",
                       winsByMove[bestMove],
