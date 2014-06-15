@@ -7,44 +7,55 @@ import gamer.Player;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class NaiveMonteCarlo implements Player {
-  private final long timeout;
-  private final int MAX_SAMPLERS = 32;
+  private double timeoutInSec;
+  private Executor executor = null;
+  private int maxWorkers;
 
-  public NaiveMonteCarlo(long timeout) {
-    this.timeout = timeout;
+  public NaiveMonteCarlo() {}
+
+  public NaiveMonteCarlo setTimeout(double timeoutInSec) {
+    this.timeoutInSec = timeoutInSec;
+    return this;
   }
 
-  public <T extends Game> Move<T> selectMove(GameState<T> state)
+  public MonteCarloUcb setExecutor(Executor executor, int maxWorkers) {
+    this.executor = executor;
+    this.maxWorkers = maxWorkers;
+    return this;
+  }
+
+  public <G extends Game> Move<G> selectMove(GameState<G> state)
       throws Exception {
     long startTime = System.currentTimeMillis();
 
-    List<Move<T>> moves = state.getAvailableMoves();
+    List<Move<G>> moves = state.getAvailableMoves();
     int[] resultByMove = new int[moves.size()];
     int[] totalByMove = new int[moves.size()];
+
+
+    GameState<G>[] stateAfterMove = new ...
+
     Arrays.fill(resultByMove, 0);
     Arrays.fill(totalByMove, 0);
-    boolean iAmFirst = state.isFirstPlayersTurn();
+    boolean iAmFirst = state.getPlayer();
 
-    ExecutorService executor = Executors.newFixedThreadPool(32);
-    CompletionService<Sample<Integer>> compService =
-        new ExecutorCompletionService<>(executor);
+    EvaluationQueue<G, Integer> evaluationQueue = new EvaluationQueue<>(
+        new RandomSampleEvaluator(), executor, maxWorkers);
 
     int imove = 0;
-    int runningSamplers = 0;
 
-    while (System.currentTimeMillis() - startTime < timeout) {
+    while (System.currentTimeMillis() - startTime < timeoutInSec * 1000) {
+      while (evaluationQueue.needMoreWork()) {
+        evaluationQueue.put(imove,
+      }
+
       while (runningSamplers < MAX_SAMPLERS) {
-        GameState<T> mcState = state.clone();
+        GameState<G> mcState = state.clone();
         mcState.play(moves.get(imove));
-        compService.submit(new RandomSampler<Integer>(imove, mcState, 10));
+        compService.submit(new RandomSampler<Integer, G>(imove, mcState, 10));
         runningSamplers += 1;
         imove = (imove + 1) % moves.size();
       }

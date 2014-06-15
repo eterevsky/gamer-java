@@ -8,26 +8,30 @@ import gamer.Player;
 import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class MonteCarloUcb implements Player {
-  private final long timeout;
-  private final int MAX_SAMPLERS = 32;
-  private final int SAMPLES_BATCH = 10;
+  private long timeoutInMs = 1000;
+  private ExecutorService executor = null;
+  private int maxWorkers = 1;
 
-  public MonteCarloUcb(long timeout) {
-    this.timeout = timeout;
+  public MonteCarloUcb() {}
+
+  public MonteCarloUcb setTimeout(double timeoutInSec) {
+    this.timeoutInMs = Math.round(1000 * timeoutInSec);
+    return this;
   }
 
-  public <T extends Game> Move<G> selectMove(GameState<G> state)
+  public MonteCarloUcb setExecutor(ExecutorService executor, int maxWorkers) {
+    this.executor = executor;
+    this.maxWorkers = maxWorkers;
+    return this;
+  }
+
+  public <G extends Game> Move<G> selectMove(GameState<G> state)
       throws Exception {
     long startTime = System.currentTimeMillis();
-    boolean iAmFirst = state.isFirstPlayersTurn();
+    boolean iAmFirst = state.getPlayer();
     List<Move<G>> moves = state.getAvailableMoves();
 
     int[] winsByMove = new int[moves.size()];
@@ -38,7 +42,7 @@ public class MonteCarloUcb implements Player {
 
     PriorityQueue<QueueElement<Integer>> queue = new PriorityQueue<>();
     for (int i = 0; i < moves.size(); i++) {
-      queue.add(new QueuedItem(i, -1));
+      queue.add(new QueueElement<>(i, -1));
     }
 
     ExecutorService executor = Executors.newFixedThreadPool(32);
@@ -46,7 +50,7 @@ public class MonteCarloUcb implements Player {
         new ExecutorCompletionService<>(executor);
     int runningSamplers = 0;
 
-    while (System.currentTimeMillis() - startTime < timeout) {
+    while (System.currentTimeMillis() - startTime < timeoutInMs) {
       while (runningSamplers < MAX_SAMPLERS) {
         int imove = queue.poll().item;
 
@@ -56,12 +60,12 @@ public class MonteCarloUcb implements Player {
             ((double) winsByMove[imove]) /
                 (samplesByMove[imove] * Math.sqrt(Math.log(total))) +
             Math.sqrt(2.0 / samplesByMove[imove]);
-        queue.add(new QueuedElement<Integer>(imove, -newPriority));
+        queue.add(new QueueElement<>(imove, -newPriority));
 
         GameState<G> mcState = state.clone();
         mcState.play(moves.get(imove));
         compService.submit(
-            new RandomSampler<Integer>(imove, mcState, SAMPLES_BATCH));
+            new RandomSampler<Integer, G>(imove, mcState, SAMPLES_BATCH));
         runningSamplers += 1;
       }
 

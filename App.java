@@ -9,14 +9,14 @@ import players.RandomPlayer;
 class App {
   public static void main(String[] args) throws Exception {
     GameState<Gomoku> game = Gomoku.newGame();
-    Player player1 = new MonteCarloUcb(3000);
-    Player player2 = new MonteCarloUcb(5000);
+    Player player1 = new NaiveMonteCarlo().setTimeout(2);
+    Player player2 = new MonteCarloUcb().setTimeout(2);
 
     System.out.println(game);
 
     while (!game.isTerminal()) {
       Move<Gomoku> move;
-      if (game.isFirstPlayersTurn()) {
+      if (game.getPlayer()) {
         move = player1.selectMove(game);
       } else {
         move = player2.selectMove(game);

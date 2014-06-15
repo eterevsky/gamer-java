@@ -18,9 +18,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MonteCarloUct implements Player {
-  private final long timeout;
   private final int MAX_SAMPLERS = 32;
   private final int SAMPLES_BATCH = 10;
+
+  private long timeoutInMs;
+  private Executor executor = null;
+  private int maxWorkers = 1;
 
   private class PositionNode<G extends Game> {
     int samples = 0;
@@ -40,21 +43,30 @@ public class MonteCarloUct implements Player {
     }
   }
 
-  private class NodeAndState<G> {
+  private class NodeAndState<G extends Game> {
     PositionNode<G> node;
     GameState<G> state;
   }
 
-  public MonteCarloUct(long timeout) {
-    this.timeout = timeout;
+  public MonteCarloUct() {}
+
+  public MonteCarloUct setTimeout(double timeoutInSec) {
+    this.timeoutInMs = Math.round(1000 * timeoutInSec);
+    return this;
+  }
+
+  public MonteCarloUcb setExecutor(Executor executor, int maxWorkers) {
+    this.executor = executor;
+    this.maxWorkers = maxWorkers;
+    return this;
   }
 
   public <G extends Game> Move<G> selectMove(GameState<G> state)
       throws Exception {
     long startTime = System.currentTimeMillis();
 
-    PositionNode root =
-        new PositionNode(null, state.getPlayer(), state.getAvailableMoves());
+    PositionNode<G> root =
+        new PositionNode<>(null, state.getPlayer(), state.getAvailableMoves());
 
     ExecutorService executor = Executors.newFixedThreadPool(32);
     CompletionService<Sample<Integer>> compService =
@@ -73,12 +85,14 @@ public class MonteCarloUct implements Player {
 
     executor.shutdownNow();
 
-... */
+...
 
     System.out.format("%d of %d\n",
                       winsByMove[bestMove],
                       samplesByMove[bestMove]);
 
     return bestMove;
+*/
+    return null;
   }
 }

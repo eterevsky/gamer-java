@@ -2,15 +2,16 @@ package gomoku;
 
 import gamer.Move;
 
-public class GomokuMove implements Move<Gomoku> {
-  /* package */ int cell;
-  /* package */ boolean player;
+public final class GomokuMove implements Move<Gomoku> {
+  int cell;
+  boolean player;
 
-  /* package */ GomokuMove(int cell, boolean player) {
+  GomokuMove(int cell, boolean player) {
     this.cell = cell;
     this.player = player;
   }
 
+  @Override
   public String toString() {
     return String.format("%s (%d, %d)",
                          (this.player ? "X" : "0"),

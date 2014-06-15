@@ -5,7 +5,7 @@ import gamer.GameState;
 import gamer.Move;
 import java.util.concurrent.Callable;
 
-/* package */ class RandomSampler<T, G> implements Callable<Sample<T>> {
+class RandomSampler<T, G extends Game> implements Callable<Sample<T>> {
   private T label;
   private GameState<G> state;
   private int nsamples;
@@ -26,7 +26,7 @@ import java.util.concurrent.Callable;
       while (!stateCopy.isTerminal()) {
         stateCopy.play(randomPlayer.selectMove(stateCopy));
       }
-      result += stateCopy.getResult();
+      result += stateCopy.getResult().asInt();
     }
 
     return new Sample<T>(label, nsamples, result);

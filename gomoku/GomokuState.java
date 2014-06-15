@@ -2,12 +2,13 @@ package gomoku;
 
 import gamer.GameException;
 import gamer.GameState;
+import gamer.GameResult;
 import gamer.Move;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class GomokuState implements GameState<Gomoku> {
   private enum CellState {
@@ -18,11 +19,10 @@ public class GomokuState implements GameState<Gomoku> {
 
   private CellState field[] = new CellState[Gomoku.SIZE * Gomoku.SIZE];
   private int movesCount = 0;
-  private int result;
+  private GameResult result;
   private boolean terminal = false;
-  private Random random = null;
 
-  /* package */ GomokuState() {
+  GomokuState() {
     Arrays.fill(field, CellState.EMPTY);
   }
 
@@ -33,6 +33,7 @@ public class GomokuState implements GameState<Gomoku> {
     result = other.result;
   }
 
+  @Override
   public GomokuState clone() {
     return new GomokuState(this);
   }
@@ -64,7 +65,7 @@ public class GomokuState implements GameState<Gomoku> {
     return terminal;
   }
 
-  public int getResult() throws GameException {
+  public GameResult getResult() throws GameException {
     if (!isTerminal())
       throw new GameException();
     return result;
@@ -86,12 +87,9 @@ public class GomokuState implements GameState<Gomoku> {
     if (isTerminal())
       return null;
 
-    if (random == null)
-      random = new Random();
-
     int cell;
     do {
-      cell = random.nextInt(field.length);
+      cell = ThreadLocalRandom.current().nextInt(field.length);
     } while (field[cell] != CellState.EMPTY);
 
     return new GomokuMove(cell, getPlayer());
@@ -151,8 +149,8 @@ public class GomokuState implements GameState<Gomoku> {
     CellState cs = player ? CellState.X : CellState.O;
 
     boolean won = checkLine(cell - left, cell + right, 1, cs)
-               || checkLine(cell - top*Gomoku.SIZE,
-                            cell + bottom*Gomoku.SIZE,
+               || checkLine(cell - top * Gomoku.SIZE,
+                            cell + bottom * Gomoku.SIZE,
                             Gomoku.SIZE,
                             cs)
                || checkLine(cell - Math.min(left, top) * (Gomoku.SIZE + 1),
@@ -166,10 +164,10 @@ public class GomokuState implements GameState<Gomoku> {
 
     if (won) {
       terminal = true;
-      result = player ? 1 : -1;
+      result = player ? GameResult.WIN : GameResult.LOSS;
     } else if (movesCount == field.length) {
       terminal = true;
-      result = 0;
+      result = GameResult.DRAW;
     } else {
       terminal = false;
     }
