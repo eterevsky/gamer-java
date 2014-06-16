@@ -5,17 +5,29 @@ import gamer.GameState;
 import gamer.Move;
 
 class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
+  private final int nsamples;
+
+  RandomSampleEvaluator(int nsamples) {
+    this.nsamples = nsamples;
+  }
+
   public int evaluate(GameState<G> origState) {
-    GameState<G> state = origState.clone();
-    while (!state.isTerminal()) {
-      state.play(state.getRandomMove());
+    int s = 0;
+
+    for (int i = 0; i < nsamples; i++) {
+      GameState<G> state = origState.clone();
+      while (!state.isTerminal()) {
+        state.play(state.getRandomMove());
+      }
+
+      s += state.getResult().asInt();
     }
 
-    return state.getResult().asInt();
+    return s;
   }
 
   @Override
   public RandomSampleEvaluator<G> clone() {
-    return new RandomSampleEvaluator<G>();
+    return new RandomSampleEvaluator<G>(nsamples);
   }
 }

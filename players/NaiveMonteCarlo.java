@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class NaiveMonteCarlo implements Player {
-  private double timeoutInSec;
+  private final int SAMPLES_BATCH = 8;
+
+  private double timeoutInSec = 1;
   private ExecutorService executor = null;
   private int maxWorkers;
 
@@ -29,7 +31,7 @@ public class NaiveMonteCarlo implements Player {
 
     void addSample(int result) {
       wins += result;
-      nsamples += 1;
+      nsamples += SAMPLES_BATCH;
     }
 
     double result() {
@@ -60,7 +62,7 @@ public class NaiveMonteCarlo implements Player {
     }
 
     EvaluationQueue<G, Integer> evaluationQueue = new EvaluationQueue<>(
-        new RandomSampleEvaluator<G>(), executor, maxWorkers);
+        new RandomSampleEvaluator<G>(SAMPLES_BATCH), executor, maxWorkers);
 
     int imove = 0;
 
