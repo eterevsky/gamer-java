@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+
 public class MonteCarloUcb implements Player {
   private long timeoutInMs = 1000;
   private ExecutorService executor = null;
@@ -45,17 +48,16 @@ public class MonteCarloUcb implements Player {
       queue.add(new QueueElement<>(i, -1));
     }
 
-    ExecutorService executor = Executors.newFixedThreadPool(32);
     CompletionService<Sample<Integer>> compService =
         new ExecutorCompletionService<>(executor);
     int runningSamplers = 0;
 
     while (System.currentTimeMillis() - startTime < timeoutInMs) {
-      while (runningSamplers < MAX_SAMPLERS) {
+      while (runningSamplers < maxWorkers) {
         int imove = queue.poll().item;
 
-        total += SAMPLES_BATCH;
-        samplesByMove[imove] += SAMPLES_BATCH;
+        total += 1;
+        samplesByMove[imove] += 1;
         double newPriority =
             ((double) winsByMove[imove]) /
                 (samplesByMove[imove] * Math.sqrt(Math.log(total))) +
@@ -65,19 +67,19 @@ public class MonteCarloUcb implements Player {
         GameState<G> mcState = state.clone();
         mcState.play(moves.get(imove));
         compService.submit(
-            new RandomSampler<Integer, G>(imove, mcState, SAMPLES_BATCH));
+            new RandomSampler<Integer, G>(imove, mcState, 1));
         runningSamplers += 1;
       }
 
       Sample<Integer> sample = compService.take().get();
       runningSamplers -= 1;
 
-      int wins = (sample.result + SAMPLES_BATCH) / 2;
+      int wins = (sample.result + 1) / 2;
 
       if (iAmFirst) {
         winsByMove[sample.label] += wins;
       } else {
-        winsByMove[sample.label] += SAMPLES_BATCH - wins;
+        winsByMove[sample.label] += 1 - wins;
       }
     }
 

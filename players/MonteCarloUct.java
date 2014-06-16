@@ -22,7 +22,7 @@ public class MonteCarloUct implements Player {
   private final int SAMPLES_BATCH = 10;
 
   private long timeoutInMs;
-  private Executor executor = null;
+  private ExecutorService executor = null;
   private int maxWorkers = 1;
 
   private class PositionNode<G extends Game> {
@@ -55,7 +55,7 @@ public class MonteCarloUct implements Player {
     return this;
   }
 
-  public MonteCarloUcb setExecutor(Executor executor, int maxWorkers) {
+  public MonteCarloUct setExecutor(ExecutorService executor, int maxWorkers) {
     this.executor = executor;
     this.maxWorkers = maxWorkers;
     return this;

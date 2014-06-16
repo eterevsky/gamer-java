@@ -1,16 +1,23 @@
 package players;
 
 import gamer.Game;
+import gamer.GameState;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 
 class EvaluationQueue<G extends Game, L> {
-  private Executor executor;
+  private ExecutorService executor;
   private int nworkers;
   private Evaluator<G> evaluator;
-  private BlockingQueue<LabeledState> states;
-  private BlockingQueue<LabeledResult> results;
+  private List<Future<?>> tasks = new ArrayList<>();
+  private BlockingQueue<LabeledState> states = new LinkedBlockingQueue<>();
+  private BlockingQueue<LabeledResult> results = new LinkedBlockingQueue<>();
   boolean moreWork = true;
 
   private class LabeledState {
@@ -27,13 +34,13 @@ class EvaluationQueue<G extends Game, L> {
     L label;
     int result;
 
-    LabeledState(L label, int result) {
+    LabeledResult(L label, int result) {
       this.label = label;
       this.result = result;
     }
   }
 
-  private class Worker extends Runnable {
+  private class Worker implements Runnable {
     private final Evaluator<G> evaluator;
     private final BlockingQueue<LabeledState> states;
     private final BlockingQueue<LabeledResult> results;
@@ -46,12 +53,14 @@ class EvaluationQueue<G extends Game, L> {
       this.results = results;
     }
 
-    void run() {
-      while (true) {
-        LabeledState lstate = states.take();
-        int result = evaluator.evaluate(lstate.state);
-        results.put(new LabeledResult(lstate.label, result));
-      }
+    public void run() {
+      try {
+        while (true) {
+          LabeledState lstate = states.take();
+          int result = evaluator.evaluate(lstate.state);
+          results.put(new LabeledResult(lstate.label, result));
+        }
+      } catch (InterruptedException e) {}
     }
   }
 
@@ -66,11 +75,9 @@ class EvaluationQueue<G extends Game, L> {
     this.nworkers = nworkers;
     this.evaluator = evaluator;
 
-    states = new BlockingQueue<>();
-    results = new BlockingQueue<>();
-
     for (int i = 0; i < nworkers; i++) {
-      executor.execute(new Worker(evaluator.clone(), states, results));
+      tasks.add(
+          executor.submit(new Worker(evaluator.clone(), states, results)));
     }
   }
 
@@ -89,19 +96,29 @@ class EvaluationQueue<G extends Game, L> {
   }
 
   void put(L label, GameState<G> state) throws RuntimeException {
-    if (!states.offer(LabeledState(label, state))) {
-      throw RuntimeException("State evaluation queue overflow.");
+    if (!states.offer(new LabeledState(label, state))) {
+      throw new RuntimeException("State evaluation queue overflow.");
     }
   }
 
   // Blocking.
   LabeledResult get() {
-    if (executor != null) {
-      return this.results.take();
-    } else {
-      LabeledState lstate = states.take();
-      int result = evaluator.evaluate(lstate.state);
-      return new LabeledResult(lstate.label, result);
+    try {
+      if (executor != null) {
+        return this.results.take();
+      } else {
+        LabeledState lstate = states.take();
+        int result = evaluator.evaluate(lstate.state);
+        return new LabeledResult(lstate.label, result);
+      }
+    } catch (InterruptedException e) {
+      return null;
+    }
+  }
+
+  void shutdown() {
+    for (Future<?> task : tasks) {
+      task.cancel(true);
     }
   }
 }

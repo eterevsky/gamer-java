@@ -16,7 +16,7 @@ public class RandomPlayer implements Player {
     return this;
   }
 
-  public MonteCarloUcb setExecutor(Executor executor, int maxWorkers) {
+  public RandomPlayer setExecutor(ExecutorService executor, int maxWorkers) {
     return this;
   }
 }
