@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class MonteCarloUct implements Player {
+public class MonteCarloUct<G extends Game> implements Player<G> {
   private final int MAX_SAMPLERS = 32;
   private final int SAMPLES_BATCH = 10;
 
@@ -61,8 +61,7 @@ public class MonteCarloUct implements Player {
     return this;
   }
 
-  public <G extends Game> Move<G> selectMove(GameState<G> state)
-      throws Exception {
+  public Move<G> selectMove(GameState<G> state) throws Exception {
     long startTime = System.currentTimeMillis();
 
     PositionNode<G> root =

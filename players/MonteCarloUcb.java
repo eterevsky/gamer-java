@@ -5,96 +5,77 @@ import gamer.GameState;
 import gamer.Move;
 import gamer.Player;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
+public class MonteCarloUcb<G extends Game> implements Player<G> {
+  private final int SAMPLES_BATCH = 8;
 
-public class MonteCarloUcb implements Player {
-  private long timeoutInMs = 1000;
-  private ExecutorService executor = null;
-  private int maxWorkers = 1;
+  private double timeoutInSec = 1;
+  private EvaluationQueue<G, ShallowNode<G>> evaluationQueue =
+      new EvaluationQueue<>(new RandomSampleEvaluator<G>(SAMPLES_BATCH));
 
   public MonteCarloUcb() {}
 
   public MonteCarloUcb setTimeout(double timeoutInSec) {
-    this.timeoutInMs = Math.round(1000 * timeoutInSec);
+    this.timeoutInSec = timeoutInSec;
     return this;
   }
 
   public MonteCarloUcb setExecutor(ExecutorService executor, int maxWorkers) {
-    this.executor = executor;
-    this.maxWorkers = maxWorkers;
+    evaluationQueue = new EvaluationQueue<>(
+        new RandomSampleEvaluator<G>(SAMPLES_BATCH), executor, maxWorkers);
     return this;
   }
 
-  public <G extends Game> Move<G> selectMove(GameState<G> state)
-      throws Exception {
+  public Move<G> selectMove(GameState<G> state) throws Exception {
     long startTime = System.currentTimeMillis();
-    boolean iAmFirst = state.getPlayer();
-    List<Move<G>> moves = state.getAvailableMoves();
 
-    int[] winsByMove = new int[moves.size()];
-    int[] samplesByMove = new int[moves.size()];
-    Arrays.fill(winsByMove, 0);
-    Arrays.fill(samplesByMove, 0);
-    int total = 0;
-
-    PriorityQueue<QueueElement<Integer>> queue = new PriorityQueue<>();
-    for (int i = 0; i < moves.size(); i++) {
-      queue.add(new QueueElement<>(i, -1));
+    List<ShallowNode<G>> nodes = new ArrayList<>();
+    PriorityQueue<QueueElement<ShallowNode<G>>> queue = new PriorityQueue<>();
+    for (Move<G> move : state.getAvailableMoves()) {
+      ShallowNode<G> node = new ShallowNode<>(state, move);
+      nodes.add(node);
+      queue.add(new QueueElement<>(node, -1));
     }
 
-    CompletionService<Sample<Integer>> compService =
-        new ExecutorCompletionService<>(executor);
-    int runningSamplers = 0;
-
-    while (System.currentTimeMillis() - startTime < timeoutInMs) {
-      while (runningSamplers < maxWorkers) {
-        int imove = queue.poll().item;
-
-        total += 1;
-        samplesByMove[imove] += 1;
-        double newPriority =
-            ((double) winsByMove[imove]) /
-                (samplesByMove[imove] * Math.sqrt(Math.log(total))) +
-            Math.sqrt(2.0 / samplesByMove[imove]);
-        queue.add(new QueueElement<>(imove, -newPriority));
-
-        GameState<G> mcState = state.clone();
-        mcState.play(moves.get(imove));
-        compService.submit(
-            new RandomSampler<Integer, G>(imove, mcState, 1));
-        runningSamplers += 1;
+    boolean player = state.getPlayer();
+    int totalSamples = 0;
+    while (System.currentTimeMillis() - startTime < timeoutInSec * 1000) {
+      while (evaluationQueue.needMoreWork()) {
+        ShallowNode<G> node = queue.poll().item;
+        evaluationQueue.put(node, node.state);
       }
 
-      Sample<Integer> sample = compService.take().get();
-      runningSamplers -= 1;
+      EvaluationQueue<G, ShallowNode<G>>.LabeledResult result =
+          evaluationQueue.get();
+      ShallowNode<G> node = result.label;
+      node.addSamples(result.result, SAMPLES_BATCH);
+      totalSamples += SAMPLES_BATCH;
+      double newPriority =
+          node.getValue(player) / Math.sqrt(Math.log(totalSamples)) +
+          Math.sqrt(2.0 * SAMPLES_BATCH / node.getSamplesWithProcessed());
+      queue.add(new QueueElement<>(node, -newPriority));
+    }
 
-      int wins = (sample.result + 1) / 2;
+    ShallowNode<G> bestNode = null;
 
-      if (iAmFirst) {
-        winsByMove[sample.label] += wins;
-      } else {
-        winsByMove[sample.label] += 1 - wins;
+    totalSamples = 0;
+    for (QueueElement<ShallowNode<G>> queueElement : queue) {
+      ShallowNode<G> node = queueElement.item;
+      totalSamples += node.samples;
+      if (bestNode == null ||
+          node.getValue(player) > bestNode.getValue(player)) {
+        bestNode = node;
       }
     }
 
-    executor.shutdownNow();
-
-    int bestMove = 0;
-    for (int i = 1; i < moves.size(); i++) {
-      if (winsByMove[i] > winsByMove[bestMove])
-        bestMove = i;
-    }
-
-    System.out.format("%d of %d\n",
-                      winsByMove[bestMove],
-                      samplesByMove[bestMove]);
-
-    return moves.get(bestMove);
+    System.out.format(
+        "%f over %d (%d)\n", bestNode.getValue(player), bestNode.samples,
+        totalSamples);
+    return bestNode.move;
   }
 }

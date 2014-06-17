@@ -16,8 +16,10 @@ class App {
     ExecutorService executor = Executors.newCachedThreadPool();
 
     GameState<Gomoku> game = Gomoku.newGame();
-    Player player1 = new NaiveMonteCarlo().setExecutor(executor, cores);
-    Player player2 = new NaiveMonteCarlo().setExecutor(executor, cores);
+    Player<Gomoku> player1 = new NaiveMonteCarlo<>();
+    Player<Gomoku> player2 = new MonteCarloUcb<>();
+    player1.setExecutor(executor, cores).setTimeout(2);
+    player2.setExecutor(executor, cores).setTimeout(2);
 
     System.out.println(game);
 

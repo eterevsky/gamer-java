@@ -10,34 +10,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class NaiveMonteCarlo implements Player {
+public class NaiveMonteCarlo<G extends Game> implements Player<G> {
   private final int SAMPLES_BATCH = 8;
 
   private double timeoutInSec = 1;
-  private ExecutorService executor = null;
-  private int maxWorkers;
-
-  private class Variant<G extends Game> {
-    final Move<G> move;
-    final GameState<G> state;
-    int nsamples = 0;
-    int wins = 0;
-
-    Variant(GameState<G> parent, Move<G> move) {
-      this.move = move;
-      state = parent.clone();
-      state.play(move);
-    }
-
-    void addSample(int result) {
-      wins += result;
-      nsamples += SAMPLES_BATCH;
-    }
-
-    double result() {
-      return (double) wins / nsamples;
-    }
-  }
+  private EvaluationQueue<G, ShallowNode<G>> evaluationQueue =
+      new EvaluationQueue<>(new RandomSampleEvaluator<G>(SAMPLES_BATCH));
 
   public NaiveMonteCarlo() {}
 
@@ -47,53 +25,46 @@ public class NaiveMonteCarlo implements Player {
   }
 
   public NaiveMonteCarlo setExecutor(ExecutorService executor, int maxWorkers) {
-    this.executor = executor;
-    this.maxWorkers = maxWorkers;
+    evaluationQueue = new EvaluationQueue<>(
+        new RandomSampleEvaluator<G>(SAMPLES_BATCH), executor, maxWorkers);
     return this;
   }
 
-  public <G extends Game> Move<G> selectMove(GameState<G> state)
-      throws Exception {
+  public Move<G> selectMove(GameState<G> state) throws Exception {
     long startTime = System.currentTimeMillis();
 
-    List<Variant<G>> variants = new ArrayList<>();
+    List<ShallowNode<G>> nodes = new ArrayList<>();
     for (Move<G> move : state.getAvailableMoves()) {
-      variants.add(new Variant<>(state, move));
+      nodes.add(new ShallowNode<>(state, move));
     }
-
-    EvaluationQueue<G, Integer> evaluationQueue = new EvaluationQueue<>(
-        new RandomSampleEvaluator<G>(SAMPLES_BATCH), executor, maxWorkers);
 
     int imove = 0;
 
-    try {
-      while (System.currentTimeMillis() - startTime < timeoutInSec * 1000) {
-        while (evaluationQueue.needMoreWork()) {
-          evaluationQueue.put(imove, variants.get(imove).state);
-          imove = (imove + 1) % variants.size();
-        }
-
-        EvaluationQueue<G, Integer>.LabeledResult result =
-            evaluationQueue.get();
-        variants.get(result.label).addSample(result.result);
+    while (System.currentTimeMillis() - startTime < timeoutInSec * 1000) {
+      while (evaluationQueue.needMoreWork()) {
+        evaluationQueue.put(nodes.get(imove), nodes.get(imove).state);
+        imove = (imove + 1) % nodes.size();
       }
-    } finally {
-      evaluationQueue.shutdown();
+
+      EvaluationQueue<G, ShallowNode<G>>.LabeledResult result =
+          evaluationQueue.get();
+      result.label.addSamples(result.result, SAMPLES_BATCH);
     }
 
-    boolean iAmFirst = state.getPlayer();
-    Variant<G> bestVariant = null;
-    for (Variant<G> variant : variants) {
-      if (bestVariant == null ||
-          iAmFirst && variant.result() > bestVariant.result() ||
-          !iAmFirst && variant.result() < bestVariant.result()) {
-        bestVariant = variant;
+    boolean player = state.getPlayer();
+    ShallowNode<G> bestNode = null;
+    int totalSamples = 0;
+    for (ShallowNode<G> node : nodes) {
+      totalSamples += node.samples;
+      if (bestNode == null ||
+          node.getValue(player) > bestNode.getValue(player)) {
+        bestNode = node;
       }
     }
 
     System.out.format(
-        "%f over %d\n", bestVariant.result(), bestVariant.nsamples);
-
-    return bestVariant.move;
+        "%f over %d (%d)\n", bestNode.getValue(player), bestNode.samples,
+        totalSamples);
+    return bestNode.move;
   }
 }

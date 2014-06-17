@@ -11,7 +11,7 @@ class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
     this.nsamples = nsamples;
   }
 
-  public int evaluate(GameState<G> origState) {
+  public double evaluate(GameState<G> origState) {
     int s = 0;
 
     for (int i = 0; i < nsamples; i++) {
@@ -20,7 +20,7 @@ class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
         state.play(state.getRandomMove());
       }
 
-      s += state.getResult().asInt();
+      s += state.getResult().asDouble();
     }
 
     return s;

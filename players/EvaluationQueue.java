@@ -32,9 +32,9 @@ class EvaluationQueue<G extends Game, L> {
 
   public class LabeledResult {
     L label;
-    int result;
+    double result;
 
-    LabeledResult(L label, int result) {
+    LabeledResult(L label, double result) {
       this.label = label;
       this.result = result;
     }
@@ -57,11 +57,15 @@ class EvaluationQueue<G extends Game, L> {
       try {
         while (true) {
           LabeledState lstate = states.take();
-          int result = evaluator.evaluate(lstate.state);
+          double result = evaluator.evaluate(lstate.state);
           results.put(new LabeledResult(lstate.label, result));
         }
       } catch (InterruptedException e) {}
     }
+  }
+
+  EvaluationQueue(Evaluator<G> evaluator) {
+    this(evaluator, null, 0);
   }
 
   EvaluationQueue(Evaluator<G> evaluator,
@@ -108,7 +112,7 @@ class EvaluationQueue<G extends Game, L> {
         return this.results.take();
       } else {
         LabeledState lstate = states.take();
-        int result = evaluator.evaluate(lstate.state);
+        double result = evaluator.evaluate(lstate.state);
         return new LabeledResult(lstate.label, result);
       }
     } catch (InterruptedException e) {

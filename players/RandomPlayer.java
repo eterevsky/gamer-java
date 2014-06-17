@@ -7,8 +7,8 @@ import gamer.Player;
 
 import java.util.concurrent.ExecutorService;
 
-public class RandomPlayer implements Player {
-  public <T extends Game> Move<T> selectMove(GameState<T> state) {
+public class RandomPlayer<G extends Game> implements Player<G> {
+  public Move<G> selectMove(GameState<G> state) {
     return state.getRandomMove();
   }
 
