@@ -6,6 +6,17 @@ public final class GomokuMove implements Move<Gomoku> {
   int cell;
   boolean player;
 
+  static final GomokuMove create(char player, int x, int y)
+      throws RuntimeException {
+    boolean playerBool;
+    switch (player) {
+      case 'X': playerBool = true; break;
+      case 'O': playerBool = false; break;
+      default: throw new RuntimeException();
+    }
+    return new GomokuMove(y * Gomoku.SIZE + x, playerBool);
+  }
+
   GomokuMove(int cell, boolean player) {
     this.cell = cell;
     this.player = player;
