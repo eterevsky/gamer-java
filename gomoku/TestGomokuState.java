@@ -29,15 +29,15 @@ public class TestGomokuState {
   @Test
   public void playHorizontal() {
     GomokuState state = new GomokuState();
-    state.play(GomokuMove.create('X', 5, 5));
-    state.play(GomokuMove.create('O', 4, 5));
-    state.play(GomokuMove.create('X', 5, 6));
-    state.play(GomokuMove.create('O', 4, 6));
-    state.play(GomokuMove.create('X', 5, 7));
-    state.play(GomokuMove.create('O', 4, 7));
-    state.play(GomokuMove.create('X', 5, 8));
-    state.play(GomokuMove.create('O', 4, 8));
-    state.play(GomokuMove.create('X', 5, 9));
+    state.play(GomokuMove.create('X', 2, 3));
+    state.play(GomokuMove.create('O', 5, 5));
+    state.play(GomokuMove.create('X', 4, 3));
+    state.play(GomokuMove.create('O', 6, 6));
+    state.play(GomokuMove.create('X', 1, 3));
+    state.play(GomokuMove.create('O', 7, 7));
+    state.play(GomokuMove.create('X', 0, 3));
+    state.play(GomokuMove.create('O', 8, 8));
+    state.play(GomokuMove.create('X', 3, 3));
 
     assertTrue(state.isTerminal());
     assertEquals(GameResult.WIN, state.getResult());
