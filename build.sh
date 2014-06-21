@@ -1,8 +1,6 @@
 #!/bin/sh
 
-rm -f *.jar *.class */*.class
-
-CLASSPATH=$CLASSPATH:/usr/share/java/junit4.jar
+rm -f *.jar
 
 javac -cp .:/usr/share/java/junit4.jar -Xlint:unchecked \
     gamer/*.java gamer/*/*.java && \
