@@ -1,4 +1,4 @@
-package players;
+package gamer.players;
 
 class Sample<T> {
   T label;

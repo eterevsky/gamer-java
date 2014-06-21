@@ -1,12 +1,12 @@
-package treegame;
+package gamer.treegame;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import gamer.GameException;
-import gamer.GameResult;
-import gamer.Move;
+import gamer.def.GameException;
+import gamer.def.GameResult;
+import gamer.def.Move;
 
 import java.util.List;
 

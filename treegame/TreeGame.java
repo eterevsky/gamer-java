@@ -1,7 +1,7 @@
-package treegame;
+package gamer.treegame;
 
-import gamer.Game;
-import gamer.GameResult;
+import gamer.def.Game;
+import gamer.def.GameResult;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,6 +1,6 @@
-package gomoku;
+package gamer.gomoku;
 
-import gamer.Move;
+import gamer.def.Move;
 
 public final class GomokuMove implements Move<Gomoku> {
   int cell;

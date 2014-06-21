@@ -1,4 +1,4 @@
-package players;
+package gamer.players;
 
 class QueueElement<T> implements Comparable<QueueElement<T>> {
   final T item;

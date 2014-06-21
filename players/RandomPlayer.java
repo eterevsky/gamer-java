@@ -1,9 +1,9 @@
-package players;
+package gamer.players;
 
-import gamer.Game;
-import gamer.GameState;
-import gamer.Move;
-import gamer.Player;
+import gamer.def.Game;
+import gamer.def.GameState;
+import gamer.def.Move;
+import gamer.def.Player;
 
 import java.util.concurrent.ExecutorService;
 

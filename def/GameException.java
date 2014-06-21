@@ -1,4 +1,4 @@
-package gamer;
+package gamer.def;
 
 public class GameException extends RuntimeException {
   public GameException() {

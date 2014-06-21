@@ -1,7 +1,7 @@
-package treegame;
+package gamer.treegame;
 
-import gamer.GameException;
-import gamer.GameResult;
+import gamer.def.GameException;
+import gamer.def.GameResult;
 
 import java.util.ArrayList;
 import java.util.EnumSet;

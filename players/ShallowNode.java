@@ -1,10 +1,10 @@
-package players;
+package gamer.players;
 
-import gamer.Game;
-import gamer.GameState;
-import gamer.Move;
+import gamer.def.Game;
+import gamer.def.GameState;
+import gamer.def.Move;
 
-class ShallowNode<G extends Game> {
+final class ShallowNode<G extends Game> {
   final Move<G> move;
   final GameState<G> state;
   int samples = 0;

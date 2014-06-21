@@ -1,8 +1,8 @@
-package players;
+package gamer.players;
 
-import gamer.Game;
-import gamer.GameState;
-import gamer.Move;
+import gamer.def.Game;
+import gamer.def.GameState;
+import gamer.def.Move;
 
 class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
   private final int nsamples;

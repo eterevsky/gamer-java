@@ -1,9 +1,9 @@
-package gomoku;
+package gamer.gomoku;
 
-import gamer.GameException;
-import gamer.GameState;
-import gamer.GameResult;
-import gamer.Move;
+import gamer.def.GameException;
+import gamer.def.GameState;
+import gamer.def.GameResult;
+import gamer.def.Move;
 
 import java.util.ArrayList;
 import java.util.Arrays;

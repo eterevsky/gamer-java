@@ -1,10 +1,12 @@
-import gamer.GameState;
-import gamer.Move;
-import gamer.Player;
-import gomoku.Gomoku;
-import players.MonteCarloUcb;
-import players.NaiveMonteCarlo;
-import players.RandomPlayer;
+package gamer;
+
+import gamer.def.GameState;
+import gamer.def.Move;
+import gamer.def.Player;
+import gamer.gomoku.Gomoku;
+import gamer.players.MonteCarloUcb;
+import gamer.players.NaiveMonteCarlo;
+import gamer.players.RandomPlayer;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;

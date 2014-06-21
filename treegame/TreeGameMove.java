@@ -1,6 +1,6 @@
-package treegame;
+package gamer.treegame;
 
-import gamer.Move;
+import gamer.def.Move;
 
 public final class TreeGameMove implements Move<TreeGame> {
   final Node node;

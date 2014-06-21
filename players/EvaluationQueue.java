@@ -1,7 +1,7 @@
-package players;
+package gamer.players;
 
-import gamer.Game;
-import gamer.GameState;
+import gamer.def.Game;
+import gamer.def.GameState;
 
 import java.util.ArrayList;
 import java.util.List;

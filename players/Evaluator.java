@@ -1,7 +1,7 @@
-package players;
+package gamer.players;
 
-import gamer.Game;
-import gamer.GameState;
+import gamer.def.Game;
+import gamer.def.GameState;
 
 interface Evaluator<G extends Game> extends Cloneable {
   // This method must not modify the state.

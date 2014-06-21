@@ -1,11 +1,11 @@
-package gomoku;
-
-import gamer.GameException;
-import gamer.GameResult;
+package gamer.gomoku;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import gamer.def.GameException;
+import gamer.def.GameResult;
 
 import org.junit.Test;
 

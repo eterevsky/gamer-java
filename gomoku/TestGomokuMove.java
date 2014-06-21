@@ -1,4 +1,4 @@
-package gomoku;
+package gamer.gomoku;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
