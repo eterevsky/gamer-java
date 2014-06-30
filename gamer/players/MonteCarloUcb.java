@@ -12,20 +12,26 @@ import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 
 public class MonteCarloUcb<G extends Game> implements Player<G> {
-  private final int SAMPLES_BATCH = 8;
+  private static final int SAMPLES_BATCH = 8;
 
   private double timeoutInSec = 1;
+  private long samplesLimit = -1;
   private EvaluationQueue<G, ShallowNode<G>> evaluationQueue =
       new EvaluationQueue<>(new RandomSampleEvaluator<G>(SAMPLES_BATCH));
 
   public MonteCarloUcb() {}
 
-  public MonteCarloUcb setTimeout(double timeoutInSec) {
+  public MonteCarloUcb<G> setTimeout(double timeoutInSec) {
     this.timeoutInSec = timeoutInSec;
     return this;
   }
 
-  public MonteCarloUcb setExecutor(ExecutorService executor, int maxWorkers) {
+  public MonteCarloUcb<G> setSamplesLimit(long samplesLimit) {
+    this.samplesLimit = samplesLimit;
+    return this;
+  }
+
+  public MonteCarloUcb<G> setExecutor(ExecutorService executor, int maxWorkers) {
     evaluationQueue = new EvaluationQueue<>(
         new RandomSampleEvaluator<G>(SAMPLES_BATCH), executor, maxWorkers);
     return this;
@@ -44,7 +50,9 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
 
     boolean player = state.getPlayer();
     int totalSamples = 0;
-    while (System.currentTimeMillis() - startTime < timeoutInSec * 1000) {
+    while ((samplesLimit < 0 || totalSamples < samplesLimit) &&
+           (timeoutInSec < 0 ||
+            System.currentTimeMillis() - startTime < timeoutInSec * 1000)) {
       while (evaluationQueue.needMoreWork()) {
         ShallowNode<G> node = queue.poll().item;
         evaluationQueue.put(node, node.state);

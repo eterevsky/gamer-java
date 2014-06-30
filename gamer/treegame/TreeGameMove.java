@@ -8,4 +8,8 @@ public final class TreeGameMove implements Move<TreeGame> {
   TreeGameMove(Node node) {
     this.node = node;
   }
+
+  public int getNodeId() {
+    return node.id;
+  }
 }

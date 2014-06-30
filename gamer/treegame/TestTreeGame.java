@@ -16,16 +16,7 @@ public class TestTreeGame {
 
   @Test
   public void simpleGame() {
-    TreeGame game =
-        TreeGame.newBuilder().setRoot(0)
-            .addNode(0, true)
-            .addNode(1, false).addNode(2, false)
-            .addNode(3, true).addTermNode(4, true, GameResult.LOSS)
-            .addTermNode(5, false, GameResult.WIN)
-            .addMove(0, 1).addMove(0, 2)
-            .addMove(1, 3).addMove(2, 3).addMove(2, 4)
-            .addMove(3, 5)
-            .toGame();
+    TreeGame game = TreeGameInstances.GAME1;
 
     TreeGameState state = game.newGame();
     List<Move<TreeGame>> moves = state.getAvailableMoves();

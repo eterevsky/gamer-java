@@ -1,0 +1,8 @@
+digraph G {
+  node [shape=circle];
+  1 [shape=square, color=red];
+  3 [shape=square, color=blue];
+  0 -> 1;
+  0 -> 2;
+  2 -> 3;
+}

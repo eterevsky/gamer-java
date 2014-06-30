@@ -14,6 +14,7 @@ public class NaiveMonteCarlo<G extends Game> implements Player<G> {
   private final int SAMPLES_BATCH = 8;
 
   private double timeoutInSec = 1;
+  private long samplesLimit = -1;
   private EvaluationQueue<G, ShallowNode<G>> evaluationQueue =
       new EvaluationQueue<>(new RandomSampleEvaluator<G>(SAMPLES_BATCH));
 
@@ -21,6 +22,11 @@ public class NaiveMonteCarlo<G extends Game> implements Player<G> {
 
   public NaiveMonteCarlo setTimeout(double timeoutInSec) {
     this.timeoutInSec = timeoutInSec;
+    return this;
+  }
+
+  public NaiveMonteCarlo setSamplesLimit(long samplesLimit) {
+    this.samplesLimit = samplesLimit;
     return this;
   }
 

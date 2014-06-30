@@ -55,6 +55,11 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     return this;
   }
 
+  public MonteCarloUct setSamplesLimit(long samplesLimit) {
+//    this.samplesLimit = samplesLimit;
+    return this;
+  }
+
   public MonteCarloUct setExecutor(ExecutorService executor, int maxWorkers) {
     this.executor = executor;
     this.maxWorkers = maxWorkers;

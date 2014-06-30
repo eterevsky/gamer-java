@@ -16,6 +16,10 @@ public class RandomPlayer<G extends Game> implements Player<G> {
     return this;
   }
 
+  public RandomPlayer setSamplesLimit(long samplesLimit) {
+    return this;
+  }
+
   public RandomPlayer setExecutor(ExecutorService executor, int maxWorkers) {
     return this;
   }

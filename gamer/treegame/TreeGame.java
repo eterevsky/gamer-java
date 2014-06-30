@@ -1,6 +1,7 @@
 package gamer.treegame;
 
 import gamer.def.Game;
+import gamer.def.GameException;
 import gamer.def.GameResult;
 
 import java.util.HashMap;
@@ -24,8 +25,8 @@ public final class TreeGame implements Game<TreeGame> {
       return game;
     }
 
-    public Builder addTermNode(int id, boolean player, GameResult result) {
-      nodes.put(id, new Node(id, player, true, result));
+    public Builder addTermNode(int id, GameResult result) {
+      nodes.put(id, new Node(id, true, true, result));
       return this;
     }
 
@@ -35,12 +36,28 @@ public final class TreeGame implements Game<TreeGame> {
     }
 
     public Builder addMove(int from, int to) {
+      if (!nodes.containsKey(to)) {
+        this.addNode(to, !nodes.get(from).getPlayer());
+      }
       nodes.get(from).addChild(nodes.get(to));
       return this;
     }
 
+    public Builder addLastMove(int from, int to, GameResult result)
+        throws GameException {
+      if (nodes.containsKey(to)) {
+        if (nodes.get(to).getResult() != result) {
+          throw new GameException();
+        }
+      } else {
+        this.addTermNode(to, result);
+      }
+      return this.addMove(from, to);
+    }
+
     public Builder setRoot(int id) {
       rootId = id;
+      this.addNode(id, true);
       return this;
     }
   }
