@@ -17,7 +17,7 @@ class App {
     System.out.format("Found %d cores.\n", cores);
     ExecutorService executor = Executors.newCachedThreadPool();
 
-    GameState<Gomoku> game = Gomoku.newGame();
+    GameState<Gomoku> game = Gomoku.getInstance().newGame();
     Player<Gomoku> player1 = new NaiveMonteCarlo<>();
     Player<Gomoku> player2 = new MonteCarloUcb<>();
     player1.setExecutor(executor, cores).setTimeout(2);

@@ -4,8 +4,15 @@ import gamer.def.Game;
 
 public final class Gomoku implements Game<Gomoku> {
   static final int SIZE = 19;
+  private static final Gomoku INSTANCE = new Gomoku();
 
-  public static GomokuState newGame() {
+  private Gomoku() {}
+
+  public static Gomoku getInstance() {
+    return INSTANCE;
+  }
+
+  public GomokuState newGame() {
     return new GomokuState();
   }
 }
