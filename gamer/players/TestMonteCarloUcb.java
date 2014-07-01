@@ -21,7 +21,7 @@ public class TestMonteCarloUcb {
 
     TreeGameState state = game.newGame();
     MonteCarloUcb<TreeGame> player = new MonteCarloUcb<>();
-    player.setTimeout(-1).setSamplesLimit(50L);
+    player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1);
 
     TreeGameMove move = (TreeGameMove) player.selectMove(state);
     assertEquals(1, move.getNodeId());
@@ -33,7 +33,7 @@ public class TestMonteCarloUcb {
 
     TreeGameState state = game.newGame();
     MonteCarloUcb<TreeGame> player = new MonteCarloUcb<>();
-    player.setTimeout(-1).setSamplesLimit(50L);
+    player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1);
 
     TreeGameMove move = (TreeGameMove) player.selectMove(state);
     assertEquals(1, move.getNodeId());
@@ -49,7 +49,7 @@ public class TestMonteCarloUcb {
 
     TreeGameState state = game.newGame();
     MonteCarloUcb<TreeGame> player = new MonteCarloUcb<>();
-    player.setTimeout(-1).setSamplesLimit(50L);
+    player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1);
 
     TreeGameMove move = (TreeGameMove) player.selectMove(state);
     assertEquals(2, move.getNodeId());

@@ -9,15 +9,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 class EvaluationQueue<G extends Game, L> {
   private ExecutorService executor;
   private int nworkers;
   private Evaluator<G> evaluator;
   private List<Future<?>> tasks = new ArrayList<>();
-  private BlockingQueue<LabeledState> states = new LinkedBlockingQueue<>();
-  private BlockingQueue<LabeledResult> results = new LinkedBlockingQueue<>();
+  private BlockingQueue<LabeledState> states = new ArrayBlockingQueue<>(64);
+  private BlockingQueue<LabeledResult> results = new ArrayBlockingQueue<>(64);
   boolean moreWork = true;
 
   private class LabeledState {
@@ -86,6 +86,7 @@ class EvaluationQueue<G extends Game, L> {
   }
 
   boolean needMoreWork() {
+    // Make sure that there's at least one
     if (states.peek() == null) {
       moreWork = true;
       return true;

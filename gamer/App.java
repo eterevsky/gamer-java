@@ -28,7 +28,7 @@ class App {
     while (!game.isTerminal()) {
       Move<Gomoku> move;
       if (game.getPlayer()) {
-        move = player1.selectMove(game);
+        move = player2.selectMove(game);
       } else {
         move = player2.selectMove(game);
       }

@@ -53,4 +53,8 @@ public final class TreeGameState implements GameState<TreeGame> {
   public GameState<TreeGame> clone() {
     return new TreeGameState(node);
   }
+
+  public String toString() {
+    return "TreeState(" + node.id + ")";
+  }
 }

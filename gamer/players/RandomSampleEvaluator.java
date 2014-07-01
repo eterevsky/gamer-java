@@ -14,6 +14,10 @@ class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
   public double evaluate(GameState<G> origState) {
     int s = 0;
 
+    if (origState.isTerminal()) {
+      return nsamples * origState.getResult().asDouble();
+    }
+
     for (int i = 0; i < nsamples; i++) {
       GameState<G> state = origState.clone();
       while (!state.isTerminal()) {
