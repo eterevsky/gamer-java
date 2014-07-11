@@ -4,6 +4,7 @@ import gamer.gomoku.TestGomokuMove;
 import gamer.gomoku.TestGomokuState;
 import gamer.players.TestRandomPlayer;
 import gamer.players.TestMonteCarloUcb;
+import gamer.players.TestMonteCarloUct;
 import gamer.treegame.TestTreeGame;
 
 import java.util.logging.Level;
@@ -19,6 +20,7 @@ import org.junit.runners.Suite;
   TestGomokuState.class,
 
   TestMonteCarloUcb.class,
+  TestMonteCarloUct.class,
   TestRandomPlayer.class,
 
   TestTreeGame.class
