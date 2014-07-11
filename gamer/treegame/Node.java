@@ -46,13 +46,15 @@ final class Node {
     return properties.contains(Properties.TERMINAL);
   }
 
-  GameResult getResult() throws GameException {
+  GameResult getResult() {
     if (!isTerminal()) {
-      throw new GameException();
+      throw new GameException("Non-terminal node: " + id);
     }
+
     if (properties.contains(Properties.WIN)) {
       return GameResult.WIN;
     }
+
     if (properties.contains(Properties.DRAW)) {
       return GameResult.DRAW;
     } else {

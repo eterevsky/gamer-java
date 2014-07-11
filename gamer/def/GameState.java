@@ -7,14 +7,13 @@ public interface GameState<G extends Game> extends Cloneable {
 
   boolean getPlayer();
 
-  // +1 / 0 / -1
-  GameResult getResult() throws GameException;
+  GameResult getResult();
 
-  List<Move<G>> getAvailableMoves();
+  List<Move<G>> getMoves();
 
   Move<G> getRandomMove();
 
-  void play(Move<G> move) throws GameException;
+  void play(Move<G> move);
 
   GameState<G> clone();
 }

@@ -3,6 +3,7 @@ package gamer.gomoku;
 import gamer.def.GameException;
 import gamer.def.GameState;
 import gamer.def.GameResult;
+import gamer.def.IllegalMoveException;
 import gamer.def.Move;
 
 import java.util.ArrayList;
@@ -38,13 +39,19 @@ public class GomokuState implements GameState<Gomoku> {
     return new GomokuState(this);
   }
 
-  public void play(Move<Gomoku> moveInt) throws GameException {
+  public void play(Move<Gomoku> moveInt) {
     GomokuMove move = (GomokuMove) moveInt;
 
-    if (isTerminal() ||
-        field[move.cell] != CellState.EMPTY ||
-        move.player != getPlayer()) {
-      throw new GameException("wrong move: " + move.toString());
+    if (isTerminal()) {
+      throw new IllegalMoveException(this, move, "state is terminal");
+    }
+
+    if (field[move.cell] != CellState.EMPTY) {
+      throw new IllegalMoveException(this, move, "cell is not empty");
+    }
+
+    if (move.player != getPlayer()) {
+      throw new IllegalMoveException(this, move, "wrong player");
     }
 
     if (move.player) {
@@ -71,7 +78,7 @@ public class GomokuState implements GameState<Gomoku> {
     return result;
   }
 
-  public List<Move<Gomoku>> getAvailableMoves() {
+  public List<Move<Gomoku>> getMoves() {
     List<Move<Gomoku>> moves = new ArrayList<>();
     for (int i = 0; i < field.length; i++) {
       if (field[i] == CellState.EMPTY) {
@@ -97,6 +104,7 @@ public class GomokuState implements GameState<Gomoku> {
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
+    builder.append('\n');
     for (int i = 0; i < field.length; i++) {
       switch (field[i]) {
         case EMPTY:

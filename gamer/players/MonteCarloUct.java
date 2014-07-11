@@ -70,7 +70,7 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     long startTime = System.currentTimeMillis();
 
     PositionNode<G> root =
-        new PositionNode<>(null, state.getPlayer(), state.getAvailableMoves());
+        new PositionNode<>(null, state.getPlayer(), state.getMoves());
 
     ExecutorService executor = Executors.newFixedThreadPool(32);
     CompletionService<Sample<Integer>> compService =

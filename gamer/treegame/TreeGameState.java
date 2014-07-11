@@ -29,7 +29,7 @@ public final class TreeGameState implements GameState<TreeGame> {
     return node.getResult();
   }
 
-  public List<Move<TreeGame>> getAvailableMoves() {
+  public List<Move<TreeGame>> getMoves() {
     ArrayList<Move<TreeGame>> moves = new ArrayList<>();
     for (Node child : node.children) {
       moves.add(new TreeGameMove(child));

@@ -69,7 +69,7 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
     long startTime = System.currentTimeMillis();
 
     List<ShallowNode<G>> nodes = new ArrayList<>();
-    for (Move<G> move : state.getAvailableMoves()) {
+    for (Move<G> move : state.getMoves()) {
       ShallowNode<G> node = new ShallowNode<>(state, move);
       nodes.add(node);
     }
