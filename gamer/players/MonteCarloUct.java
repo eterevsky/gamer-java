@@ -5,6 +5,7 @@ import gamer.def.GameState;
 import gamer.def.Move;
 import gamer.def.Player;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -20,10 +21,11 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
 
   private static class Node<G extends Game> {
     private int samples = 0;
-    private int wins = 0;
+    private int pendingSamples = 0;
+    private double sumValue = 0.0;
     private final GameState<G> state;
     private final Node<G> parent;  // May be null.
-    private final Move<G> lastMove;  // May be null.
+    final Move<G> lastMove;  // May be null.
     private List<Node<G>> children = null;
 
     Node(Node<G> parent, GameState<G> state, Move<G> lastMove) {
@@ -33,48 +35,82 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     }
 
     boolean isUnexplored() {
-      return samples == 0;
-    }
-
-    private void initChildren() {
-      List<Move<G>> moves = state
-      children = new ArrayList<>(moves.size());
-      for (Move<G> move : moves) {
-        GameState<G> newState = state.clone();
-        children.add(new Node(this, newState, move));
-      }
+      return samples + pendingSamples <= 1;
     }
 
     Node<G> select() {
       if (children == null)
         initChildren();
 
-      double bestNodePriority = 0.0;
-      Move<G> bestMove = null;
-      for (Map.Entry<Move<G>, Node<G>> entry : children) {
-        Move<G> move = entry.getKey();
-        Node<G> node = node.getValue();
-        if (node == null) {
-          node = new Node(this,
-        }
+      double totalSamplesLog = 2 * Math.log(samples + pendingSamples);
+      assert totalSamplesLog >= 0;
 
-        double priority;
-        if (node.getSamplesWithProcessed() == 0) {
-          priority = Double.MAX_VALUE;
-        } else {
-          priority = Math.sqrt(1.0 / node.getSamplesWithProcessed());
-          if (totalSamples > 1.0) {
-            priority += node.getValue(player) /
-                        Math.sqrt(Math.log(totalSamples));
-          }
-        }
+      Node<G> bestChild = null;
+      double bestChildPrio = 0;
+      for (Node<G> child : children) {
+        if (child.isUnexplored())
+          return child;
 
-        if (bestNode == null || priority > bestNodePriority) {
-          bestNode = node;
-          bestNodePriority = priority;
+        double priority = child.getPriority(totalSamplesLog);
+        if (bestChild == null || priority > bestChildPrio) {
+          bestChild = child;
+          bestChildPrio = priority;
         }
       }
 
+      return bestChild;
+    }
+
+    void addPendingSamples(int ps) {
+      pendingSamples += ps;
+      if (parent != null)
+        parent.addPendingSamples(ps);
+    }
+
+    void addSamples(int s, double v) {
+      samples += s;
+      pendingSamples -= s;
+      assert pendingSamples >= 0;
+
+      sumValue += v;
+      if (parent != null)
+        parent.addSamples(s, v);
+    }
+
+    double getValue() {
+      return state.getPlayer() ? (sumValue / samples)
+                               : (1 - sumValue / samples);
+    }
+
+    int getSamples() {
+      return samples;
+    }
+
+    List<Node<G>> getChildren() {
+      return children;
+    }
+
+    GameState<G> getState() {
+      return state;
+    }
+
+    private void initChildren() {
+      List<Move<G>> moves = state.getMoves();
+      children = new ArrayList<>(moves.size());
+      for (Move<G> move : moves) {
+        GameState<G> newState = state.clone();
+        newState.play(move);
+        children.add(new Node<>(this, newState, move));
+      }
+    }
+
+    private double getPriority(double parentSamplesLog) {
+      int totalSamples = samples + pendingSamples;
+      assert totalSamples > 0;
+
+      return (state.getPlayer() ? sumValue / totalSamples
+                                : (samples - sumValue) / totalSamples) +
+             Math.sqrt(parentSamplesLog / totalSamples);
     }
   }
 
@@ -122,29 +158,34 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     long startTime = System.currentTimeMillis();
     initEvaluationQueue();
 
-    PositionNode<G> root =
-        new PositionNode<>(null, state.getPlayer(), state.getMoves());
+    Node<G> root = new Node<>(null, state, null);
 
-/*    while (System.currentTimeMillis() - startTime < timeout) {
-      if (runningSamplers < MAX_SAMPLERS) {
-        NodeAndState<G> = getNodeFromQueue(root, state);
-
+    while ((samplesLimit < 0 || root.getSamples() < samplesLimit) &&
+           (timeoutInSec < 0 ||
+            System.currentTimeMillis() - startTime < timeoutInSec * 1000)) {
+      while (evaluationQueue.needMoreWork()) {
+        Node<G> node = root;
+        while (!node.isUnexplored() && !node.getState().isTerminal()) {
+          node = node.select();
+        }
+        evaluationQueue.put(node, node.getState());
+        node.addPendingSamples(samplesBatch);
       }
 
-...
-
+      EvaluationQueue<G, Node<G>>.LabeledResult result =
+          evaluationQueue.get();
+      Node<G> node = result.label;
+      node.addSamples(samplesBatch, result.result);
     }
 
-    executor.shutdownNow();
+    Node<G> bestNode = null;
+    for (Node<G> node : root.getChildren()) {
+      if (bestNode == null || node.getValue() > bestNode.getValue())
+        bestNode = node;
+    }
 
-...
+    System.out.println(root.toString());
 
-    System.out.format("%d of %d\n",
-                      winsByMove[bestMove],
-                      samplesByMove[bestMove]);
-
-    return bestMove;
-*/
-    return null;
+    return bestNode.lastMove;
   }
 }

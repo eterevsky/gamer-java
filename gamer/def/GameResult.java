@@ -13,7 +13,7 @@ public enum GameResult {
       case DRAW: return 0.5;
     }
 
-    throw RuntimeException("can't happen");
+    throw new RuntimeException("can't happen");
   }
 
   // From 0 to 2.
@@ -24,6 +24,6 @@ public enum GameResult {
       case DRAW: return 1;
     }
 
-    throw RuntimeException("can't happen");
+    throw new RuntimeException("can't happen");
   }
 }
