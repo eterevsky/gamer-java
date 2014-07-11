@@ -7,5 +7,5 @@ public interface Player<G extends Game> {
   Player setSamplesLimit(long samplesLimit);
   Player setExecutor(ExecutorService executor, int maxWorkers);
 
-  Move<G> selectMove(GameState<G> state) throws Exception;
+  Move<G> selectMove(GameState<G> state);
 }

@@ -36,7 +36,7 @@ public class NaiveMonteCarlo<G extends Game> implements Player<G> {
     return this;
   }
 
-  public Move<G> selectMove(GameState<G> state) throws Exception {
+  public Move<G> selectMove(GameState<G> state) {
     long startTime = System.currentTimeMillis();
 
     List<ShallowNode<G>> nodes = new ArrayList<>();

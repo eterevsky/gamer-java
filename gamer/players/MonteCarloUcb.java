@@ -63,7 +63,7 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
     }
   }
 
-  public Move<G> selectMove(GameState<G> state) throws Exception {
+  public Move<G> selectMove(GameState<G> state) {
     initEvaluationQueue();
 
     long startTime = System.currentTimeMillis();

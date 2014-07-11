@@ -25,7 +25,7 @@ public final class TreeGameState implements GameState<TreeGame> {
     return node.getPlayer();
   }
 
-  public GameResult getResult() throws GameException {
+  public GameResult getResult() {
     return node.getResult();
   }
 

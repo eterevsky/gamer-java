@@ -18,12 +18,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MonteCarloUct<G extends Game> implements Player<G> {
-  private final int MAX_SAMPLERS = 32;
-  private final int SAMPLES_BATCH = 10;
-
-  private long timeoutInMs;
-  private ExecutorService executor = null;
+  private long samplesLimit = -1;
+  private int samplesBatch = 16;
+  private double timeoutInSec = 1;
+  private ExecutorService executorService;
   private int maxWorkers = 1;
+
+  private EvaluationQueue<G, PositionNode<G>> evaluationQueue = null;
 
   private class PositionNode<G extends Game> {
     int samples = 0;
@@ -50,23 +51,32 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
 
   public MonteCarloUct() {}
 
-  public MonteCarloUct setTimeout(double timeoutInSec) {
-    this.timeoutInMs = Math.round(1000 * timeoutInSec);
+  public MonteCarloUct<G> setTimeout(double timeoutInSec) {
+    this.timeoutInSec = timeoutInSec;
     return this;
   }
 
-  public MonteCarloUct setSamplesLimit(long samplesLimit) {
-//    this.samplesLimit = samplesLimit;
+  public MonteCarloUct<G> setSamplesLimit(long samplesLimit) {
+    this.samplesLimit = samplesLimit;
     return this;
   }
 
-  public MonteCarloUct setExecutor(ExecutorService executor, int maxWorkers) {
-    this.executor = executor;
+  MonteCarloUct<G> setSamplesBatch(int samplesBatch) {
+    this.samplesBatch = samplesBatch;
+    evaluationQueue = null;
+    return this;
+  }
+
+  public MonteCarloUct<G> setExecutor(
+      ExecutorService executor, int maxWorkers) {
+    executorService = executor;
     this.maxWorkers = maxWorkers;
+    evaluationQueue = null;
     return this;
   }
 
-  public Move<G> selectMove(GameState<G> state) throws Exception {
+
+  public Move<G> selectMove(GameState<G> state) {
     long startTime = System.currentTimeMillis();
 
     PositionNode<G> root =

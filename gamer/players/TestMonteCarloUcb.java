@@ -16,7 +16,7 @@ import org.junit.Test;
 public class TestMonteCarloUcb {
 
   @Test
-  public void play0() throws Exception {
+  public void play0() {
     TreeGame game = TreeGameInstances.GAME0;
 
     TreeGameState state = game.newGame();
@@ -28,7 +28,7 @@ public class TestMonteCarloUcb {
   }
 
   @Test
-  public void play1() throws Exception {
+  public void play1() {
     TreeGame game = TreeGameInstances.GAME1;
 
     TreeGameState state = game.newGame();
@@ -44,7 +44,7 @@ public class TestMonteCarloUcb {
   }
 
   @Test
-  public void play3() throws Exception {
+  public void play3() {
     TreeGame game = TreeGameInstances.GAME3;
 
     TreeGameState state = game.newGame();
