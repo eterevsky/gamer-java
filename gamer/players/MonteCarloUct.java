@@ -6,16 +6,8 @@ import gamer.def.Move;
 import gamer.def.Player;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class MonteCarloUct<G extends Game> implements Player<G> {
   private long samplesLimit = -1;
@@ -24,29 +16,66 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
   private ExecutorService executorService;
   private int maxWorkers = 1;
 
-  private EvaluationQueue<G, PositionNode<G>> evaluationQueue = null;
+  private EvaluationQueue<G, Node<G>> evaluationQueue = null;
 
-  private class PositionNode<G extends Game> {
-    int samples = 0;
-    int wins = 0;
-    final PositionNode parent;
-    final boolean player;
-    Map<Move<G>, PositionNode> children = new HashMap<>();
-    private PriorityQueue<QueueElement<Move<G>>> queue = new PriorityQueue<>();
+  private static class Node<G extends Game> {
+    private int samples = 0;
+    private int wins = 0;
+    private final GameState<G> state;
+    private final Node<G> parent;  // May be null.
+    private final Move<G> lastMove;  // May be null.
+    private List<Node<G>> children = null;
 
-    PositionNode(PositionNode parent, boolean player, List<Move<G>> moves) {
+    Node(Node<G> parent, GameState<G> state, Move<G> lastMove) {
       this.parent = parent;
-      this.player = player;
+      this.state = state.clone();  // TODO: make state immutable
+      this.lastMove = lastMove;
+    }
+
+    boolean isUnexplored() {
+      return samples == 0;
+    }
+
+    private void initChildren() {
+      List<Move<G>> moves = state
+      children = new ArrayList<>(moves.size());
       for (Move<G> move : moves) {
-        this.children.put(move, null);
-        this.queue.add(new QueueElement<Move<G>>(move, -1));
+        GameState<G> newState = state.clone();
+        children.add(new Node(this, newState, move));
       }
     }
-  }
 
-  private class NodeAndState<G extends Game> {
-    PositionNode<G> node;
-    GameState<G> state;
+    Node<G> select() {
+      if (children == null)
+        initChildren();
+
+      double bestNodePriority = 0.0;
+      Move<G> bestMove = null;
+      for (Map.Entry<Move<G>, Node<G>> entry : children) {
+        Move<G> move = entry.getKey();
+        Node<G> node = node.getValue();
+        if (node == null) {
+          node = new Node(this,
+        }
+
+        double priority;
+        if (node.getSamplesWithProcessed() == 0) {
+          priority = Double.MAX_VALUE;
+        } else {
+          priority = Math.sqrt(1.0 / node.getSamplesWithProcessed());
+          if (totalSamples > 1.0) {
+            priority += node.getValue(player) /
+                        Math.sqrt(Math.log(totalSamples));
+          }
+        }
+
+        if (bestNode == null || priority > bestNodePriority) {
+          bestNode = node;
+          bestNodePriority = priority;
+        }
+      }
+
+    }
   }
 
   public MonteCarloUct() {}
@@ -75,17 +104,26 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     return this;
   }
 
+  private void initEvaluationQueue() {
+    if (evaluationQueue != null)
+      return;
+
+    Evaluator<G> evaluator = new RandomSampleEvaluator<G>(samplesBatch);
+
+    if (executorService != null) {
+      evaluationQueue =
+          new EvaluationQueue<>(evaluator, executorService, maxWorkers);
+    } else {
+      evaluationQueue = new EvaluationQueue<>(evaluator);
+    }
+  }
 
   public Move<G> selectMove(GameState<G> state) {
     long startTime = System.currentTimeMillis();
+    initEvaluationQueue();
 
     PositionNode<G> root =
         new PositionNode<>(null, state.getPlayer(), state.getMoves());
-
-    ExecutorService executor = Executors.newFixedThreadPool(32);
-    CompletionService<Sample<Integer>> compService =
-        new ExecutorCompletionService<>(executor);
-    int runningSamplers = 0;
 
 /*    while (System.currentTimeMillis() - startTime < timeout) {
       if (runningSamplers < MAX_SAMPLERS) {

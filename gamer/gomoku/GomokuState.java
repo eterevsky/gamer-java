@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GomokuState implements GameState<Gomoku> {
-  private enum CellState {
+  private static enum CellState {
     EMPTY,
     X,
     O
