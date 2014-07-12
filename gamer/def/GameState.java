@@ -2,7 +2,6 @@ package gamer.def;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public interface GameState<G extends Game> extends Cloneable {
   boolean isTerminal();

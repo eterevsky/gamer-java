@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import gamer.def.GameException;
 import gamer.def.GameResult;
 
+import java.util.Random;
 import org.junit.Test;
 
 public class TestGomokuState {
@@ -154,5 +155,23 @@ public class TestGomokuState {
 
     assertTrue(state.isTerminal());
     assertEquals(GameResult.DRAW, state.getResult());
+  }
+
+  @Test
+  public void playRandomMoves() {
+    GomokuState state = new GomokuState();
+    Random random = new Random(1234567890L);
+
+    assertFalse(state.isTerminal());
+    int moves = 0;
+
+    while (!state.isTerminal()) {
+      state.play(state.getRandomMove(random));
+      moves++;
+    }
+
+    state.getResult();
+    assertTrue(moves >= 9);
+    assertTrue(moves <= Gomoku.CELLS);
   }
 }

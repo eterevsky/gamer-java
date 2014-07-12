@@ -2,6 +2,9 @@ package gamer.gomoku;
 
 import gamer.def.Move;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class GomokuMove implements Move<Gomoku> {
   int cell;
   boolean player;
@@ -17,7 +20,7 @@ public final class GomokuMove implements Move<Gomoku> {
     return new GomokuMove(y * Gomoku.SIZE + x, playerBool);
   }
 
-  GomokuMove(int cell, boolean player) {
+  private GomokuMove(int cell, boolean player) {
     this.cell = cell;
     this.player = player;
   }
@@ -40,6 +43,24 @@ public final class GomokuMove implements Move<Gomoku> {
 
   @Override
   public int hashCode() {
-    return (player ? Gomoku.SIZE : 0) + cell;
+    return (player ? Gomoku.CELLS : 0) + cell;
+  }
+
+  private static final List<GomokuMove> player1Moves, player2Moves;
+  static {
+    player1Moves = new ArrayList<>(Gomoku.CELLS);
+    player2Moves = new ArrayList<>(Gomoku.CELLS);
+    for (int cell = 0; cell < Gomoku.CELLS; cell++) {
+      player1Moves.add(new GomokuMove(cell, true));
+      player2Moves.add(new GomokuMove(cell, false));
+    }
+  }
+
+  static GomokuMove of(int cell, boolean player) {
+    if (player) {
+      return player1Moves.get(cell);
+    } else {
+      return player2Moves.get(cell);
+    }
   }
 }
