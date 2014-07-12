@@ -9,6 +9,7 @@ import gamer.def.GameResult;
 import gamer.def.Move;
 
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Test;
 
@@ -16,6 +17,7 @@ public class TestTreeGame {
 
   @Test
   public void simpleGame() {
+    Random random = new Random(1234567890L);
     TreeGame game = TreeGameInstances.GAME1;
 
     TreeGameState state = game.newGame();
@@ -29,7 +31,7 @@ public class TestTreeGame {
     assertFalse(state.getPlayer());
     assertEquals(1, state.getMoves().size());
 
-    state.play(state.getRandomMove());  // Only 1 move available.
+    state.play(state.getRandomMove(random));  // Only 1 move available.
     assertFalse(state.isTerminal());
     assertTrue(state.getPlayer());
 

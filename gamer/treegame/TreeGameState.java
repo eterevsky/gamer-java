@@ -7,6 +7,7 @@ import gamer.def.Move;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -37,8 +38,8 @@ public final class TreeGameState implements GameState<TreeGame> {
     return moves;
   }
 
-  public Move<TreeGame> getRandomMove() {
-    int i = ThreadLocalRandom.current().nextInt(node.children.size());
+  public Move<TreeGame> getRandomMove(Random random) {
+    int i = random.nextInt(node.children.size());
     return new TreeGameMove(node.children.get(i));
   }
 

@@ -8,6 +8,7 @@ import gamer.def.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
@@ -17,6 +18,7 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
   private double timeoutInSec = 1;
   private ExecutorService executorService;
   private int maxWorkers = 1;
+  private Random random = null;
 
   private final Logger LOG = Logger.getLogger("gamer.players.MonteCarloUcb");
 
@@ -48,17 +50,22 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
     return this;
   }
 
+  public MonteCarloUcb<G> setRandom(Random random) {
+    this.random = random;
+    return this;
+  }
+
   private void initEvaluationQueue() {
     if (evaluationQueue != null)
       return;
 
     if (executorService != null) {
       evaluationQueue = new EvaluationQueue<>(
-          new RandomSampleEvaluator<G>(samplesBatch), executorService,
+          new RandomSampleEvaluator<G>(samplesBatch, random), executorService,
           maxWorkers);
     } else {
-      evaluationQueue =
-          new EvaluationQueue<>(new RandomSampleEvaluator<G>(samplesBatch));
+      evaluationQueue = new EvaluationQueue<>(
+          new RandomSampleEvaluator<G>(samplesBatch, random));
     }
   }
 

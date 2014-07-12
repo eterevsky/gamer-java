@@ -135,7 +135,7 @@ public class TestGomokuState {
   @Test
   public void playDraw() {
     GomokuState state = new GomokuState();
-    for (int i = 0; i < 19; i++) {
+    for (int i = 0; i < Gomoku.SIZE; i++) {
       int row;
       switch (i % 4) {
         case 1: row = i + 1; break;
@@ -143,7 +143,7 @@ public class TestGomokuState {
         default: row = i;
       }
 
-      for (int j = 0; j < 19; j++) {
+      for (int j = 0; j < Gomoku.SIZE; j++) {
         if ((i + j) % 2 == 0) {
           state.play(GomokuMove.create('X', row, j));
         } else {

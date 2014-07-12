@@ -9,7 +9,7 @@ import gamer.def.Move;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 public class GomokuState implements GameState<Gomoku> {
   private static enum CellState {
@@ -90,13 +90,13 @@ public class GomokuState implements GameState<Gomoku> {
     return moves;
   }
 
-  public GomokuMove getRandomMove() {
+  public GomokuMove getRandomMove(Random random) {
     if (isTerminal())
-      return null;
+      throw new GameException();
 
     int cell;
     do {
-      cell = ThreadLocalRandom.current().nextInt(field.length);
+      cell = random.nextInt(field.length);
     } while (field[cell] != CellState.EMPTY);
 
     return new GomokuMove(cell, getPlayer());

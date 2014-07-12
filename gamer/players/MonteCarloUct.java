@@ -8,24 +8,28 @@ import gamer.def.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 public class MonteCarloUct<G extends Game> implements Player<G> {
   private long samplesLimit = -1;
-  private int samplesBatch = 16;
+  private int samplesBatch = 1;
   private double timeoutInSec = 1;
   private ExecutorService executorService;
   private int maxWorkers = 1;
+  private Random random = null;
 
   private EvaluationQueue<G, Node<G>> evaluationQueue = null;
+  private final Logger LOG = Logger.getLogger("gamer.players.MonteCarloUct");
 
   private static class Node<G extends Game> {
     private int samples = 0;
     private int pendingSamples = 0;
     private double sumValue = 0.0;
     private final GameState<G> state;
-    private final Node<G> parent;  // May be null.
-    final Move<G> lastMove;  // May be null.
+    private final Node<G> parent;  // null for root
+    final Move<G> lastMove;  // null for root
     private List<Node<G>> children = null;
 
     Node(Node<G> parent, GameState<G> state, Move<G> lastMove) {
@@ -35,7 +39,7 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     }
 
     boolean isUnexplored() {
-      return samples + pendingSamples <= 1;
+      return samples + pendingSamples <= 2;
     }
 
     Node<G> select() {
@@ -51,7 +55,7 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
         if (child.isUnexplored())
           return child;
 
-        double priority = child.getPriority(totalSamplesLog);
+        double priority = child.getPriority(totalSamplesLog, state.getPlayer());
         if (bestChild == null || priority > bestChildPrio) {
           bestChild = child;
           bestChildPrio = priority;
@@ -77,9 +81,8 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
         parent.addSamples(s, v);
     }
 
-    double getValue() {
-      return state.getPlayer() ? (sumValue / samples)
-                               : (1 - sumValue / samples);
+    double getValue(boolean player) {
+      return player ? (sumValue / samples) : (1 - sumValue / samples);
     }
 
     int getSamples() {
@@ -94,6 +97,32 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
       return state;
     }
 
+    public String toString() {
+      return toString(0);
+    }
+
+    public String toString(int indent) {
+      StringBuilder builder = new StringBuilder();
+      builder.append('\n');
+      for (int i = 0; i < indent; i++) {
+        builder.append(' ');
+      }
+      if (lastMove != null) {
+        builder.append(lastMove.toString());
+      } else {
+        builder.append(state.toString());
+      }
+      builder.append(
+          String.format(" %.1f/%d/%d", sumValue, samples, pendingSamples));
+      if (children != null) {
+        for (Node<G> child : children) {
+          builder.append(child.toString(indent + 2));
+        }
+      }
+
+      return builder.toString();
+    }
+
     private void initChildren() {
       List<Move<G>> moves = state.getMoves();
       children = new ArrayList<>(moves.size());
@@ -104,12 +133,12 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
       }
     }
 
-    private double getPriority(double parentSamplesLog) {
+    private double getPriority(double parentSamplesLog, boolean lastPlayer) {
       int totalSamples = samples + pendingSamples;
       assert totalSamples > 0;
 
-      return (state.getPlayer() ? sumValue / totalSamples
-                                : (samples - sumValue) / totalSamples) +
+      return (lastPlayer ? sumValue / totalSamples
+                         : (samples - sumValue) / totalSamples) +
              Math.sqrt(parentSamplesLog / totalSamples);
     }
   }
@@ -140,11 +169,16 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     return this;
   }
 
+  public MonteCarloUct<G> setRandom(Random random) {
+    this.random = random;
+    return this;
+  }
+
   private void initEvaluationQueue() {
     if (evaluationQueue != null)
       return;
 
-    Evaluator<G> evaluator = new RandomSampleEvaluator<G>(samplesBatch);
+    Evaluator<G> evaluator = new RandomSampleEvaluator<G>(samplesBatch, random);
 
     if (executorService != null) {
       evaluationQueue =
@@ -179,12 +213,15 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     }
 
     Node<G> bestNode = null;
+    boolean player = state.getPlayer();
     for (Node<G> node : root.getChildren()) {
-      if (bestNode == null || node.getValue() > bestNode.getValue())
+      if (bestNode == null || node.getSamples() > bestNode.getSamples())
         bestNode = node;
     }
 
-    System.out.println(root.toString());
+    LOG.info(String.format(
+        "%f over %d (%d)\n", bestNode.getValue(player), bestNode.getSamples(),
+        root.getSamples()));
 
     return bestNode.lastMove;
   }

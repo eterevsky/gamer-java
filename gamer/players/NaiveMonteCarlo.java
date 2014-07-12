@@ -8,6 +8,7 @@ import gamer.def.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
 public class NaiveMonteCarlo<G extends Game> implements Player<G> {
@@ -15,29 +16,42 @@ public class NaiveMonteCarlo<G extends Game> implements Player<G> {
 
   private double timeoutInSec = 1;
   private long samplesLimit = -1;
-  private EvaluationQueue<G, ShallowNode<G>> evaluationQueue =
-      new EvaluationQueue<>(new RandomSampleEvaluator<G>(SAMPLES_BATCH));
+  private Random random = null;
+  private EvaluationQueue<G, ShallowNode<G>> evaluationQueue = null;
 
   public NaiveMonteCarlo() {}
 
-  public NaiveMonteCarlo setTimeout(double timeoutInSec) {
+  public NaiveMonteCarlo<G> setTimeout(double timeoutInSec) {
     this.timeoutInSec = timeoutInSec;
     return this;
   }
 
-  public NaiveMonteCarlo setSamplesLimit(long samplesLimit) {
+  public NaiveMonteCarlo<G> setSamplesLimit(long samplesLimit) {
     this.samplesLimit = samplesLimit;
     return this;
   }
 
-  public NaiveMonteCarlo setExecutor(ExecutorService executor, int maxWorkers) {
-    evaluationQueue = new EvaluationQueue<>(
-        new RandomSampleEvaluator<G>(SAMPLES_BATCH), executor, maxWorkers);
+  public NaiveMonteCarlo<G> setExecutor(
+      ExecutorService executor, int maxWorkers) {
+    throw new RuntimeException("don't support");
+  }
+
+  public NaiveMonteCarlo<G> setRandom(Random random) {
+    this.random = random;
     return this;
+  }
+
+  private void initEvaluationQueue() {
+    if (evaluationQueue != null)
+      return;
+
+    evaluationQueue = new EvaluationQueue<>(
+        new RandomSampleEvaluator<G>(SAMPLES_BATCH, random));
   }
 
   public Move<G> selectMove(GameState<G> state) {
     long startTime = System.currentTimeMillis();
+    initEvaluationQueue();
 
     List<ShallowNode<G>> nodes = new ArrayList<>();
     for (Move<G> move : state.getMoves()) {

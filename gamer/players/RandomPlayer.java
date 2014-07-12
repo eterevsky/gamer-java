@@ -5,22 +5,32 @@ import gamer.def.GameState;
 import gamer.def.Move;
 import gamer.def.Player;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomPlayer<G extends Game> implements Player<G> {
+  private Random random = null;
+
   public Move<G> selectMove(GameState<G> state) {
-    return state.getRandomMove();
+    return state.getRandomMove(
+        random == null ? ThreadLocalRandom.current() : random);
   }
 
-  public RandomPlayer setTimeout(double timeoutInSec) {
+  public RandomPlayer<G> setTimeout(double timeoutInSec) {
     return this;
   }
 
-  public RandomPlayer setSamplesLimit(long samplesLimit) {
+  public RandomPlayer<G> setSamplesLimit(long samplesLimit) {
     return this;
   }
 
-  public RandomPlayer setExecutor(ExecutorService executor, int maxWorkers) {
+  public RandomPlayer<G> setExecutor(ExecutorService executor, int maxWorkers) {
+    return this;
+  }
+
+  public RandomPlayer<G> setRandom(Random random) {
+    this.random = random;
     return this;
   }
 }

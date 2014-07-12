@@ -9,15 +9,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 
 class EvaluationQueue<G extends Game, L> {
   private ExecutorService executor;
   private int nworkers;
   private Evaluator<G> evaluator;
   private List<Future<?>> tasks = new ArrayList<>();
-  private BlockingQueue<LabeledState> states = new ArrayBlockingQueue<>(64);
-  private BlockingQueue<LabeledResult> results = new ArrayBlockingQueue<>(64);
+  private BlockingQueue<LabeledState> states = new LinkedBlockingQueue<>();
+  private BlockingQueue<LabeledResult> results = new LinkedBlockingQueue<>();
   boolean moreWork = true;
 
   private class LabeledState {
@@ -80,8 +81,8 @@ class EvaluationQueue<G extends Game, L> {
     this.evaluator = evaluator;
 
     for (int i = 0; i < nworkers; i++) {
-      tasks.add(
-          executor.submit(new Worker(evaluator.clone(), states, results)));
+      tasks.add(executor.submit(
+          new Worker(evaluator.clone(), states, results)));
     }
   }
 
@@ -100,10 +101,8 @@ class EvaluationQueue<G extends Game, L> {
     return false;
   }
 
-  void put(L label, GameState<G> state) throws RuntimeException {
-    if (!states.offer(new LabeledState(label, state))) {
-      throw new RuntimeException("State evaluation queue overflow.");
-    }
+  void put(L label, GameState<G> state) {
+    states.add(new LabeledState(label, state));
   }
 
   // Blocking.

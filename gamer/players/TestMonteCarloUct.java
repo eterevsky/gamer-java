@@ -43,7 +43,7 @@ public class TestMonteCarloUct {
   public void play2() {
     TreeGameState state = TreeGameInstances.GAME2.newGame();
     MonteCarloUct<TreeGame> player = new MonteCarloUct<>();
-    player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1);
+    player.setTimeout(-1).setSamplesLimit(500L).setSamplesBatch(1);
 
     TreeGameMove move = (TreeGameMove) player.selectMove(state);
     assertEquals(1, move.getNodeId());

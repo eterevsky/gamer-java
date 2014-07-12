@@ -12,4 +12,8 @@ public final class TreeGameMove implements Move<TreeGame> {
   public int getNodeId() {
     return node.id;
   }
+
+  public String toString() {
+    return "-> " + node.id;
+  }
 }
