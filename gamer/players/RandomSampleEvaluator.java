@@ -20,7 +20,7 @@ class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
     int s = 0;
 
     if (origState.isTerminal()) {
-      return nsamples * origState.getResult().asDouble();
+      return nsamples * origState.status().value();
     }
 
     for (int i = 0; i < nsamples; i++) {
@@ -30,7 +30,7 @@ class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
             random == null ? ThreadLocalRandom.current() : random));
       }
 
-      s += state.getResult().asDouble();
+      s += state.status().value();
     }
 
     return s;

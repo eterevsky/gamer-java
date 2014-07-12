@@ -2,7 +2,7 @@ package gamer.treegame;
 
 import gamer.def.GameException;
 import gamer.def.GameState;
-import gamer.def.GameResult;
+import gamer.def.GameStatus;
 import gamer.def.Move;
 
 import java.util.ArrayList;
@@ -26,8 +26,8 @@ public final class TreeGameState implements GameState<TreeGame> {
     return node.getPlayer();
   }
 
-  public GameResult getResult() {
-    return node.getResult();
+  public GameStatus status() {
+    return node.status;
   }
 
   public List<Move<TreeGame>> getMoves() {

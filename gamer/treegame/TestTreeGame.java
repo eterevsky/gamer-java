@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import gamer.def.GameException;
-import gamer.def.GameResult;
+import gamer.def.GameStatus;
 import gamer.def.Move;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class TestTreeGame {
 
     state.play(state.getMoves().get(0));
     assertTrue(state.isTerminal());
-    assertEquals(GameResult.WIN, state.getResult());
+    assertEquals(GameStatus.WIN, state.status());
 
     // Another game with the same tree.
     state = game.newGame();
@@ -49,6 +49,6 @@ public class TestTreeGame {
 
     state.play(new TreeGameMove(game.getNode(4)));
     assertTrue(state.isTerminal());
-    assertEquals(GameResult.LOSS, state.getResult());
+    assertEquals(GameStatus.LOSS, state.status());
   }
 }

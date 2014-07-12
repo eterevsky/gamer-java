@@ -55,7 +55,8 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
         if (child.isUnexplored())
           return child;
 
-        double priority = child.getPriority(totalSamplesLog, state.getPlayer());
+        double priority = child.getPriority(totalSamplesLog,
+                                            state.status().getPlayer());
         if (bestChild == null || priority > bestChildPrio) {
           bestChild = child;
           bestChildPrio = priority;
@@ -213,7 +214,7 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
     }
 
     Node<G> bestNode = null;
-    boolean player = state.getPlayer();
+    boolean player = state.status().getPlayer();
     for (Node<G> node : root.getChildren()) {
       if (bestNode == null || node.getSamples() > bestNode.getSamples())
         bestNode = node;

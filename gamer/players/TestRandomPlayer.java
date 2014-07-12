@@ -3,7 +3,7 @@ package gamer.players;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import gamer.def.GameResult;
+import gamer.def.GameStatus;
 import gamer.treegame.TreeGame;
 import gamer.treegame.TreeGameState;
 
@@ -19,7 +19,7 @@ public class TestRandomPlayer {
     TreeGame game = TreeGame.newBuilder().setRoot(0)
         .addMove(0, 1).addMove(0, 2)
         .addMove(1, 3).addMove(2, 3)
-        .addLastMove(3, 4, GameResult.WIN)
+        .addLastMove(3, 4, GameStatus.WIN)
         .toGame();
 
     TreeGameState state = game.newGame();
@@ -29,7 +29,6 @@ public class TestRandomPlayer {
       state.play(player.selectMove(state));
     }
 
-    assertTrue(state.isTerminal());
-    assertEquals(GameResult.WIN, state.getResult());
+    assertEquals(GameStatus.WIN, state.status());
   }
 }

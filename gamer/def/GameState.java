@@ -6,9 +6,7 @@ import java.util.Random;
 public interface GameState<G extends Game> extends Cloneable {
   boolean isTerminal();
 
-  boolean getPlayer();
-
-  GameResult getResult();
+  GameStatus status();
 
   List<Move<G>> getMoves();
 

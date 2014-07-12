@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import gamer.def.GameException;
-import gamer.def.GameResult;
+import gamer.def.GameStatus;
 
 import java.util.Random;
 import org.junit.Test;
@@ -15,8 +15,11 @@ public class TestGomokuState {
   @Test
   public void playVertical() {
     GomokuState state = new GomokuState();
+    assertTrue(state.status().getPlayer());
     state.play(GomokuMove.create('X', 5, 5));
+    assertFalse(state.status().getPlayer());
     state.play(GomokuMove.create('O', 4, 5));
+    assertTrue(state.status().getPlayer());
     state.play(GomokuMove.create('X', 5, 6));
     state.play(GomokuMove.create('O', 4, 6));
     state.play(GomokuMove.create('X', 5, 7));
@@ -25,8 +28,7 @@ public class TestGomokuState {
     state.play(GomokuMove.create('O', 4, 8));
     state.play(GomokuMove.create('X', 5, 9));
 
-    assertTrue(state.isTerminal());
-    assertEquals(GameResult.WIN, state.getResult());
+    assertEquals(GameStatus.WIN, state.status());
   }
 
   @Test
@@ -42,8 +44,7 @@ public class TestGomokuState {
     state.play(GomokuMove.create('O', 8, 8));
     state.play(GomokuMove.create('X', 3, 3));
 
-    assertTrue(state.isTerminal());
-    assertEquals(GameResult.WIN, state.getResult());
+    assertEquals(GameStatus.WIN, state.status());
   }
 
   @Test
@@ -60,8 +61,7 @@ public class TestGomokuState {
     state.play(GomokuMove.create('X', 10, 10));
     state.play(GomokuMove.create('O', 9, 9));
 
-    assertTrue(state.isTerminal());
-    assertEquals(GameResult.LOSS, state.getResult());
+    assertEquals(GameStatus.LOSS, state.status());
   }
 
   @Test
@@ -78,8 +78,7 @@ public class TestGomokuState {
     state.play(GomokuMove.create('X', 10, 10));
     state.play(GomokuMove.create('O', 2, 9));
 
-    assertTrue(state.isTerminal());
-    assertEquals(GameResult.LOSS, state.getResult());
+    assertEquals(GameStatus.LOSS, state.status());
   }
 
   @Test
@@ -113,8 +112,7 @@ public class TestGomokuState {
     state.play(GomokuMove.create('X', 10, 10));
     state.play(GomokuMove.create('O', 2, 9));
 
-    assertTrue(state.isTerminal());
-    assertEquals(GameResult.LOSS, state.getResult());
+    assertEquals(GameStatus.LOSS, state.status());
 
     state.play(GomokuMove.create('X', 1, 1));
   }
@@ -154,7 +152,7 @@ public class TestGomokuState {
     }
 
     assertTrue(state.isTerminal());
-    assertEquals(GameResult.DRAW, state.getResult());
+    assertEquals(GameStatus.DRAW, state.status());
   }
 
   @Test
@@ -162,7 +160,7 @@ public class TestGomokuState {
     GomokuState state = new GomokuState();
     Random random = new Random(1234567890L);
 
-    assertFalse(state.isTerminal());
+    assertTrue(state.status().getPlayer());
     int moves = 0;
 
     while (!state.isTerminal()) {
@@ -170,7 +168,7 @@ public class TestGomokuState {
       moves++;
     }
 
-    state.getResult();
+    state.status();
     assertTrue(moves >= 9);
     assertTrue(moves <= Gomoku.CELLS);
   }

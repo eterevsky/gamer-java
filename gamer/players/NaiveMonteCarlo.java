@@ -71,7 +71,7 @@ public class NaiveMonteCarlo<G extends Game> implements Player<G> {
       result.label.addSamples(result.result, SAMPLES_BATCH);
     }
 
-    boolean player = state.getPlayer();
+    boolean player = state.status().getPlayer();
     ShallowNode<G> bestNode = null;
     int totalSamples = 0;
     for (ShallowNode<G> node : nodes) {

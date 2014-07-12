@@ -3,13 +3,12 @@ package gamer.players;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import gamer.def.GameResult;
 import gamer.treegame.TreeGame;
 import gamer.treegame.TreeGameMove;
 import gamer.treegame.TreeGameInstances;
 import gamer.treegame.TreeGameState;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 import org.junit.Test;
 
@@ -49,7 +48,8 @@ public class TestMonteCarloUcb {
 
     TreeGameState state = game.newGame();
     MonteCarloUcb<TreeGame> player = new MonteCarloUcb<>();
-    player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1);
+    player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1)
+          .setRandom(new Random(1234567890L));
 
     TreeGameMove move = (TreeGameMove) player.selectMove(state);
     assertEquals(2, move.getNodeId());

@@ -3,7 +3,7 @@ package gamer.players;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import gamer.def.GameResult;
+import gamer.def.GameStatus;
 import gamer.treegame.TreeGame;
 import gamer.treegame.TreeGameMove;
 import gamer.treegame.TreeGameInstances;
@@ -53,7 +53,7 @@ public class TestMonteCarloUct {
     state.play(player.selectMove(state));
 
     assertTrue(state.isTerminal());
-    assertEquals(GameResult.WIN, state.getResult());
+    assertEquals(GameStatus.WIN, state.status());
   }
 
   @Test

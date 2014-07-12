@@ -80,7 +80,7 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
       nodes.add(node);
     }
 
-    boolean player = state.getPlayer();
+    boolean player = state.status().getPlayer();
     int totalSamples = 0;
     while ((samplesLimit < 0 || totalSamples < samplesLimit) &&
            (timeoutInSec < 0 ||

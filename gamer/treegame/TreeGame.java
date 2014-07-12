@@ -2,7 +2,7 @@ package gamer.treegame;
 
 import gamer.def.Game;
 import gamer.def.GameException;
-import gamer.def.GameResult;
+import gamer.def.GameStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,39 +25,35 @@ public final class TreeGame implements Game<TreeGame> {
       return game;
     }
 
-    public Builder addTermNode(int id, GameResult result) {
-      nodes.put(id, new Node(id, true, true, result));
-      return this;
-    }
-
-    public Builder addNode(int id, boolean player) {
-      nodes.put(id, new Node(id, player, false, null));
+    public Builder addNode(int id, GameStatus status) {
+      nodes.put(id, new Node(id, status));
       return this;
     }
 
     public Builder addMove(int from, int to) {
       if (!nodes.containsKey(to)) {
-        this.addNode(to, !nodes.get(from).getPlayer());
+        this.addNode(to, nodes.get(from).status.otherPlayer());
       }
       nodes.get(from).addChild(nodes.get(to));
       return this;
     }
 
-    public Builder addLastMove(int from, int to, GameResult result)
+    public Builder addLastMove(int from, int to, GameStatus status)
         throws GameException {
+      assert status.isTerminal();
       if (nodes.containsKey(to)) {
-        if (nodes.get(to).getResult() != result) {
+        if (nodes.get(to).status != status) {
           throw new GameException();
         }
       } else {
-        this.addTermNode(to, result);
+        this.addNode(to, status);
       }
       return this.addMove(from, to);
     }
 
     public Builder setRoot(int id) {
       rootId = id;
-      this.addNode(id, true);
+      this.addNode(id, GameStatus.FIRST_PLAYER);
       return this;
     }
   }
