@@ -19,11 +19,11 @@ public final class TreeGameState implements GameState<TreeGame> {
   }
 
   public boolean isTerminal() {
-    return node.isTerminal();
+    return node.status.isTerminal();
   }
 
   public boolean getPlayer() {
-    return node.getPlayer();
+    return node.status.getPlayer();
   }
 
   public GameStatus status() {
