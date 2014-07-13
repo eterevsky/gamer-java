@@ -9,6 +9,17 @@ public final class GomokuMove implements Move<Gomoku> {
   final int cell;
   final boolean player;
 
+  private static final List<GomokuMove> player1Moves, player2Moves;
+
+  static {
+    player1Moves = new ArrayList<>(Gomoku.CELLS);
+    player2Moves = new ArrayList<>(Gomoku.CELLS);
+    for (int cell = 0; cell < Gomoku.CELLS; cell++) {
+      player1Moves.add(new GomokuMove(cell, true));
+      player2Moves.add(new GomokuMove(cell, false));
+    }
+  }
+
   static GomokuMove of(int cell, boolean player) {
     if (player) {
       return player1Moves.get(cell);
@@ -52,15 +63,4 @@ public final class GomokuMove implements Move<Gomoku> {
   public int hashCode() {
     return (player ? Gomoku.CELLS : 0) + cell;
   }
-
-  private static final List<GomokuMove> player1Moves, player2Moves;
-  static {
-    player1Moves = new ArrayList<>(Gomoku.CELLS);
-    player2Moves = new ArrayList<>(Gomoku.CELLS);
-    for (int cell = 0; cell < Gomoku.CELLS; cell++) {
-      player1Moves.add(new GomokuMove(cell, true));
-      player2Moves.add(new GomokuMove(cell, false));
-    }
-  }
-
 }
