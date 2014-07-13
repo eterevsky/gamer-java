@@ -39,7 +39,7 @@ class Benchmark {
       long startTime = System.currentTimeMillis();
       Move<Gomoku> move = player.selectMove(game);
       moveTime.add(System.currentTimeMillis() - startTime);
-      game.play(move);
+      game = game.play(move);
       System.out.println(game);
     }
 

@@ -13,8 +13,7 @@ final class ShallowNode<G extends Game> {
 
   ShallowNode(GameState<G> parent, Move<G> move) {
     this.move = move;
-    state = parent.clone();
-    state.play(move);
+    state = parent.play(move);
   }
 
   int getSamplesWithProcessed() {

@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class TestTreeGame {
 
-  @Test
+  @Test(timeout=10)
   public void simpleGame() {
     Random random = new Random(1234567890L);
     TreeGame game = TreeGameInstances.GAME1;
@@ -24,30 +24,30 @@ public class TestTreeGame {
     List<Move<TreeGame>> moves = state.getMoves();
     assertEquals(2, state.getMoves().size());
     assertFalse(state.isTerminal());
-    assertTrue(state.getPlayer());
+    assertTrue(state.status().getPlayer());
 
-    state.play(new TreeGameMove(game.getNode(1)));
+    state = state.play(new TreeGameMove(game.getNode(1)));
     assertFalse(state.isTerminal());
-    assertFalse(state.getPlayer());
+    assertFalse(state.status().getPlayer());
     assertEquals(1, state.getMoves().size());
 
-    state.play(state.getRandomMove(random));  // Only 1 move available.
+    state = state.play(state.getRandomMove(random));  // Only 1 move available.
     assertFalse(state.isTerminal());
-    assertTrue(state.getPlayer());
+    assertTrue(state.status().getPlayer());
 
-    state.play(state.getMoves().get(0));
+    state = state.play(state.getMoves().get(0));
     assertTrue(state.isTerminal());
     assertEquals(GameStatus.WIN, state.status());
 
     // Another game with the same tree.
     state = game.newGame();
 
-    state.play(new TreeGameMove(game.getNode(2)));
+    state = state.play(new TreeGameMove(game.getNode(2)));
     assertFalse(state.isTerminal());
-    assertFalse(state.getPlayer());
+    assertFalse(state.status().getPlayer());
     assertEquals(2, state.getMoves().size());
 
-    state.play(new TreeGameMove(game.getNode(4)));
+    state = state.play(new TreeGameMove(game.getNode(4)));
     assertTrue(state.isTerminal());
     assertEquals(GameStatus.LOSS, state.status());
   }

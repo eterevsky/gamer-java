@@ -21,8 +21,8 @@ class App {
     GameState<Gomoku> game = Gomoku.getInstance().newGame();
     Player<Gomoku> player1 = new MonteCarloUct<>();
     Player<Gomoku> player2 = new MonteCarloUct<>();
-    // player1.setTimeout(10);
-    // player2.setTimeout(10);
+    player1.setTimeout(15);
+    player2.setTimeout(25);
 
 
     System.out.println(game);
@@ -37,7 +37,7 @@ class App {
         move = player2.selectMove(game);
       }
       // executor.shutdownNow();
-      game.play(move);
+      game = game.play(move);
       System.out.println(game);
     }
   }

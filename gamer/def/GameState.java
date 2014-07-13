@@ -3,7 +3,8 @@ package gamer.def;
 import java.util.List;
 import java.util.Random;
 
-public interface GameState<G extends Game> extends Cloneable {
+// Immutable
+public interface GameState<G extends Game> {
   boolean isTerminal();
 
   GameStatus status();
@@ -12,7 +13,5 @@ public interface GameState<G extends Game> extends Cloneable {
 
   Move<G> getRandomMove(Random random);
 
-  void play(Move<G> move);
-
-  GameState<G> clone();
+  GameState<G> play(Move<G> move);
 }

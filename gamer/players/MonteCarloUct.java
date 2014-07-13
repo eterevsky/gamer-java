@@ -34,7 +34,7 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
 
     Node(Node<G> parent, GameState<G> state, Move<G> lastMove) {
       this.parent = parent;
-      this.state = state.clone();  // TODO: make state immutable
+      this.state = state;
       this.lastMove = lastMove;
     }
 
@@ -128,8 +128,7 @@ public class MonteCarloUct<G extends Game> implements Player<G> {
       List<Move<G>> moves = state.getMoves();
       children = new ArrayList<>(moves.size());
       for (Move<G> move : moves) {
-        GameState<G> newState = state.clone();
-        newState.play(move);
+        GameState<G> newState = state.play(move);
         children.add(new Node<>(this, newState, move));
       }
     }

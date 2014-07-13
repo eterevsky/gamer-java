@@ -17,17 +17,17 @@ class RandomSampleEvaluator<G extends Game> implements Evaluator<G> {
   }
 
   public double evaluate(GameState<G> origState) {
-    int s = 0;
-
     if (origState.isTerminal()) {
       return nsamples * origState.status().value();
     }
 
+    Random rnd = random == null ? ThreadLocalRandom.current() : random;
+    double s = 0;
+
     for (int i = 0; i < nsamples; i++) {
-      GameState<G> state = origState.clone();
+      GameState<G> state = origState;
       while (!state.isTerminal()) {
-        state.play(state.getRandomMove(
-            random == null ? ThreadLocalRandom.current() : random));
+        state = state.play(state.getRandomMove(rnd));
       }
 
       s += state.status().value();

@@ -6,18 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class GomokuMove implements Move<Gomoku> {
-  int cell;
-  boolean player;
+  final int cell;
+  final boolean player;
 
-  static final GomokuMove create(char player, int x, int y)
-      throws RuntimeException {
+  static GomokuMove of(int cell, boolean player) {
+    if (player) {
+      return player1Moves.get(cell);
+    } else {
+      return player2Moves.get(cell);
+    }
+  }
+
+  static GomokuMove create(char player, int x, int y) {
     boolean playerBool;
     switch (player) {
       case 'X': playerBool = true; break;
       case 'O': playerBool = false; break;
       default: throw new RuntimeException();
     }
-    return new GomokuMove(y * Gomoku.SIZE + x, playerBool);
+    return GomokuMove.of(y * Gomoku.SIZE + x, playerBool);
   }
 
   private GomokuMove(int cell, boolean player) {
@@ -56,11 +63,4 @@ public final class GomokuMove implements Move<Gomoku> {
     }
   }
 
-  static GomokuMove of(int cell, boolean player) {
-    if (player) {
-      return player1Moves.get(cell);
-    } else {
-      return player2Moves.get(cell);
-    }
-  }
 }

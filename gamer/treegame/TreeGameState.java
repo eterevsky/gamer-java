@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public final class TreeGameState implements GameState<TreeGame> {
-  private Node node;
+  private final Node node;
 
   TreeGameState(Node node) {
     this.node = node;
@@ -20,10 +20,6 @@ public final class TreeGameState implements GameState<TreeGame> {
 
   public boolean isTerminal() {
     return node.status.isTerminal();
-  }
-
-  public boolean getPlayer() {
-    return node.status.getPlayer();
   }
 
   public GameStatus status() {
@@ -39,20 +35,19 @@ public final class TreeGameState implements GameState<TreeGame> {
   }
 
   public Move<TreeGame> getRandomMove(Random random) {
+    if (node.status.isTerminal()) {
+      throw new GameException("terminal state: " + this.toString());
+    }
     int i = random.nextInt(node.children.size());
     return new TreeGameMove(node.children.get(i));
   }
 
-  public void play(Move<TreeGame> move) throws GameException {
+  public TreeGameState play(Move<TreeGame> move) {
     Node newNode = ((TreeGameMove) move).node;
     if (!node.children.contains(newNode)) {
       throw new GameException();
     }
-    node = newNode;
-  }
-
-  public GameState<TreeGame> clone() {
-    return new TreeGameState(node);
+    return new TreeGameState(newNode);
   }
 
   public String toString() {

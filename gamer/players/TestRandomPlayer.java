@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class TestRandomPlayer {
 
-  @Test
+  @Test(timeout=10)
   public void play() {
 
     TreeGame game = TreeGame.newBuilder().setRoot(0)
@@ -26,7 +26,7 @@ public class TestRandomPlayer {
     RandomPlayer<TreeGame> player = new RandomPlayer<TreeGame>();
 
     while (!state.isTerminal()) {
-      state.play(player.selectMove(state));
+      state = state.play(player.selectMove(state));
     }
 
     assertEquals(GameStatus.WIN, state.status());
