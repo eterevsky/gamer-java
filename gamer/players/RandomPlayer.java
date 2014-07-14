@@ -17,7 +17,7 @@ public class RandomPlayer<G extends Game> implements Player<G> {
         random == null ? ThreadLocalRandom.current() : random);
   }
 
-  public RandomPlayer<G> setTimeout(double timeoutInSec) {
+  public RandomPlayer<G> setTimeout(long timeout) {
     return this;
   }
 

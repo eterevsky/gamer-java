@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class TestMonteCarloUct {
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void play0() {
     TreeGameState state = TreeGameInstances.GAME0.newGame();
     MonteCarloUct<TreeGame> player = new MonteCarloUct<>();
@@ -25,7 +25,7 @@ public class TestMonteCarloUct {
     assertEquals(1, move.getNodeId());
   }
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void play1() {
     TreeGameState state = TreeGameInstances.GAME1.newGame();
     MonteCarloUct<TreeGame> player = new MonteCarloUct<>();
@@ -56,7 +56,7 @@ public class TestMonteCarloUct {
     assertEquals(GameStatus.WIN, state.status());
   }
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void play3() {
     TreeGameState state = TreeGameInstances.GAME3.newGame();
     MonteCarloUct<TreeGame> player = new MonteCarloUct<>();

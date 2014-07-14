@@ -67,20 +67,27 @@ final class NodeUct<G extends Game> implements Node<G> {
 
   public void addSamplesToExact(long nsamples) {
     samples += nsamples;
+    double value = getPlayer() ? exactValue : 1.0 - exactValue;
+    parent.addSamples(nsamples, nsamples * value);
   }
 
   public void addSamples(long nsamples, double value) {
+    assert value >= 0;
+    assert value <= nsamples;
     samples += nsamples;
     pendingSamples -= nsamples;
     assert pendingSamples >= 0;
 
-    sumValue += getPlayer() ? value : samples - value;
+    sumValue += getPlayer() ? value : nsamples - value;
     if (parent != null)
       parent.addSamples(nsamples, value);
+
+    assert sumValue >= 0;
+    assert sumValue <= samples;
   }
 
   public void setExactValue(double value) {
-    exactValue = value;
+    exactValue = getPlayer() ? value : 1.0 - value;
   }
 
   public NodeUct<G> selectChild() {
@@ -130,7 +137,7 @@ final class NodeUct<G extends Game> implements Node<G> {
       builder.append(state.toString());
     }
     builder.append(
-        String.format(" %.1f/%d/%d", sumValue, samples, pendingSamples));
+        String.format(" %.1f/%d/%d", getValue(), samples, pendingSamples));
     if (children != null) {
       for (NodeUct<G> child : children) {
         builder.append(child.toString(indent + 2));

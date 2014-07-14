@@ -14,7 +14,7 @@ import org.junit.Test;
 
 public class TestMonteCarloUcb {
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void play0() {
     TreeGame game = TreeGameInstances.GAME0;
 
@@ -26,7 +26,7 @@ public class TestMonteCarloUcb {
     assertEquals(1, move.getNodeId());
   }
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void play1() {
     TreeGame game = TreeGameInstances.GAME1;
 
@@ -42,7 +42,7 @@ public class TestMonteCarloUcb {
     assertEquals(3, move.getNodeId());
   }
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void play3() {
     TreeGame game = TreeGameInstances.GAME3;
 

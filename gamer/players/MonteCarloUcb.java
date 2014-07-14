@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 public class MonteCarloUcb<G extends Game> implements Player<G> {
   private long samplesLimit = -1;
   private int samplesBatch = 16;
-  private double timeoutInSec = 1;
+  private long timeout = 1000;
   private ExecutorService executorService;
   private int maxWorkers = 1;
   private Random random = null;
@@ -26,8 +26,8 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
 
   public MonteCarloUcb() {}
 
-  public MonteCarloUcb<G> setTimeout(double timeoutInSec) {
-    this.timeoutInSec = timeoutInSec;
+  public MonteCarloUcb<G> setTimeout(long timeout) {
+    this.timeout = timeout;
     return this;
   }
 
@@ -83,8 +83,7 @@ public class MonteCarloUcb<G extends Game> implements Player<G> {
     boolean player = state.status().getPlayer();
     int totalSamples = 0;
     while ((samplesLimit < 0 || totalSamples < samplesLimit) &&
-           (timeoutInSec < 0 ||
-            System.currentTimeMillis() - startTime < timeoutInSec * 1000)) {
+           (timeout < 0 || System.currentTimeMillis() - startTime < timeout)) {
       while (evaluationQueue.needMoreWork()) {
         ShallowNode<G> bestNode = null;
         double bestNodePriority = 0.0;

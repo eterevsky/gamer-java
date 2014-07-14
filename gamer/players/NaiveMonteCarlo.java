@@ -14,15 +14,15 @@ import java.util.concurrent.ExecutorService;
 public class NaiveMonteCarlo<G extends Game> implements Player<G> {
   private final int SAMPLES_BATCH = 8;
 
-  private double timeoutInSec = 1;
+  private long timeout = 1000;
   private long samplesLimit = -1;
   private Random random = null;
   private EvaluationQueue<G, ShallowNode<G>> evaluationQueue = null;
 
   public NaiveMonteCarlo() {}
 
-  public NaiveMonteCarlo<G> setTimeout(double timeoutInSec) {
-    this.timeoutInSec = timeoutInSec;
+  public NaiveMonteCarlo<G> setTimeout(long timeout) {
+    this.timeout = timeout;
     return this;
   }
 
@@ -60,7 +60,7 @@ public class NaiveMonteCarlo<G extends Game> implements Player<G> {
 
     int imove = 0;
 
-    while (System.currentTimeMillis() - startTime < timeoutInSec * 1000) {
+    while (System.currentTimeMillis() - startTime < timeout) {
       while (evaluationQueue.needMoreWork()) {
         evaluationQueue.put(nodes.get(imove), nodes.get(imove).state);
         imove = (imove + 1) % nodes.size();

@@ -20,7 +20,7 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
   private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
 
   @Override
-  public GenericPlayer<G> setTimeout(double timeoutInSec) {
+  public GenericPlayer<G> setTimeout(long timeout) {
     this.timeout = timeout;
     return this;
   }
@@ -53,12 +53,11 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
 
   @Override
   public Move<G> selectMove(GameState<G> state) {
-    long startTime = System.currentTimeMillis();
     Node<G> root = getRoot(state);
 
+    long finishTime = timeout > 0 ? System.currentTimeMillis() + timeout : -1;
     Sampler<G> sampler = new Sampler<G>(
-        root, System.currentTimeMillis() + timeout, samplesLimit, samplesBatch,
-        random);
+        root, finishTime, samplesLimit, samplesBatch, random);
 
     sampler.run();
 

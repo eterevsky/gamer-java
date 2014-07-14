@@ -21,8 +21,8 @@ class App {
     GameState<Gomoku> game = Gomoku.getInstance().newGame();
     Player<Gomoku> player1 = new MonteCarloUct<>();
     Player<Gomoku> player2 = new MonteCarloUct<>();
-    player1.setTimeout(15);
-    player2.setTimeout(25);
+    player1.setTimeout(15000);
+    player2.setTimeout(15000);
 
 
     System.out.println(game);
