@@ -3,6 +3,7 @@ package gamer.players;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import gamer.def.GameStatus;
 import gamer.treegame.TreeGame;
 import gamer.treegame.TreeGameMove;
 import gamer.treegame.TreeGameInstances;
@@ -40,6 +41,25 @@ public class TestNaiveMonteCarlo {
 
     move = (TreeGameMove) player.selectMove(state);
     assertEquals(3, move.getNodeId());
+  }
+
+  // This should give wrong result.
+  @Test(timeout=50)
+  public void play2() {
+    TreeGameState state = TreeGameInstances.GAME2.newGame();
+    NaiveMonteCarlo<TreeGame> player = new NaiveMonteCarlo<>();
+    player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1)
+          .setRandom(new Random(1234567890L));
+
+    TreeGameMove move = (TreeGameMove) player.selectMove(state);
+    assertEquals(2, move.getNodeId());
+    state = state.play(move);
+
+    state = state.play(player.selectMove(state));
+    state = state.play(player.selectMove(state));
+
+    assertTrue(state.isTerminal());
+    assertEquals(GameStatus.LOSS, state.status());
   }
 
   @Test(timeout=50)
