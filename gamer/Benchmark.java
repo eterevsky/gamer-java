@@ -31,7 +31,7 @@ class Benchmark {
 
     GameState<Gomoku> game = Gomoku.getInstance().newGame();
     Player<Gomoku> player = new MonteCarloUct<>();
-    player.setSamplesLimit(120000)
+    player.setSamplesLimit(200000)
           .setTimeout(-1)
           .setRandom(random);
 

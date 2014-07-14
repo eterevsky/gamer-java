@@ -19,10 +19,10 @@ class App {
     System.out.format("Found %d cores.\n", cores);
 
     GameState<Gomoku> game = Gomoku.getInstance().newGame();
-    Player<Gomoku> player1 = new MonteCarloUct<>();
+    Player<Gomoku> player1 = new MonteCarloUcb<>();
     Player<Gomoku> player2 = new MonteCarloUct<>();
-    player1.setTimeout(15000);
-    player2.setTimeout(15000);
+    player1.setTimeout(5000);
+    player2.setTimeout(5000);
 
 
     System.out.println(game);
