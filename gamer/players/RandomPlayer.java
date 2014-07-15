@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RandomPlayer<G extends Game> implements Player<G> {
+public final class RandomPlayer<G extends Game> implements Player<G> {
   private Random random = null;
 
   public Move<G> selectMove(GameState<G> state) {

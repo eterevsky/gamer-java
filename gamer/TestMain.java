@@ -2,6 +2,7 @@ package gamer;
 
 import gamer.gomoku.TestGomokuMove;
 import gamer.gomoku.TestGomokuState;
+import gamer.players.TestGenericPlayer;
 import gamer.players.TestRandomPlayer;
 import gamer.players.TestNaiveMonteCarlo;
 import gamer.players.TestMonteCarloUcb;
@@ -20,6 +21,7 @@ import org.junit.runners.Suite;
   TestGomokuMove.class,
   TestGomokuState.class,
 
+  TestGenericPlayer.class,
   TestNaiveMonteCarlo.class,
   TestMonteCarloUcb.class,
   TestMonteCarloUct.class,

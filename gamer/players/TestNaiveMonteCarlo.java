@@ -13,7 +13,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-public class TestNaiveMonteCarlo {
+public final class TestNaiveMonteCarlo {
 
   @Test(timeout=50)
   public void play0() {
@@ -43,7 +43,6 @@ public class TestNaiveMonteCarlo {
     assertEquals(3, move.getNodeId());
   }
 
-  // This should give wrong result.
   @Test(timeout=50)
   public void play2() {
     TreeGameState state = TreeGameInstances.GAME2.newGame();
@@ -51,6 +50,7 @@ public class TestNaiveMonteCarlo {
     player.setTimeout(-1).setSamplesLimit(50L).setSamplesBatch(1)
           .setRandom(new Random(1234567890L));
 
+    // Unlike UCT this should generate an inferior move.
     TreeGameMove move = (TreeGameMove) player.selectMove(state);
     assertEquals(2, move.getNodeId());
     state = state.play(move);

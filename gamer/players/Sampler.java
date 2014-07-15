@@ -6,7 +6,7 @@ import gamer.def.GameState;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-final class Sampler<G extends Game> implements Runnable {
+class Sampler<G extends Game> implements Runnable {
   private final Node<G> root;
   private final long finishTime;
   private final long maxSamples;

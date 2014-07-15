@@ -12,7 +12,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-public class TestMonteCarloUcb {
+public final class TestMonteCarloUcb {
 
   @Test(timeout=50)
   public void play0() {

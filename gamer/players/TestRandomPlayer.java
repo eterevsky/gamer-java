@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-public class TestRandomPlayer {
+public final class TestRandomPlayer {
 
   @Test(timeout=10)
   public void play() {

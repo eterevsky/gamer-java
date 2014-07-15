@@ -20,13 +20,13 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
   private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
 
   @Override
-  public GenericPlayer<G> setTimeout(long timeout) {
+  public final GenericPlayer<G> setTimeout(long timeout) {
     this.timeout = timeout;
     return this;
   }
 
   @Override
-  public GenericPlayer<G> setSamplesLimit(long samplesLimit) {
+  public final GenericPlayer<G> setSamplesLimit(long samplesLimit) {
     this.samplesLimit = samplesLimit;
     return this;
   }
@@ -37,7 +37,8 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
   }
 
   @Override
-  public GenericPlayer<G> setExecutor(ExecutorService executor, int workers) {
+  public final GenericPlayer<G> setExecutor(ExecutorService executor,
+                                            int workers) {
     this.executor = executor;
     this.workers = workers;
     return this;
@@ -51,12 +52,22 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
 
   abstract protected Node<G> getRoot(GameState<G> state);
 
+  protected Sampler<G> getSampler(
+      Node<G> root, long finishTime, long samplesLimit, int samplesBatch,
+      Random random) {
+    return new Sampler<G>(root, finishTime, samplesLimit, samplesBatch, random);
+  }
+
+  protected long getCurrentTime() {
+    return System.currentTimeMillis();
+  }
+
   @Override
   public Move<G> selectMove(GameState<G> state) {
     Node<G> root = getRoot(state);
 
-    long finishTime = timeout > 0 ? System.currentTimeMillis() + timeout : -1;
-    Sampler<G> sampler = new Sampler<G>(
+    long finishTime = timeout > 0 ? getCurrentTime() + timeout : -1;
+    Sampler<G> sampler = getSampler(
         root, finishTime, samplesLimit, samplesBatch, random);
 
     sampler.run();

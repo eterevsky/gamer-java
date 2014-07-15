@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-public class TestMonteCarloUct {
+public final class TestMonteCarloUct {
 
   @Test(timeout=50)
   public void play0() {

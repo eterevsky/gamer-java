@@ -18,6 +18,10 @@ public final class TreeGameState implements GameState<TreeGame> {
     this.node = node;
   }
 
+  public int getId() {
+    return node.id;
+  }
+
   public boolean isTerminal() {
     return node.status.isTerminal();
   }
