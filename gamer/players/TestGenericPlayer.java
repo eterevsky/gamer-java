@@ -42,8 +42,12 @@ public final class TestGenericPlayer {
         }
       }
 
+      root.addPendingSamples(27);
+      node1.addPendingSamples(10);
       node1.addSamples(10, 8.0);
+      node2.addPendingSamples(12);
       node2.addSamples(12, 10.0);
+      node3.addPendingSamples(5);
       node3.addSamples(5, 1.0);
     }
   }
