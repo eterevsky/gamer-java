@@ -42,13 +42,12 @@ public final class TestGenericPlayer {
         }
       }
 
-      root.addPendingSamples(27);
-      node1.addPendingSamples(10);
-      node1.addSamples(10, 8.0);
-      node2.addPendingSamples(12);
-      node2.addSamples(12, 10.0);
-      node3.addPendingSamples(5);
-      node3.addSamples(5, 1.0);
+      node1.selectIfNoChildren(10);
+      node1.addSamples(10, 0.8);
+      node2.selectIfNoChildren(12);
+      node2.addSamples(12, 0.9);
+      node3.selectIfNoChildren(5);
+      node3.addSamples(5, 0.2);
     }
   }
 
@@ -69,8 +68,8 @@ public final class TestGenericPlayer {
     }
 
     protected MockSampler getSampler(
-        Node<TreeGame> root, long finishTime, long samplesLimit, int samplesBatch,
-        Random random) {
+        Node<TreeGame> root, long finishTime, long samplesLimit,
+        int samplesBatch, Random random) {
       assertEquals(this.root, root);
       assertEquals(123456L + 239, finishTime);
       assertEquals(234, samplesLimit);
@@ -87,7 +86,8 @@ public final class TestGenericPlayer {
         .addMove(0, 1).addMove(0, 2).addMove(0, 3)
         .toGame();
 
-    NodeNaiveRoot<TreeGame> root = new NodeNaiveRoot<>(game.newGame());
+    Node<TreeGame> root = new Node<TreeGame>(
+        null, game.newGame(), null, new NaiveMonteCarlo.Selector<TreeGame>());
 
     MockSampler sampler = new MockSampler(root);
     MockPlayer player = new MockPlayer(root, sampler);

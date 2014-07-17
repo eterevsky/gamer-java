@@ -72,11 +72,12 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
 
     sampler.run();
 
-    Node<G> bestNode = null;
-    double bestValue = 2.0;
     boolean player = state.status().getPlayer();
+    Node<G> bestNode = null;
+    double bestValue = player ? -1 : 2;
     for (Node<G> node : root.getChildren()) {
-      if (node.getValue() < bestValue) {
+      if (player ? (node.getValue() > bestValue)
+                 : (node.getValue() < bestValue)) {
         bestNode = node;
         bestValue = node.getValue();
       }

@@ -29,34 +29,33 @@ class Sampler<G extends Game> implements Runnable {
     while ((maxSamples <= 0 || root.getSamples() < maxSamples) &&
            (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
       Node<G> node = root;
-      while (node.isExplored() && !node.knowExactValue()) {
-        node.addPendingSamples(samplesBatch);
-        node = node.selectChild();
+      while (!node.selectIfNoChildren(samplesBatch)) {
+        node = node.selectChild(samplesBatch);
       }
 
       if (node.getState().status().isTerminal() && !node.knowExactValue()) {
         node.setExactValue(node.getState().status().value());
       }
 
-      if (node.knowExactValue()) {
-        node.addSamplesToExact(samplesBatch);
-        continue;
-      }
-
-      node.addPendingSamples(samplesBatch);
-
       double value = 0;
+      if (node.knowExactValue()) {
+        value = node.getValue();
+      } else {
+        for (int i = 0; i < samplesBatch; i++) {
+          GameState<G> state = node.getState();
+          do {
+            state = state.play(state.getRandomMove(rnd));
+          } while (!state.status().isTerminal());
 
-      for (int i = 0; i < samplesBatch; i++) {
-        GameState<G> state = node.getState();
-        do {
-          state = state.play(state.getRandomMove(rnd));
-        } while (!state.status().isTerminal());
-
-        value += state.status().value();
+          value += state.status().value();
+        }
+        value /= samplesBatch;
       }
 
-      node.addSamples(samplesBatch, value);
+      while (node != null) {
+        node.addSamples(samplesBatch, value);
+        node = node.getParent();
+      }
     }
   }
 }
