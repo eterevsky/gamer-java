@@ -24,19 +24,18 @@ class App {
     player1.setTimeout(5000);
     player2.setTimeout(5000);
 
-
     System.out.println(game);
 
     while (!game.isTerminal()) {
       Move<Gomoku> move;
-      // ExecutorService executor = Executors.newCachedThreadPool();
+      ExecutorService executor = Executors.newFixedThreadPool(cores);
       if (game.status().getPlayer()) {
-        // player1.setExecutor(executor, cores);
+        player1.setExecutor(executor, cores);
         move = player1.selectMove(game);
       } else {
         move = player2.selectMove(game);
       }
-      // executor.shutdownNow();
+      executor.shutdownNow();
       game = game.play(move);
       System.out.println(game);
     }

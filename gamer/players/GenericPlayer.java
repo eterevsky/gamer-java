@@ -5,16 +5,18 @@ import gamer.def.GameState;
 import gamer.def.Move;
 import gamer.def.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;  // TODO: remove
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 abstract class GenericPlayer<G extends Game> implements Player<G> {
   private long samplesLimit = -1;
   private int samplesBatch = 1;
   private long timeout = 1000;
-  private Executor executor = null;
+  private ExecutorService executor = null;
   private int workers = 1;
   private Random random = null;
   private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
@@ -52,7 +54,7 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
 
   abstract protected Node<G> getRoot(GameState<G> state);
 
-  protected Sampler<G> getSampler(
+  protected Sampler<G> newSampler(
       Node<G> root, long finishTime, long samplesLimit, int samplesBatch,
       Random random) {
     return new Sampler<G>(root, finishTime, samplesLimit, samplesBatch, random);
@@ -67,10 +69,25 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
     Node<G> root = getRoot(state);
 
     long finishTime = timeout > 0 ? getCurrentTime() + timeout : -1;
-    Sampler<G> sampler = getSampler(
-        root, finishTime, samplesLimit, samplesBatch, random);
 
-    sampler.run();
+    if (executor != null) {
+      List<Future<?>> tasks = new ArrayList<>();
+      for (int i = 0; i < workers; i++) {
+        tasks.add(executor.submit(
+            newSampler(root, finishTime, samplesLimit, samplesBatch, random)));
+      }
+
+      for (Future<?> task : tasks) {
+        try {
+          task.get();
+        } catch (Exception ex) {
+          throw new RuntimeException(ex);
+        }
+      }
+    } else {
+      newSampler(root, finishTime, samplesLimit, samplesBatch, random).run();
+    }
+
 
     boolean player = state.status().getPlayer();
     Node<G> bestNode = null;

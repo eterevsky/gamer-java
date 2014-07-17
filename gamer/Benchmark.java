@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 class Benchmark {
   static long median(List<Long> l) {
@@ -28,12 +30,15 @@ class Benchmark {
     List<Long> moveTime = new ArrayList<>();
 
     Random random = new Random(1234567890L);
-
+    int cores = Runtime.getRuntime().availableProcessors();
+    ExecutorService executor = Executors.newFixedThreadPool(cores);
     GameState<Gomoku> game = Gomoku.getInstance().newGame();
+
     Player<Gomoku> player = new MonteCarloUct<>();
     player.setSamplesLimit(200000)
           .setTimeout(-1)
-          .setRandom(random);
+          .setRandom(random)
+          .setExecutor(executor, cores);
 
     while (!game.isTerminal()) {
       long startTime = System.currentTimeMillis();
@@ -43,6 +48,7 @@ class Benchmark {
       System.out.println(game);
     }
 
+    executor.shutdown();
     System.out.println("Median: " + median(moveTime));
   }
 }

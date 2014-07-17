@@ -67,7 +67,7 @@ public final class TestGenericPlayer {
       return 123456L;
     }
 
-    protected MockSampler getSampler(
+    protected MockSampler newSampler(
         Node<TreeGame> root, long finishTime, long samplesLimit,
         int samplesBatch, Random random) {
       assertEquals(this.root, root);
