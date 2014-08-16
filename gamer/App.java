@@ -19,25 +19,25 @@ class App {
     System.out.format("Found %d cores.\n", cores);
 
     GameState<Gomoku> game = Gomoku.getInstance().newGame();
-    Player<Gomoku> player1 = new MonteCarloUcb<>();
+    Player<Gomoku> player1 = new MonteCarloUct<>();
     Player<Gomoku> player2 = new MonteCarloUct<>();
-    player1.setTimeout(5000);
-    player2.setTimeout(5000);
+    ExecutorService executor = Executors.newFixedThreadPool(cores);
+    player1.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(8);
+    player2.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(16);
 
     System.out.println(game);
 
     while (!game.isTerminal()) {
       Move<Gomoku> move;
-      ExecutorService executor = Executors.newFixedThreadPool(cores);
       if (game.status().getPlayer()) {
-        player1.setExecutor(executor, cores);
         move = player1.selectMove(game);
       } else {
         move = player2.selectMove(game);
       }
-      executor.shutdownNow();
       game = game.play(move);
       System.out.println(game);
     }
+
+    executor.shutdown();
   }
 }

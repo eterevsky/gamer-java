@@ -4,10 +4,11 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
 public interface Player<G extends Game> {
-  Player setTimeout(long timout);
-  Player setSamplesLimit(long samplesLimit);
-  Player setExecutor(ExecutorService executor, int maxWorkers);
-  Player setRandom(Random random);
+  Player<G> setTimeout(long timout);
+  Player<G> setSamplesLimit(long samplesLimit);
+  Player<G> setExecutor(ExecutorService executor, int maxWorkers);
+  Player<G> setRandom(Random random);
+  Player<G> setSamplesBatch(int samplesBatch);
 
   Move<G> selectMove(GameState<G> state);
 }

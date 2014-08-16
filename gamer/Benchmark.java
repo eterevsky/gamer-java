@@ -29,15 +29,14 @@ class Benchmark {
   public static void main(String[] args) throws Exception {
     List<Long> moveTime = new ArrayList<>();
 
-    Random random = new Random(1234567890L);
     int cores = Runtime.getRuntime().availableProcessors();
+    System.out.format("Cores: %d\n", cores);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
     GameState<Gomoku> game = Gomoku.getInstance().newGame();
 
     Player<Gomoku> player = new MonteCarloUct<>();
     player.setSamplesLimit(200000)
           .setTimeout(-1)
-          .setRandom(random)
           .setExecutor(executor, cores);
 
     while (!game.isTerminal()) {
@@ -48,7 +47,7 @@ class Benchmark {
       System.out.println(game);
     }
 
-    executor.shutdown();
+    executor.shutdownNow();
     System.out.println("Median: " + median(moveTime));
   }
 }

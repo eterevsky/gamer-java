@@ -3,7 +3,7 @@ package gamer.gomoku;
 import gamer.def.Game;
 
 public final class Gomoku implements Game<Gomoku> {
-  static final int SIZE = 19;
+  static final int SIZE = 11;
   static final int CELLS = SIZE * SIZE;
   private static final Gomoku INSTANCE = new Gomoku();
 

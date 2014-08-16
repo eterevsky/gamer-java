@@ -33,7 +33,7 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
     return this;
   }
 
-  GenericPlayer<G> setSamplesBatch(int samplesBatch) {
+  public final GenericPlayer<G> setSamplesBatch(int samplesBatch) {
     this.samplesBatch = samplesBatch;
     return this;
   }
@@ -101,7 +101,7 @@ abstract class GenericPlayer<G extends Game> implements Player<G> {
     }
 
     LOG.info(String.format("%s: %f over %d (%d)\n",
-        bestNode.getMove(), 1 - bestNode.getValue(), bestNode.getSamples(),
+        bestNode.getMove(), bestNode.getValue(), bestNode.getSamples(),
         root.getSamples()));
 
     return bestNode.getMove();

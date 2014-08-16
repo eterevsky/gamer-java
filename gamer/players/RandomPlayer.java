@@ -25,6 +25,10 @@ public final class RandomPlayer<G extends Game> implements Player<G> {
     return this;
   }
 
+  public RandomPlayer<G> setSamplesBatch(int samplesBatch) {
+    return this;
+  }
+
   public RandomPlayer<G> setExecutor(ExecutorService executor, int maxWorkers) {
     return this;
   }
