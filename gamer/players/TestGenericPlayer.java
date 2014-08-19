@@ -79,7 +79,7 @@ public final class TestGenericPlayer {
     }
   }
 
-  @Test(timeout=10)
+  @Test(timeout=20)
   public void selectMove() {
 
     TreeGame game = TreeGame.newBuilder().setRoot(0)
