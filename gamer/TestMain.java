@@ -8,6 +8,7 @@ import gamer.players.TestNaiveMonteCarlo;
 import gamer.players.TestMonteCarloUcb;
 import gamer.players.TestMonteCarloUct;
 import gamer.treegame.TestTreeGame;
+import gamer.util.TestUpdatablePriorityQueue;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +28,9 @@ import org.junit.runners.Suite;
   TestMonteCarloUct.class,
   TestRandomPlayer.class,
 
-  TestTreeGame.class
+  TestTreeGame.class,
+
+  TestUpdatablePriorityQueue.class
 })
 
 public class TestMain {
