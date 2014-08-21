@@ -114,10 +114,7 @@ final class Node<G extends Game> {
 
   void addSamples(long nsamples, double value) {
     synchronized(this) {
-      if (pendingSamples < nsamples) {
-        System.out.println();
-        System.out.println(toString());
-      }
+      assert nsamples <= pendingSamples;
       long newSamples = samples + nsamples;
       this.value = (samples * this.value + nsamples * value) / newSamples;
       samples = newSamples;
@@ -128,7 +125,8 @@ final class Node<G extends Game> {
       parent.childUpdated(this);
   }
 
-  synchronized double getUcbPriority(double parentSamplesLog, boolean player) {
+  // Ideally, this should be synchronized.
+  double getUcbPriority(double parentSamplesLog, boolean player) {
     long totalSamples = samples + pendingSamples;
     if (totalSamples == 0) {
       return 2 * (1 + Math.sqrt(parentSamplesLog));
