@@ -16,10 +16,18 @@ public final class UpdatablePriorityQueue<T> {
     double priority;
   }
 
-  private List<Element<T>> heap = new ArrayList<>();
-  private Map<T, Integer> position = new HashMap<>();
+  private final List<Element<T>> heap;
+  private final Map<T, Integer> position;
 
-  public UpdatablePriorityQueue() {}
+  public UpdatablePriorityQueue() {
+    heap = new ArrayList<>();
+    position = new HashMap<>();
+  }
+
+  public UpdatablePriorityQueue(int size) {
+    heap = new ArrayList<>(size);
+    position = new HashMap<>(size);
+  }
 
   public void add(T value, double priority) {
     heap.add(new Element<>(value, priority));

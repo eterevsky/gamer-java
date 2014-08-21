@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 abstract class GenericPlayer<G extends Game> implements Player<G> {
   private long samplesLimit = -1;
-  private int samplesBatch = 16;
+  private int samplesBatch = 1;
   private long timeout = 1000;
   private ExecutorService executor = null;
   private int workers = 1;

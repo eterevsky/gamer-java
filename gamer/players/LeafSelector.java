@@ -21,7 +21,7 @@ final class LeafSelector<G extends Game> implements Node.Selector<G> {
     throw new RuntimeException();
   }
 
-  public void childUpdated(Node<G> child) {
+  public void childUpdated(Node<G> child, long totalSamples) {
     throw new RuntimeException();
   }
 }

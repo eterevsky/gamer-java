@@ -30,7 +30,7 @@ final class Node<G extends Game> {
 
     Selector<G> newChildSelector();
 
-    void childUpdated(Node<G> child);
+    void childUpdated(Node<G> child, long totalSamples);
   }
 
   Node(Node<G> parent, GameState<G> state, Move<G> move, Selector<G> selector) {
@@ -173,7 +173,7 @@ final class Node<G extends Game> {
   }
 
   private synchronized void childUpdated(Node<G> child) {
-    selector.childUpdated(child);
+    selector.childUpdated(child, samples + pendingSamples);
   }
 
   private void initChildren() {

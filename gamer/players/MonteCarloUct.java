@@ -4,7 +4,8 @@ import gamer.def.Game;
 import gamer.def.GameState;
 
 public class MonteCarloUct<G extends Game> extends GenericPlayer<G> {
-  private static class Selector<G extends Game> extends BanditSelector<G> {
+  private static class Selector<G extends Game>
+      extends BanditSelectorCached<G> {
     public boolean shouldCreateChildren() {
       return node.getSamples() > 4;
     }

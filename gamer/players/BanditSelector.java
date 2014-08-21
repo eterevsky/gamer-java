@@ -40,5 +40,5 @@ abstract class BanditSelector<G extends Game> implements Node.Selector<G> {
 
   public abstract Node.Selector<G> newChildSelector();
 
-  public void childUpdated(Node<G> child) {}
+  public void childUpdated(Node<G> child, long totalSamples) {}
 }

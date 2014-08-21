@@ -29,7 +29,7 @@ public class NaiveMonteCarlo<G extends Game> extends GenericPlayer<G> {
       return new LeafSelector<G>();
     }
 
-    public void childUpdated(Node<G> child) {}
+    public void childUpdated(Node<G> child, long totalSamples) {}
   }
 
   @Override
