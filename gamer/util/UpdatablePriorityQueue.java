@@ -29,7 +29,9 @@ public final class UpdatablePriorityQueue<T> {
   public void update(T value, double priority) {
     int index = position.get(value);
     Element<T> element = heap.get(index);
-    if (priority >= element.priority) {
+    double oldPriority = element.priority;
+    element.priority = priority;
+    if (priority >= oldPriority) {
       bubbleUp(index);
     } else {
       bubbleDown(index);
