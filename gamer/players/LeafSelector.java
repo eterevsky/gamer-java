@@ -7,9 +7,7 @@ import java.util.Collection;
 final class LeafSelector<G extends Game> implements Node.Selector<G> {
   public void setNode(Node<G> node) {}
 
-  public Node<G> select(Collection<Node<G>> children,
-                 long samples,
-                 long pendingSamples)  {
+  public Node<G> select(Collection<Node<G>> children, long totalSamples)  {
     throw new RuntimeException();
   }
 

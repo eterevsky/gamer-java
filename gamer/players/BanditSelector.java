@@ -12,10 +12,8 @@ abstract class BanditSelector<G extends Game> implements Node.Selector<G> {
     this.node = node;
   }
 
-  public Node<G> select(Collection<Node<G>> children,
-                        long samples,
-                        long pendingSamples) {
-    double totalSamplesLog = 2 * Math.log(samples + pendingSamples);
+  public Node<G> select(Collection<Node<G>> children, long totalSamples) {
+    double totalSamplesLog = 2 * Math.log(totalSamples);
     assert totalSamplesLog >= 0;
 
     Node<G> bestChild = null;

@@ -12,9 +12,7 @@ public class NaiveMonteCarlo<G extends Game> extends GenericPlayer<G> {
 
     public void setNode(Node<G> node) {}
 
-    public Node<G> select(Collection<Node<G>> children,
-                          long samples,
-                          long pendingSamples) {
+    public Node<G> select(Collection<Node<G>> children, long totalSamples) {
       if (childrenIt == null || !childrenIt.hasNext())
         childrenIt = children.iterator();
 

@@ -16,15 +16,13 @@ final class Node<G extends Game> {
   private final Selector<G> selector;
   private boolean exactValue = false;
   private double value = 0.5;
-  private long samples = 0;
-  private long pendingSamples = 0;
+  private int totalSamples = 0;
+  private int pendingSamples = 0;
 
   interface Selector<G extends Game> {
     void setNode(Node<G> node);
 
-    Node<G> select(Collection<Node<G>> children,
-                   long samples,
-                   long pendingSamples);
+    Node<G> select(Collection<Node<G>> children, long totalSamples);
 
     boolean shouldCreateChildren();
 
@@ -63,7 +61,9 @@ final class Node<G extends Game> {
         return false;
       }
 
+      value *= totalSamples / (totalSamples + nsamples);
       pendingSamples += nsamples;
+      totalSamples += nsamples;
     }
 
     if (parent != null)
@@ -79,7 +79,7 @@ final class Node<G extends Game> {
 
     if (exactValue) {
       System.out.println("exact");
-      samples += nsamples;
+      totalSamples += nsamples;
       return null;
     }
 
@@ -87,8 +87,10 @@ final class Node<G extends Game> {
       initChildren();
     }
 
+    value *= totalSamples / (totalSamples + nsamples);
     pendingSamples += nsamples;
-    return selector.select(children, samples, pendingSamples);
+    totalSamples += nsamples;
+    return selector.select(children, totalSamples);
   }
 
   double getValue() {
@@ -105,34 +107,33 @@ final class Node<G extends Game> {
   }
 
   synchronized long getSamples() {
-    return samples;
+    return totalSamples - pendingSamples;
   }
 
-  synchronized long getSamplesWithPending() {
-    return samples + pendingSamples;
+  long getSamplesWithPending() {
+    return totalSamples;
   }
 
-  void addSamples(long nsamples, double value) {
+  void addSamples(int nsamples, double value) {
+    assert nsamples <= pendingSamples;
+
     synchronized(this) {
-      assert nsamples <= pendingSamples;
-      long newSamples = samples + nsamples;
-      this.value = (samples * this.value + nsamples * value) / newSamples;
-      samples = newSamples;
+      this.value += value * nsamples / totalSamples;
       pendingSamples -= nsamples;
       assert pendingSamples >= 0;
     }
+
     if (parent != null)
       parent.childUpdated(this);
   }
 
   // Ideally, this should be synchronized.
   double getUcbPriority(double parentSamplesLog, boolean player) {
-    long totalSamples = samples + pendingSamples;
     if (totalSamples == 0) {
       return 2 * (1 + Math.sqrt(parentSamplesLog));
     }
 
-    return (player ? value : 1 - value) * samples / totalSamples +
+    return (player ? value : 1 - value) +
            Math.sqrt(parentSamplesLog / totalSamples);
   }
 
@@ -160,7 +161,7 @@ final class Node<G extends Game> {
       builder.append(state.toString());
     }
     builder.append(
-        String.format(" %.1f/%d/%d", value, samples, pendingSamples));
+        String.format(" %.1f/%d/%d", value, totalSamples, pendingSamples));
     if (children != null) {
       for (Node<G> child : children) {
         builder.append(child.toString(indent + 2));
@@ -171,7 +172,7 @@ final class Node<G extends Game> {
   }
 
   private synchronized void childUpdated(Node<G> child) {
-    selector.childUpdated(child, samples + pendingSamples);
+    selector.childUpdated(child, totalSamples);
   }
 
   private void initChildren() {

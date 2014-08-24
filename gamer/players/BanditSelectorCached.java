@@ -16,10 +16,7 @@ abstract class BanditSelectorCached<G extends Game>
     this.node = node;
   }
 
-  public Node<G> select(Collection<Node<G>> children,
-                        long samples,
-                        long pendingSamples) {
-    long totalSamples = samples + pendingSamples;
+  public Node<G> select(Collection<Node<G>> children, long totalSamples) {
     if (queue == null || totalSamples > nextFullUpdate)
       initQueue(children, totalSamples);
 
