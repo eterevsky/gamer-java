@@ -42,11 +42,11 @@ public final class TestGenericPlayer {
         }
       }
 
-      node1.selectIfNoChildren(10);
+      node1.selectChildOrAddPending(10);
       node1.addSamples(10, 0.8);
-      node2.selectIfNoChildren(12);
+      node2.selectChildOrAddPending(12);
       node2.addSamples(12, 0.9);
-      node3.selectIfNoChildren(5);
+      node3.selectChildOrAddPending(5);
       node3.addSamples(5, 0.2);
     }
   }

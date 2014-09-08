@@ -57,4 +57,13 @@ public final class TreeGameState implements GameState<TreeGame> {
   public String toString() {
     return "TreeState(" + node.id + ")";
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof TreeGameState))
+      return false;
+    TreeGameState oState = (TreeGameState) o;
+    return node.equals(oState.node);
+  }
+
 }

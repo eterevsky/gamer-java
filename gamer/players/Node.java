@@ -20,7 +20,8 @@ final class Node<G extends Game> {
   private int pendingSamples = 0;
 
   // Used as a result of selectChildOrAddPending().
-  final static Node<G> KNOW_EXACT_VALUE = new Node(null, null, null, null);
+  @SuppressWarnings("unchecked")
+  final static Node KNOW_EXACT_VALUE = new Node(null, null, null, null);
 
   interface Selector<G extends Game> {
     void setNode(Node<G> node);
@@ -35,15 +36,18 @@ final class Node<G extends Game> {
   }
 
   Node(Node<G> parent, GameState<G> state, Move<G> move, Selector<G> selector) {
-    if (selector == null) {
-      throw new RuntimeException("no selector");
-    }
-
     this.parent = parent;
     this.state = state;
     this.move = move;
     this.selector = selector;
-    selector.setNode(this);
+    if (selector != null) {
+      selector.setNode(this);
+    }
+
+    if (state != null && state.status().isTerminal()) {
+      this.exactValue = true;
+      this.value = state.status().value();
+    }
   }
 
   // Getters
@@ -62,13 +66,13 @@ final class Node<G extends Game> {
 
   synchronized Collection<Node<G>> getChildren() {
     if (children == null) {
-      throw RuntimeException(
+      throw new RuntimeException(
           "Requested children from a node without children.");
     }
     return children;
   }
 
-  double getValue() {
+  synchronized double getValue() {
     return value;
   }
 
@@ -85,74 +89,44 @@ final class Node<G extends Game> {
     return totalSamples;
   }
 
+  // - If the exact value is known, add nsamples to samples (and parent samples)
+  //   and return KNOW_EXACT_VALUE.
   // - If there are children, select one using Selector, add nsamples to pending
   //   samples.
-  // - If there are no children and
+  // - If there are no children, add nsamples to pending samples and return
+  //   null.
   Node<G> selectChildOrAddPending(int nsamples) {
-  }
+    @SuppressWarnings("unchecked")
+    Node<G> returnValue = KNOW_EXACT_VALUE;
 
-  /**
-   * If there are children: return false, do nothing.
-   * If there are no children: return true, add nsamples to pending samples.
-   */
-  boolean addPendinIfNoChildren(int nsamples) {
     synchronized(this) {
+      totalSamples += nsamples;
       if (!exactValue) {
-        if (children != null || selector.shouldCreateChildren()) {
-          return false;
+        pendingSamples += nsamples;
+        value *= (totalSamples - nsamples) / totalSamples;
+
+        if (children == null && selector.shouldCreateChildren()) {
+          initChildren();
         }
 
-        value *= totalSamples / (totalSamples + nsamples);
-        pendingSamples += nsamples;
-        totalSamples += nsamples;
-      } else {
-        pendingSamples += nsamples;
-        totalSamples += nsamples;
+        returnValue =
+            children != null ? selector.select(children, totalSamples) : null;
       }
     }
 
-    if (parent != null)
-      parent.childUpdated(this);
-
-    return true;
-  }
-
-  synchronized Node<G> selectChild(int nsamples) {
-    if (exactValue) {
-      System.out.println("exact");
-      totalSamples += nsamples;
-      return null;
+    if (parent != null) {
+      if (returnValue == KNOW_EXACT_VALUE) {
+        parent.addSamplesAndUpdate(nsamples, value, this);
+      } else {
+        parent.childUpdated(this);
+      }
     }
 
-    if (children == null) {
-      initChildren();
-    }
-
-    value *= totalSamples / (totalSamples + nsamples);
-    pendingSamples += nsamples;
-    totalSamples += nsamples;
-    return selector.select(children, totalSamples);
-  }
-
-  synchronized void setExactValue(double value) {
-    this.value = value;
-    this.exactValue = true;
+    return returnValue;
   }
 
   void addSamples(int nsamples, double value) {
-    assert nsamples <= pendingSamples;
-
-    synchronized(this) {
-      this.value += value * nsamples / totalSamples;
-      // System.out.format("%s: + %f (%d) new value: %f\n", state, value, nsamples, this.value);
-      // System.out.println(totalSamples);
-      // System.out.println(pendingSamples);
-      pendingSamples -= nsamples;
-      assert pendingSamples >= 0;
-    }
-
-    if (parent != null)
-      parent.childUpdated(this);
+    addSamplesAndUpdate(nsamples, value, null);
   }
 
   // Ideally, this should be synchronized.
@@ -191,9 +165,25 @@ final class Node<G extends Game> {
     return builder.toString();
   }
 
+  private void addSamplesAndUpdate(int nsamples, double value, Node<G> child) {
+    synchronized(this) {
+      pendingSamples -= nsamples;
+      assert pendingSamples >= 0;
+      System.out.format("%f %d %d\n", value, nsamples, totalSamples);
+      if (!exactValue)
+        this.value += value * nsamples / totalSamples;
+      if (child != null)
+        selector.childUpdated(child, totalSamples);
+    }
+
+    if (parent != null)
+      parent.addSamplesAndUpdate(nsamples, value, this);
+  }
+
   private synchronized void childUpdated(Node<G> child) {
     selector.childUpdated(child, totalSamples);
   }
+
 
   private void initChildren() {
     List<Move<G>> moves = state.getMoves();

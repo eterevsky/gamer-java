@@ -19,7 +19,7 @@ abstract class BanditSelector<G extends Game> implements Node.Selector<G> {
     Node<G> bestChild = null;
     double bestChildPrio = 0;
     for (Node<G> child : children) {
-      if (child.getSamplesWithPending() == 0) {
+      if (child.getTotalSamples() == 0) {
         return child;
       }
       double priority = child.getUcbPriority(
