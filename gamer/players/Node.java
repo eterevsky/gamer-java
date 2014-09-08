@@ -31,8 +31,6 @@ final class Node<G extends Game> {
     boolean shouldCreateChildren();
 
     Selector<G> newChildSelector();
-
-    void childUpdated(Node<G> child, long totalSamples);
   }
 
   Node(Node<G> parent, GameState<G> state, Move<G> move, Selector<G> selector) {
@@ -183,16 +181,17 @@ final class Node<G extends Game> {
       assert pendingSamples >= 0;
       if (!exactValue)
         this.value += value * (double)nsamples / totalSamples;
-      if (child != null)
-        selector.childUpdated(child, totalSamples);
+      // if (child != null)
+      //   selector.childUpdated(child, totalSamples);
     }
 
     if (parent != null)
       parent.addSamplesAndUpdate(nsamples, value, this);
   }
 
-  private synchronized void childUpdated(Node<G> child) {
-    selector.childUpdated(child, totalSamples);
+  // Turned off since cached BanditSelector that requires this is not used.
+  private void childUpdated(Node<G> child) {
+//    selector.childUpdated(child, totalSamples);
   }
 
 

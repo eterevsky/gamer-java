@@ -17,10 +17,12 @@ abstract class BanditSelectorCached<G extends Game>
   }
 
   public Node<G> select(Collection<Node<G>> children, long totalSamples) {
-    if (queue == null || totalSamples > nextFullUpdate)
-      initQueue(children, totalSamples);
+    throw new RuntimeException("Shouldn't be used, since childUpdate is switched off.");
 
-    return queue.head();
+    // if (queue == null || totalSamples > nextFullUpdate)
+    //   initQueue(children, totalSamples);
+    //
+    // return queue.head();
   }
 
   private void initQueue(Collection<Node<G>> children, long totalSamples) {

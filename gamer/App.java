@@ -22,8 +22,8 @@ class App {
     Player<Gomoku> player1 = new MonteCarloUct<>();
     Player<Gomoku> player2 = new MonteCarloUct<>();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
-    player1.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(1);
-    player2.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(1);
+    player1.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(2);
+    player2.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(2);
 
     System.out.println(game);
 

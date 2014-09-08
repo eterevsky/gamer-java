@@ -28,7 +28,7 @@ public final class GomokuMove implements Move<Gomoku> {
     }
   }
 
-  static GomokuMove create(char player, int x, int y) {
+  public static GomokuMove create(char player, int x, int y) {
     boolean playerBool;
     switch (player) {
       case 'X': playerBool = true; break;

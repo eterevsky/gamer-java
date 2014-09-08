@@ -4,6 +4,8 @@ import gamer.def.GameState;
 import gamer.def.Move;
 import gamer.def.Player;
 import gamer.gomoku.Gomoku;
+import gamer.gomoku.GomokuMove;
+import gamer.gomoku.GomokuState;
 import gamer.players.MonteCarloUcb;
 import gamer.players.MonteCarloUct;
 import gamer.players.NaiveMonteCarlo;
@@ -17,6 +19,58 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 class Benchmark {
+  static final List<GomokuState> testStates;
+
+  static {
+    testStates = new ArrayList<>();
+    GomokuState state = Gomoku.getInstance().newGame();
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 5, 5));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 5, 4));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 6, 5));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 4, 5));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 6, 3));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 6, 4));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 4, 4));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 5, 6));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 6, 6));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 3, 3));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 7, 7));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 8, 8));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 7, 5));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 7, 8));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 6, 7));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 5, 7));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 6, 8));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 6, 9));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 9, 5));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 8, 5));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('X', 8, 6));
+    testStates.add(state);
+    state = state.play(GomokuMove.create('O', 5, 9));
+    testStates.add(state);
+  }
+
   static long median(List<Long> l) {
     Collections.sort(l);
     if (l.size() % 2 == 1) {
@@ -26,28 +80,36 @@ class Benchmark {
     }
   }
 
+  static long mean(List<Long> l) {
+    long sum = 0;
+    for (long e : l) {
+      sum += e;
+    }
+
+    return sum / l.size();
+  }
+
   public static void main(String[] args) throws Exception {
     List<Long> moveTime = new ArrayList<>();
 
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Cores: %d\n", cores);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
-    GameState<Gomoku> game = Gomoku.getInstance().newGame();
 
-    Player<Gomoku> player = new MonteCarloUct<>();
-    player.setSamplesLimit(200000)
-          .setTimeout(-1)
-          .setExecutor(executor, cores);
+    Player<Gomoku> player = new MonteCarloUct<Gomoku>()
+        .setSamplesLimit(200000)
+        .setTimeout(-1)
+        .setSamplesBatch(4)
+        .setExecutor(executor, cores);
 
-    while (!game.isTerminal()) {
+    for (GameState<Gomoku> s : testStates) {
       long startTime = System.currentTimeMillis();
-      Move<Gomoku> move = player.selectMove(game);
+      Move<Gomoku> move = player.selectMove(s);
       moveTime.add(System.currentTimeMillis() - startTime);
-      game = game.play(move);
-      System.out.println(game);
+      System.out.println(moveTime.get(moveTime.size() - 1));
     }
 
     executor.shutdownNow();
-    System.out.println("Median: " + median(moveTime));
+    System.out.format("Median/mean: %d / %d\n", median(moveTime), mean(moveTime));
   }
 }
