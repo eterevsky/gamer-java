@@ -32,20 +32,13 @@ public final class TestGenericPlayer {
       assertFalse(wasCalled);
       wasCalled = true;
 
-      Node<TreeGame> node1 = null, node2 = null, node3 = null;
-      for (Node<TreeGame> node : root.getChildren()) {
-        switch (((TreeGameState)node.getState()).getId()) {
-          case 1: node1 = node; break;
-          case 2: node2 = node; break;
-          case 3: node3 = node; break;
-          default: throw new AssertionError();
-        }
-      }
-
+      Node<TreeGame> node1 = root.selectChildOrAddPending(10);
       node1.selectChildOrAddPending(10);
       node1.addSamples(10, 0.8);
+      Node<TreeGame> node2 = root.selectChildOrAddPending(12);
       node2.selectChildOrAddPending(12);
       node2.addSamples(12, 0.9);
+      Node<TreeGame> node3 = root.selectChildOrAddPending(5);
       node3.selectChildOrAddPending(5);
       node3.addSamples(5, 0.2);
     }

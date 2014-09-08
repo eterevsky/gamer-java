@@ -70,7 +70,6 @@ public final class TreeGame implements Game<TreeGame> {
     return new TreeGameState(root);
   }
 
-  // For testing.
   Node getNode(int id) {
     return root.getDescendantById(id);
   }

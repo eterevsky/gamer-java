@@ -103,7 +103,7 @@ final class Node<G extends Game> {
       totalSamples += nsamples;
       if (!exactValue) {
         pendingSamples += nsamples;
-        value *= (totalSamples - nsamples) / totalSamples;
+        value *= ((double)totalSamples - nsamples) / totalSamples;
 
         if (children == null && selector.shouldCreateChildren()) {
           initChildren();
@@ -139,6 +139,18 @@ final class Node<G extends Game> {
            Math.sqrt(parentSamplesLog / totalSamples);
   }
 
+  Node<G> getChildByStateForTest(GameState<G> state) {
+    if (children == null) {
+      throw new RuntimeException(
+          "Requested children from a node without children.");
+    }
+    for (Node<G> child : children) {
+      if (child.state.equals(state))
+        return child;
+    }
+    return null;
+  }
+
   public String toString() {
     return toString(0);
   }
@@ -169,9 +181,8 @@ final class Node<G extends Game> {
     synchronized(this) {
       pendingSamples -= nsamples;
       assert pendingSamples >= 0;
-      System.out.format("%f %d %d\n", value, nsamples, totalSamples);
       if (!exactValue)
-        this.value += value * nsamples / totalSamples;
+        this.value += value * (double)nsamples / totalSamples;
       if (child != null)
         selector.childUpdated(child, totalSamples);
     }

@@ -16,4 +16,12 @@ public final class TreeGameMove implements Move<TreeGame> {
   public String toString() {
     return "-> " + node.id;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof TreeGameMove))
+      return false;
+    TreeGameMove oMove = (TreeGameMove) o;
+    return node.equals(oMove.node);
+  }
 }

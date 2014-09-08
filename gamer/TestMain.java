@@ -4,9 +4,10 @@ import gamer.gomoku.TestGomokuMove;
 import gamer.gomoku.TestGomokuState;
 import gamer.players.TestGenericPlayer;
 import gamer.players.TestRandomPlayer;
-import gamer.players.TestNaiveMonteCarlo;
 import gamer.players.TestMonteCarloUcb;
 import gamer.players.TestMonteCarloUct;
+import gamer.players.TestNaiveMonteCarlo;
+import gamer.players.TestNode;
 import gamer.treegame.TestTreeGame;
 import gamer.util.TestUpdatablePriorityQueue;
 
@@ -23,9 +24,10 @@ import org.junit.runners.Suite;
   TestGomokuState.class,
 
   TestGenericPlayer.class,
-  TestNaiveMonteCarlo.class,
   TestMonteCarloUcb.class,
   TestMonteCarloUct.class,
+  TestNaiveMonteCarlo.class,
+  TestNode.class,
   TestRandomPlayer.class,
 
   TestTreeGame.class,

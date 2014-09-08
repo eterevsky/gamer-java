@@ -38,6 +38,16 @@ public final class TreeGameState implements GameState<TreeGame> {
     return moves;
   }
 
+  public TreeGameMove getMoveToNode(int nodeId) {
+    for (Node child : node.children) {
+      if (child.id == nodeId) {
+        return new TreeGameMove(child);
+      }
+    }
+
+    return null;
+  }
+
   public Move<TreeGame> getRandomMove(Random random) {
     if (node.status.isTerminal()) {
       throw new GameException("terminal state: " + this.toString());
