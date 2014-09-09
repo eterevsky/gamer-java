@@ -99,7 +99,7 @@ class Benchmark {
     Player<Gomoku> player = new MonteCarloUct<Gomoku>()
         .setSamplesLimit(200000)
         .setTimeout(-1)
-        .setSamplesBatch(4)
+        .setSamplesBatch(1)
         .setExecutor(executor, cores);
 
     for (GameState<Gomoku> s : testStates) {

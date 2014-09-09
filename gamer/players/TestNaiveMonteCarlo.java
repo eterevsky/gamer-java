@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public final class TestNaiveMonteCarlo {
 
-  @Test(timeout=50)
+  @Test(timeout=100)
   public void play0() {
     TreeGame game = TreeGameInstances.GAME0;
 
@@ -27,7 +27,7 @@ public final class TestNaiveMonteCarlo {
     assertEquals(1, move.getNodeId());
   }
 
-  @Test(timeout=50)
+  @Test(timeout=100)
   public void play1() {
     TreeGame game = TreeGameInstances.GAME1;
 
@@ -62,7 +62,7 @@ public final class TestNaiveMonteCarlo {
     assertEquals(GameStatus.LOSS, state.status());
   }
 
-  @Test(timeout=50)
+  @Test(timeout=100)
   public void play3() {
     TreeGame game = TreeGameInstances.GAME3;
 

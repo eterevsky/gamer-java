@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public final class TestRandomPlayer {
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void play() {
 
     TreeGame game = TreeGame.newBuilder().setRoot(0)
