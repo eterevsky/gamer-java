@@ -31,7 +31,7 @@ public class TestGomokuState {
     assertEquals(GameStatus.WIN, state.status());
   }
 
-  @Test(timeout=10)
+  @Test(timeout=100)
   public void playHorizontal() {
     GomokuState state = new GomokuState();
     state = state.play(GomokuMove.create('X', 2, 3));
@@ -98,7 +98,7 @@ public class TestGomokuState {
     assertFalse(state.isTerminal());
   }
 
-  @Test(expected = GameException.class, timeout=10)
+  @Test(expected = GameException.class, timeout=50)
   public void playNoMoveAfterEnd() {
     GomokuState state = new GomokuState();
     state = state.play(GomokuMove.create('X', 2, 3));
@@ -124,14 +124,14 @@ public class TestGomokuState {
     state = state.play(GomokuMove.create('X', 6, 5));
   }
 
-  @Test(expected = GameException.class, timeout=10)
+  @Test(expected = GameException.class, timeout=50)
   public void playTwoMovesBySamePlace() {
     GomokuState state = new GomokuState();
     state = state.play(GomokuMove.create('X', 2, 3));
     state = state.play(GomokuMove.create('O', 2, 3));
   }
 
-  @Test(timeout=10)
+  @Test(timeout=100)
   public void playDraw() {
     GomokuState state = new GomokuState();
     for (int i = 0; i < Gomoku.SIZE; i++) {
@@ -155,7 +155,7 @@ public class TestGomokuState {
     assertEquals(GameStatus.DRAW, state.status());
   }
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void playRandomMoves() {
     GomokuState state = new GomokuState();
     Random random = new Random(1234567890L);

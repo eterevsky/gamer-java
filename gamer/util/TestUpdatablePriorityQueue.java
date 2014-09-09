@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public final class TestUpdatablePriorityQueue {
 
-  @Test(timeout=10)
+  @Test(timeout=100)
   public void run() {
     UpdatablePriorityQueue<Integer> queue = new UpdatablePriorityQueue<>();
     queue.add(1, 0.5);
@@ -36,7 +36,7 @@ public final class TestUpdatablePriorityQueue {
     assertEquals(Integer.valueOf(3), queue.head());
   }
 
-  @Test(timeout=50)
+  @Test(timeout=800)
   public void randomized() {
     Random random = new Random(123456789L);
 

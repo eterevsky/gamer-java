@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class TestTreeGame {
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void simpleGame() {
     Random random = new Random(1234567890L);
     TreeGame game = TreeGameInstances.GAME1;
