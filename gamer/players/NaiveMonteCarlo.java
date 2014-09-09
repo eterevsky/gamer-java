@@ -12,7 +12,8 @@ public class NaiveMonteCarlo<G extends Game> extends GenericPlayer<G> {
 
     public void setNode(Node<G> node) {}
 
-    public Node<G> select(Collection<Node<G>> children, long totalSamples) {
+    public synchronized Node<G> select(
+        Collection<Node<G>> children, long totalSamples) {
       if (childrenIt == null || !childrenIt.hasNext())
         childrenIt = children.iterator();
 
@@ -23,7 +24,7 @@ public class NaiveMonteCarlo<G extends Game> extends GenericPlayer<G> {
       return true;
     }
 
-    public LeafSelector<G> newChildSelector() {
+    public synchronized LeafSelector<G> newChildSelector() {
       return new LeafSelector<G>();
     }
 

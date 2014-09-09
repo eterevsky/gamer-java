@@ -27,9 +27,14 @@ class App {
     tournament.addPlayer(new MonteCarloUct<Gomoku>().setSamplesBatch(1));
     tournament.addPlayer(new MonteCarloUct<Gomoku>().setSamplesBatch(2));
     tournament.addPlayer(new MonteCarloUct<Gomoku>().setSamplesBatch(4));
+    tournament.addPlayer(new MonteCarloUct<Gomoku>().setSamplesBatch(8));
+    tournament.addPlayer(new MonteCarloUct<Gomoku>().setSamplesBatch(16));
     tournament.addPlayer(new MonteCarloUcb<Gomoku>().setSamplesBatch(1));
     tournament.addPlayer(new MonteCarloUcb<Gomoku>().setSamplesBatch(2));
     tournament.addPlayer(new MonteCarloUcb<Gomoku>().setSamplesBatch(4));
+    tournament.addPlayer(new MonteCarloUcb<Gomoku>().setSamplesBatch(8));
+    tournament.addPlayer(new NaiveMonteCarlo<Gomoku>().setSamplesBatch(1));
+    tournament.addPlayer(new NaiveMonteCarlo<Gomoku>().setSamplesBatch(2));
     tournament.addPlayer(new RandomPlayer<Gomoku>());
 
     tournament.play();
