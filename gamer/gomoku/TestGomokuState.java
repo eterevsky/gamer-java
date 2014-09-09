@@ -47,7 +47,7 @@ public class TestGomokuState {
     assertEquals(GameStatus.WIN, state.status());
   }
 
-  @Test(timeout=10)
+  @Test(timeout=50)
   public void playDiagonal1O() {
     GomokuState state = new GomokuState();
     state = state.play(GomokuMove.create('X', 2, 3));
