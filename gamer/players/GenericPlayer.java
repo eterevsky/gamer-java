@@ -20,6 +20,7 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   private int workers = 1;
   private Random random = null;
   private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
+  private String name = null;
 
   @Override
   public final GenericPlayer<G> setTimeout(long timeout) {
@@ -50,6 +51,23 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   public GenericPlayer<G> setRandom(Random random) {
     this.random = random;
     return this;
+  }
+
+  @Override
+  public GenericPlayer<G> setName(String name) {
+    this.name = name;
+    return this;
+  }
+
+  @Override
+  public String getName() {
+    if (name != null)
+      return name;
+    String threads =
+        this.executor == null ? "t0" : String.format("t%d", this.workers);
+    return String.format(
+        "%s b%d %s %.1fs", getClass().getSimpleName(), this.samplesBatch, threads,
+        timeout/1000.0);
   }
 
   abstract protected Node<G> getRoot(GameState<G> state);

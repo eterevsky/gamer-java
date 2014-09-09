@@ -9,6 +9,9 @@ public interface Player<G extends Game> {
   Player<G> setExecutor(ExecutorService executor, int maxWorkers);
   Player<G> setRandom(Random random);
   Player<G> setSamplesBatch(int samplesBatch);
+  Player<G> setName(String name);
+
+  String getName();
 
   Move<G> selectMove(GameState<G> state);
 }

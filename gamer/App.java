@@ -22,10 +22,10 @@ class App {
     Player<Gomoku> player1 = new MonteCarloUct<>();
     Player<Gomoku> player2 = new MonteCarloUct<>();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
-    player1.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(2);
-    player2.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(2);
+    player1.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(8);
+    player2.setTimeout(5000).setExecutor(executor, cores).setSamplesBatch(16);
 
-    System.out.println(game);
+    System.out.format("%s  vs  %s\n", player1.getName(), player2.getName());
 
     while (!game.isTerminal()) {
       Move<Gomoku> move;

@@ -33,8 +33,17 @@ public final class RandomPlayer<G extends Game> implements Player<G> {
     return this;
   }
 
+  public RandomPlayer<G> setName(String name) {
+    return this;
+  }
+
+  public String getName() {
+    return "RandomPlayer";
+  }
+
   public RandomPlayer<G> setRandom(Random random) {
     this.random = random;
     return this;
   }
+
 }
