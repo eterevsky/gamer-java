@@ -1,0 +1,25 @@
+MacbookPro
+
+MonteCarloUct b1 t8 1.0s ct1 33.000000
+MonteCarloUct b2 t8 1.0s ct4 29.000000
+MonteCarloUct b1 t8 1.0s ct0 28.000000
+MonteCarloUct b1 t8 1.0s ct2 28.000000
+MonteCarloUct b8 t8 1.0s ct8 27.000000
+MonteCarloUct b1 t8 1.0s ct4 26.000000
+MonteCarloUct b8 t8 1.0s ct0 26.000000
+MonteCarloUct b16 t8 1.0s ct16 26.000000
+MonteCarloUct b4 t8 1.0s ct4 25.000000
+MonteCarloUct b8 t8 1.0s ct16 24.000000
+MonteCarloUct b16 t8 1.0s ct32 24.000000
+MonteCarloUct b2 t8 1.0s ct2 23.000000
+MonteCarloUct b16 t8 1.0s ct0 23.000000
+MonteCarloUct b4 t8 1.0s ct0 21.000000
+MonteCarloUct b4 t8 1.0s ct8 21.000000
+MonteCarloUct b2 t8 1.0s ct0 20.000000
+MonteCarloUcb b8 t8 1.0s 20.000000
+MonteCarloUcb b2 t8 1.0s 18.000000
+MonteCarloUcb b4 t8 1.0s 18.000000
+NaiveMonteCarlo b2 t8 1.0s 17.000000
+MonteCarloUcb b1 t8 1.0s 15.000000
+NaiveMonteCarlo b1 t8 1.0s 14.000000
+RandomPlayer 0.000000
