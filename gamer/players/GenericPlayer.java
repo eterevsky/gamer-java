@@ -20,7 +20,7 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   private int workers = 1;
   private Random random = null;
   private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
-  private String name = null;
+  protected String name = null;
 
   @Override
   public final GenericPlayer<G> setTimeout(long timeout) {
@@ -41,7 +41,7 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
 
   @Override
   public final GenericPlayer<G> setExecutor(ExecutorService executor,
-                                            int workers) {
+                                             int workers) {
     this.executor = executor;
     this.workers = workers;
     return this;
