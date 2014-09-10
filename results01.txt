@@ -1,0 +1,25 @@
+Z620
+
+MonteCarloUct b8 t32 1.0s ct16 37.000000
+MonteCarloUct b16 t32 1.0s ct32 35.500000
+MonteCarloUct b16 t32 1.0s ct16 35.000000
+MonteCarloUct b16 t32 1.0s ct0 34.000000
+MonteCarloUct b8 t32 1.0s ct0 33.000000
+MonteCarloUct b8 t32 1.0s ct8 32.000000
+MonteCarloUct b4 t32 1.0s ct0 27.500000
+MonteCarloUct b4 t32 1.0s ct8 27.000000
+MonteCarloUct b2 t32 1.0s ct4 25.000000
+MonteCarloUct b2 t32 1.0s ct0 21.000000
+MonteCarloUct b2 t32 1.0s ct2 20.000000
+MonteCarloUcb b4 t32 1.0s 20.000000
+MonteCarloUct b1 t32 1.0s ct2 19.000000
+MonteCarloUct b4 t32 1.0s ct4 18.000000
+MonteCarloUct b1 t32 1.0s ct0 17.000000
+MonteCarloUct b1 t32 1.0s ct1 17.000000
+MonteCarloUct b1 t32 1.0s ct4 17.000000
+MonteCarloUcb b8 t32 1.0s 17.000000
+MonteCarloUcb b2 t32 1.0s 15.000000
+NaiveMonteCarlo b2 t32 1.0s 14.000000
+MonteCarloUcb b1 t32 1.0s 13.000000
+NaiveMonteCarlo b1 t32 1.0s 12.000000
+RandomPlayer 0.000000
