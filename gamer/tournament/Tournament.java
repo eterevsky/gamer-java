@@ -75,6 +75,14 @@ public final class Tournament<G extends Game<G>> {
           double gameResult = playSingleGame(p1, p2);
           results.get(p1).put(p2, results.get(p1).get(p2) + gameResult);
           results.get(p2).put(p1, results.get(p2).get(p1) + (1 - gameResult));
+          String p1res =
+              gameResult > 0.4 && gameResult < 0.6 ?
+                  "½" : String.format("%d", Math.round(gameResult));
+          String p2res =
+              gameResult > 0.4 && gameResult < 0.6 ?
+                  "½" : String.format("%d", 1 - Math.round(gameResult));
+          System.out.format("%s (%s)  vs  %s (%s)\n",
+                            p1.getName(), p1res, p2.getName(), p2res);
         }
       }
     }
@@ -92,7 +100,7 @@ public final class Tournament<G extends Game<G>> {
     Collections.sort(playersTable);
 
     for (PlayerResult<G> pr : playersTable) {
-      System.out.format("%16s %f\n", pr.player.getName(), pr.result);
+      System.out.format("%s %f\n", pr.player.getName(), pr.result);
     }
   }
 
@@ -110,7 +118,7 @@ public final class Tournament<G extends Game<G>> {
   }
 
   private double playSingleGame(Player<G> p1, Player<G> p2) {
-    System.out.format("%s  vs  %s\n", p1.getName(), p2.getName());
+    // System.out.format("%s  vs  %s\n", p1.getName(), p2.getName());
 
     GameState<G> state = game.newGame();
 
@@ -122,7 +130,6 @@ public final class Tournament<G extends Game<G>> {
         move = p2.selectMove(state);
       }
       state = state.play(move);
-      System.out.println(state);
     }
 
     return state.status().value();

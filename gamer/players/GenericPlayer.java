@@ -117,9 +117,9 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
       }
     }
 
-    LOG.info(String.format("%s: %f over %d (%d)\n",
-        bestNode.getMove(), bestNode.getValue(), bestNode.getSamples(),
-        root.getSamples()));
+    // LOG.info(String.format("%s: %f over %d (%d)\n",
+    //     bestNode.getMove(), bestNode.getValue(), bestNode.getSamples(),
+    //     root.getSamples()));
 
     return bestNode.getMove();
   }
