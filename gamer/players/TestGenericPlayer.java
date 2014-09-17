@@ -80,7 +80,8 @@ public final class TestGenericPlayer {
         .toGame();
 
     Node<TreeGame> root = new Node<TreeGame>(
-        null, game.newGame(), null, new NaiveMonteCarlo.Selector<TreeGame>());
+        null, game.newGame(), null, new NaiveMonteCarlo.Selector<TreeGame>(),
+        NodeContext.BASIC);
 
     MockSampler sampler = new MockSampler(root);
     MockPlayer player = new MockPlayer(root, sampler);

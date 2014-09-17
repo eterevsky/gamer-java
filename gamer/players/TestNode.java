@@ -25,7 +25,8 @@ public final class TestNode {
         null,
         TreeGameInstances.GAME0.newGame(),
         null,
-        new LeafSelector<TreeGame>());
+        new LeafSelector<TreeGame>(),
+        NodeContext.BASIC);
 
     assertNull(node.getParent());
     assertNull(node.getMove());
@@ -108,7 +109,7 @@ public final class TestNode {
     TreeGameState rootState = TreeGameInstances.GAME0.newGame();
 
     Node<TreeGame> root = new Node<TreeGame>(
-        null, rootState, null, rootSelector);
+        null, rootState, null, rootSelector, NodeContext.BASIC);
 
     assertNull(root.selectChildOrAddPending(1));
     assertEquals(1, root.getTotalSamples());
@@ -205,5 +206,48 @@ public final class TestNode {
     } else {
       assertEquals(0.8, root.getValue(), 1E-8);
     }
+  }
+
+  @Test(timeout=50)
+  public void testExactValues() {
+    TestSelector rootSelector = new TestSelector();
+    TreeGameState rootState = TreeGameInstances.GAME0.newGame();
+
+    Node<TreeGame> root = new Node<TreeGame>(
+        null, rootState, null, rootSelector, new NodeContext(true));
+
+    TreeGameState state1 = rootState.play(rootState.getMoveToNode(1));
+    TreeGameState state2 = rootState.play(rootState.getMoveToNode(2));
+    TreeGameState state3 = state2.play(state2.getMoveToNode(3));
+
+    rootSelector.shouldCreateChildrenResult = true;
+    rootSelector.selectResultState = state2;
+    Node<TreeGame> node2 = root.selectChildOrAddPending(2);
+
+    assertNotNull(node2);
+    assertEquals(state2, node2.getState());
+    assertFalse(node2.knowExactValue());
+
+    TestSelector selector2 = rootSelector.getChildSelector(node2);
+    selector2.shouldCreateChildrenResult = true;
+    selector2.selectResultState = state3;
+
+    assertEquals(Node.KNOW_EXACT_VALUE, node2.selectChildOrAddPending(2));
+    assertTrue(node2.knowExactValue());
+    assertEquals(0.0, node2.getValue(), 1E-8);
+    // assertFalse(root.knowExactValue());
+    // assertEquals(0.0, root.getValue(), 1E-8);
+    //
+    // rootSelector.selectResultState = state1;
+    // Node<TreeGame> node1 = root.selectChildOrAddPending(1);
+    //
+    // assertNotNull(node1);
+    // assertEquals(state1, node1.getState());
+    //
+    // assertEquals(Node.KNOW_EXACT_VALUE, node3.selectChildOrAddPending(1));
+
+    // assertTrue(node1.knowExactValue());
+    assertTrue(root.knowExactValue());
+    assertEquals(1.0, root.getValue(), 1E-8);
   }
 }

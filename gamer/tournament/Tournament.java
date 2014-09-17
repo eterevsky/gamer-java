@@ -19,15 +19,15 @@ public final class Tournament<G extends Game<G>> {
   private ExecutorService executor = null;
   private int workers = 1;
   private Map<Player<G>, Map<Player<G>, Double>> results = null;
-  private final boolean verbose = false;
+  private final boolean verbose;
 
   public Tournament(G game) {
-    this.game = game;
+    this(game, false);
   }
 
   public Tournament(G game, boolean verbose) {
+    this.game = game;
     this.verbose = verbose;
-    this(game);
   }
 
   public void addPlayer(Player<G> player) {
