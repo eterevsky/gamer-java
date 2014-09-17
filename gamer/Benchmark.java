@@ -100,6 +100,7 @@ class Benchmark {
         .setSamplesLimit(200000)
         .setTimeout(-1)
         .setSamplesBatch(1)
+        .setFindExact(false)
         .setExecutor(executor, cores);
 
     for (GameState<Gomoku> s : testStates) {

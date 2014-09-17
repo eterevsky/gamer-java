@@ -229,6 +229,9 @@ final class Node<G extends Game> {
               this, newState, move, selector.newChildSelector(), context));
     }
 
+    if (!context.propagateExact)
+      return false;
+
     int lo = 2;
     int hi = 0;
     boolean hasNonExact = false;
