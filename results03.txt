@@ -1,0 +1,23 @@
+MonteCarloUct b16 t6 1.0s ct16 91.000000
+MonteCarloUct b8 t6 1.0s ct16 84.000000
+MonteCarloUct b8 t6 1.0s ct0 82.000000
+MonteCarloUct b2 t6 1.0s ct4 81.000000
+MonteCarloUct b8 t6 1.0s ct8 80.000000
+MonteCarloUct b16 t6 1.0s ct32 79.000000
+MonteCarloUct b2 t6 1.0s ct2 78.000000
+MonteCarloUct b4 t6 1.0s ct8 77.000000
+MonteCarloUct b2 t6 1.0s ct0 76.000000
+MonteCarloUct b16 t6 1.0s ct0 75.000000
+MonteCarloUct b1 t6 1.0s ct4 71.000000
+MonteCarloUct b4 t6 1.0s ct4 70.000000
+MonteCarloUct b4 t6 1.0s ct0 69.000000
+MonteCarloUct b1 t6 1.0s ct1 66.000000
+MonteCarloUcb b2 t6 1.0s 65.000000
+MonteCarloUct b1 t6 1.0s ct0 64.000000
+MonteCarloUct b1 t6 1.0s ct2 56.000000
+MonteCarloUcb b4 t6 1.0s 56.000000
+NaiveMonteCarlo b2 t6 1.0s 55.000000
+MonteCarloUcb b8 t6 1.0s 52.000000
+MonteCarloUcb b1 t6 1.0s 48.000000
+NaiveMonteCarlo b1 t6 1.0s 43.000000
+RandomPlayer 0.000000

@@ -19,9 +19,15 @@ public final class Tournament<G extends Game<G>> {
   private ExecutorService executor = null;
   private int workers = 1;
   private Map<Player<G>, Map<Player<G>, Double>> results = null;
+  private final boolean verbose;
 
   public Tournament(G game) {
+    this(game, false);
+  }
+
+  public Tournament(G game, boolean verbose) {
     this.game = game;
+    this.verbose = verbose;
   }
 
   public void addPlayer(Player<G> player) {
@@ -118,7 +124,8 @@ public final class Tournament<G extends Game<G>> {
   }
 
   private double playSingleGame(Player<G> p1, Player<G> p2) {
-    // System.out.format("%s  vs  %s\n", p1.getName(), p2.getName());
+    if (verbose)
+      System.out.format("Starting %s  vs  %s\n", p1.getName(), p2.getName());
 
     GameState<G> state = game.newGame();
 
@@ -130,6 +137,8 @@ public final class Tournament<G extends Game<G>> {
         move = p2.selectMove(state);
       }
       state = state.play(move);
+      if (verbose)
+        System.out.println(state);
     }
 
     return state.status().value();

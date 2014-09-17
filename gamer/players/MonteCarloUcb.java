@@ -16,6 +16,6 @@ public class MonteCarloUcb<G extends Game> extends GenericPlayer<G> {
 
   @Override
   protected Node<G> getRoot(GameState<G> state) {
-    return new Node<G>(null, state, null, new Selector<G>());
+    return new Node<G>(null, state, null, new Selector<G>(), nodeContext);
   }
 }

@@ -18,6 +18,7 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   private long timeout = 1000;
   private ExecutorService executor = null;
   private int workers = 1;
+  protected NodeContext nodeContext = NodeContext.BASIC;
   private Random random = null;
   private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
   protected String name = null;
@@ -59,15 +60,24 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
     return this;
   }
 
+  public GenericPlayer<G> setFindExact(boolean exact) {
+    this.nodeContext = new NodeContext(exact);
+    return this;
+  }
+
   @Override
   public String getName() {
     if (name != null)
       return name;
     String threads =
         this.executor == null ? "t0" : String.format("t%d", this.workers);
-    return String.format(
+    String s = String.format(
         "%s b%d %s %.1fs", getClass().getSimpleName(), this.samplesBatch, threads,
         timeout/1000.0);
+    if (this.nodeContext.propagateExact)
+      s += " +exact";
+
+    return s;
   }
 
   abstract protected Node<G> getRoot(GameState<G> state);

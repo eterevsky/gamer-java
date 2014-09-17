@@ -16,6 +16,19 @@ public enum GameStatus {
     }
   }
 
+  // 0 - LOSS
+  // 1 - DRAW
+  // 2 - WIN
+  // 3 - DON'T KNOW
+  public int valueInt() {
+    switch (this) {
+      case WIN: return 2;
+      case LOSS: return 0;
+      case DRAW: return 1;
+      default: return 3;
+    }
+  }
+
   public double value(boolean player) {
     if (player) {
       return value();

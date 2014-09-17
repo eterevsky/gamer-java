@@ -26,7 +26,8 @@ class Sampler<G extends Game> implements Runnable {
   public void run() {
     Random rnd = random == null ? ThreadLocalRandom.current() : random;
 
-    while ((maxSamples <= 0 || root.getSamples() < maxSamples) &&
+    while (!root.knowExactValue() &&
+           (maxSamples <= 0 || root.getSamples() < maxSamples) &&
            (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
       Node<G> node = null;
       Node<G> child = root;
