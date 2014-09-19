@@ -92,6 +92,13 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
     return System.currentTimeMillis();
   }
 
+  String report;
+
+  @Override
+  public String getReport() {
+    return report;
+  }
+
   @Override
   public Move<G> selectMove(GameState<G> state) {
     Node<G> root = getRoot(state);
@@ -127,9 +134,10 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
       }
     }
 
-    // LOG.info(String.format("%s: %f over %d (%d)\n",
-    //     bestNode.getMove(), bestNode.getValue(), bestNode.getSamples(),
-    //     root.getSamples()));
+    report = String.format(
+        "%s: %f over %d (%d)",
+        bestNode.getMove(), bestNode.getValue(), bestNode.getSamples(),
+        root.getSamples());
 
     return bestNode.getMove();
   }

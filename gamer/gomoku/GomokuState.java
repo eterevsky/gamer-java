@@ -91,7 +91,6 @@ public final class GomokuState implements GameState<Gomoku> {
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append('\n');
     for (int i = 0; i < CELLS; i++) {
       if (marked.get(i)) {
         if (markedx.get(i)) {

@@ -12,6 +12,7 @@ public interface Player<G extends Game> {
   Player<G> setName(String name);
 
   String getName();
+  String getReport();
 
   Move<G> selectMove(GameState<G> state);
 }

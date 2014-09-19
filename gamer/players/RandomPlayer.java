@@ -41,6 +41,11 @@ public final class RandomPlayer<G extends Game> implements Player<G> {
     return "RandomPlayer";
   }
 
+  @Override
+  public String getReport() {
+    return "";
+  }
+
   public RandomPlayer<G> setRandom(Random random) {
     this.random = random;
     return this;
