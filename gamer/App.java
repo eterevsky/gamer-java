@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
 class App {
-  private void addPlayers(Tournament<Gomoku> tournament) {
+  private static void addPlayers(Tournament<Gomoku> tournament) {
     tournament.addPlayer(
         new MonteCarloUct<Gomoku>().setChildrenThreshold(0).setSamplesBatch(1));
     tournament.addPlayer(new MonteCarloUct<Gomoku>()
@@ -110,16 +110,7 @@ class App {
     tournament.setThreadsPerPlayer(cores);
     tournament.setRounds(1);
 
-    tournament.addPlayer(
-        new MonteCarloUct<Gomoku>()
-            .setChildrenThreshold(16)
-            .setSamplesBatch(16));
-
-    tournament.addPlayer(
-        new MonteCarloUct<Gomoku>()
-            .setChildrenThreshold(16)
-            .setSamplesBatch(16)
-            .setFindExact(true));
+    addPlayers(tournament);
 
     tournament.play();
     executor.shutdown();
