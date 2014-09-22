@@ -37,9 +37,11 @@ public final class GameRunner<G extends Game<G>> implements Runnable {
     while (!state.isTerminal()) {
       Player<G> player = state.status().getPlayer() ? p1 : p2;
       state = state.play(player.selectMove(state));
-      System.out.println(player.getReport());
-      System.out.println(state);
-      System.out.println();
+      if (verbose) {
+        System.out.println(player.getReport());
+        System.out.println(state);
+        System.out.println();
+      }
     }
 
     return state.status();

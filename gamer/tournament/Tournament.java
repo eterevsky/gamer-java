@@ -129,7 +129,7 @@ public final class Tournament<G extends Game<G>> {
       }
       Player<G> p1 = match.player1;
       Player<G> p2 = match.player2;
-      System.out.println(match);
+      System.out.format("%s  (%d/%d)", match, nresults, ngames);
       double gameResult = match.result.value();
       results.get(p1).put(p2, results.get(p1).get(p2) + gameResult);
       results.get(p2).put(p1, results.get(p2).get(p1) + (1 - gameResult));

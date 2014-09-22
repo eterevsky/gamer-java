@@ -101,14 +101,14 @@ class App {
     System.out.format("Found %d cores.\n", cores);
 
     Gomoku gomoku = Gomoku.getInstance();
-    Tournament<Gomoku> tournament = new Tournament<Gomoku>(gomoku, true);
+    Tournament<Gomoku> tournament = new Tournament<Gomoku>(gomoku, false);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
-    tournament.setTimeout(10000);
+    tournament.setTimeout(1000);
     tournament.setExecutor(executor);
     tournament.setGameThreads(1);
     tournament.setThreadsPerPlayer(cores);
-    tournament.setRounds(2);
+    tournament.setRounds(1);
 
     tournament.addPlayer(
         new MonteCarloUct<Gomoku>()
