@@ -25,21 +25,24 @@ public final class GameRunner<G extends Game<G>> implements Runnable {
       if (match == null)
         return;
 
-      match.result = playSingleGame(match.game, match.player1, match.player2);
+      match.result = playSingleGame(
+          match.game, match.player1, match.player2, verbose);
       results.add(match);
     }
   }
 
   public static <G extends Game<G>> GameStatus playSingleGame(
-      Game<G> game, Player<G> p1, Player<G> p2) {
+      Game<G> game, Player<G> p1, Player<G> p2, boolean verbose) {
     GameState<G> state = game.newGame();
 
     while (!state.isTerminal()) {
       Player<G> player = state.status().getPlayer() ? p1 : p2;
       state = state.play(player.selectMove(state));
-      System.out.println(player.getReport());
-      System.out.println(state);
-      System.out.println();
+      if (verbose) {
+        System.out.println(player.getReport());
+        System.out.println(state);
+        System.out.println();
+      }
     }
 
     return state.status();
