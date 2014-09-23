@@ -1,0 +1,33 @@
+19x19 20 sec Z620, 16 cores per player
+
+MonteCarloUct b16 t16 20.0s ct32 82.000000
+MonteCarloUct b8 t16 20.0s ct8 79.000000
+MonteCarloUct b8 t16 20.0s ct16 78.000000
+MonteCarloUct b8 t16 20.0s ct0 77.000000
+MonteCarloUct b16 t16 20.0s ct0 74.000000
+MonteCarloUct b16 t16 20.0s ct16 74.000000
+MonteCarloUct b4 t16 20.0s ct4 71.000000
+MonteCarloUct b16 t16 20.0s +exact ct16 71.000000
+MonteCarloUct b8 t16 20.0s +exact ct0 70.000000
+MonteCarloUct b8 t16 20.0s +exact ct8 67.000000
+MonteCarloUct b2 t16 20.0s ct2 65.000000
+MonteCarloUct b2 t16 20.0s ct4 65.000000
+MonteCarloUct b4 t16 20.0s ct8 64.000000
+MonteCarloUcb b2 t16 20.0s 64.000000
+MonteCarloUcb b4 t16 20.0s 63.000000
+MonteCarloUcb b8 t16 20.0s 63.000000
+MonteCarloUct b4 t16 20.0s ct0 62.000000
+MonteCarloUct b2 t16 20.0s +exact ct4 61.000000
+NaiveMonteCarlo b2 t16 20.0s 61.000000
+MonteCarloUct b1 t16 20.0s ct2 59.000000
+MonteCarloUct b1 t16 20.0s ct4 58.000000
+NaiveMonteCarlo b1 t16 20.0s 55.000000
+MonteCarloUct b1 t16 20.0s +exact ct4 54.000000
+MonteCarloUct b1 t16 20.0s +exact ct1 53.000000
+MonteCarloUct b2 t16 20.0s ct0 52.000000
+MonteCarloUcb b1 t16 20.0s 52.000000
+MonteCarloUct b1 t16 20.0s +exact ct2 48.000000
+MonteCarloUct b1 t16 20.0s ct1 45.000000
+MonteCarloUct b1 t16 20.0s +exact ct0 39.000000
+MonteCarloUct b1 t16 20.0s ct0 34.000000
+RandomPlayer 0.000000
