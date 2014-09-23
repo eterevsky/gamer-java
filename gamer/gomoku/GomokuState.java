@@ -72,8 +72,8 @@ public final class GomokuState implements GameState<Gomoku> {
   }
 
   GomokuState() {
-    marked = new BitSet();
-    markedx = new BitSet();
+    marked = new BitSet(CELLS);
+    markedx = new BitSet(CELLS);
     status = GameStatus.FIRST_PLAYER;
   }
 
