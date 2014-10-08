@@ -2,6 +2,10 @@ package gamer.chess;
 
 import static gamer.chess.Chess.CELLS;
 import static gamer.chess.Chess.SIZE;
+import static gamer.chess.Util.a2i;
+import static gamer.chess.Util.i2a;
+import static gamer.chess.Util.i2col;
+import static gamer.chess.Util.i2row;
 
 import gamer.def.GameException;
 import gamer.def.GameState;
@@ -16,7 +20,10 @@ public final class ChessState implements GameState<Chess> {
   private static final byte BISHOP = 4;
   private static final byte QUEEN = 5;
   private static final byte KING = 6;
+
   private static final byte WHITE = 0x10;
+  private static final byte BLACK = 0;
+
   private static final byte EN_PASSANT = 0x20;
 
   private static final byte WHITE_SHORT_CASTLES = 1;
@@ -25,23 +32,7 @@ public final class ChessState implements GameState<Chess> {
   private static final byte BLACK_LONG_CASTLES = 8;
 
   private static final int MAX_DRY_MOVES = 150;
-
-  private final byte[] board;
-  private final int movesSinceTake;
-  private final byte castles;
-  private final GameStatus status;
-  private final List<ChessMove> moves;
-
-  private static byte[] hexStringToByteArray(String s) {
-    int len = s.length();
-    byte[] data = new byte[len / 2];
-    for (int i = 0; i < len; i += 2) {
-        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                             + Character.digit(s.charAt(i+1), 16));
-    }
-    return data;
-  }
-
+  
   private static final byte[] INITIAL_BOARD = hexStringToByteArray(
       "1211000000000102" +
       "1311000000000103" +
@@ -52,10 +43,16 @@ public final class ChessState implements GameState<Chess> {
       "1311000000000103" +
       "1211000000000102");
 
+  private final byte[] board;
+  private final int movesSinceTake;
+  private final byte castles;
+  private final GameStatus status;
+  private final List<ChessMove> moves;
+
   ChessState() {
     board = INITIAL_BOARD;
     movesSinceTake = 0;
-    castles = 15;
+    castles = 0xF;
     status = GameStatus.FIRST_PLAYER;
     moves = generateMoves(true);
   }
@@ -71,7 +68,7 @@ public final class ChessState implements GameState<Chess> {
       movesSinceTake = prev.movesSinceTake + 1;
     }
 
-    castles = newCastles(prev.castles, move);
+    castles = newCastles(prev.castles, move, player, piece);
     moves = generateMoves(player);
 
     if (moves.size() > 0 && movesSinceTake < MAX_DRY_MOVES) {
@@ -103,6 +100,8 @@ public final class ChessState implements GameState<Chess> {
     return board[cell] == 0;
   }
 
+  // true - white
+  // false - black or empty
   private boolean getColor(int cell) {
     return board[cell] & WHITE != 0;
   }
@@ -111,27 +110,26 @@ public final class ChessState implements GameState<Chess> {
     return board[cell] & PIECE_MASK;
   }
 
-  private byte newCastles(byte prevCastles, ChessMove move) {
+  private byte newCastles(byte prevCastles, byte[] board) {
     byte castles = prevCastles;
-    if (piece == ROOK) {
-      switch (move.from) {
-        case 0:  // a1
-          castles &= ~WHITE_LONG_CASTLES;
-          break;
+    if (board[a2i("a1")] != WHITE | ROOK)
+      castles &= ~WHITE_LONG_CASTLES;
 
-        case 7:  // a8
-          castles &= ~BLACK_LONG_CASTLES;
-          break;
+    if (board[a2i("a8")] != BLACK | ROOK)
+      castles &= ~BLACK_LONG_CASTLES;
+      
+    if (board[a2i("h1")] != WHITE | ROOK)
+      castles &= ~WHITE_SHORT_CASTLES;
+     
+    if (board[a2i("h8")] != BLACK | ROOK)
+      castles &= ~BLACK_SHORT_CASTLES;
 
-        case 56:  // h1
-          castles &= ~WHITE_SHORT_CASTLES;
-          break;
-
-        case 63:  // h8
-          castles &= ~BLACK_LONG_CASTLES;
-          break;
-      }
-    }
+    if (board[a2i("e1")] != WHITE | KING)
+      castles &= ~WHITE_LONG_CASTLES & ~WHITE_SHORT_CASTLES;
+      
+    if (board[a2i("e8")] != BLACK | KING)
+      castles &= ~BLACK_LONG_CASTLES & ~BLACK_SHORT_CASTLES;
+      
     return castles;
   }
 
@@ -139,9 +137,40 @@ public final class ChessState implements GameState<Chess> {
   private byte[] applyMove(byte[] prevBoard, ChessMove move) {
     byte[] board = prevBoard.clone();
     byte piece = board[move.from] & PIECE_MASK;
-    boolean player = 
+    boolean player = status.getPlayer();
+    
+    if (piece == KING && 
 
-    switch
+    switch (piece) {
+      case PAWN:
+        int rowTo = i2row(move.to);
+        if (Math.abs(move.from - move.to) > 2 && board[move.to] == EMPTY) {
+          // Take en passant.
+          
+        }
+        if (rowTo == 1 || rowTo == 8) {
+          // Promote pawn.
+        
+        } else {
+          applySimpleMove(board, move);
+        }
+        break;          
+    
+      case ROOK:
+      case KNIGHT:
+      case BISHOP:
+      case QUEEN:
+        applySimpleMove(board, move);
+        break;
+       
+      case KING:
+        if (Math.abs(move.from - move.to) > 12) {
+          // Castles.
+        } else {
+          applySimpleMove(board, move);
+        }
+      
+    }
   }
 
   private void generateMoves(boolean player) {

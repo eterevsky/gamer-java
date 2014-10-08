@@ -56,7 +56,7 @@ public final class ChessMove implements Move<Chess> {
 
   static ChessMove of(int from, int to, byte promote) {
   }
-
+  
   public String toString() {
     return Chess.idxToCoords(from) + "-" + Chess.idxToCoords(to) +
         PIECE_LETTER[promote];
