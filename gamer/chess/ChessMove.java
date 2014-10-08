@@ -7,13 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ChessMove implements Move<Chess> {
+  private static String[] 
+  PIECE_LETTER = {"", null, "R", "N", "B", "Q", "K"};
+
   final int from;
   final int to;
   final byte promote;
 
   private static final List<ChessMove> moves;
   private static final List<ChessMove> promotions;
-  private static String[] PIECE_LETTER = {"", null, "R", "N", "B", "Q", "K"};
 
   static {
     moves = new ArrayList<>(CELLS * CELLS);
