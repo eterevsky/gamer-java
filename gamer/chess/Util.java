@@ -1,6 +1,8 @@
 package gamer.chess;
 
-static class Util {
+import static gamer.chess.Chess.SIZE;
+
+class Util {
   private static final int
       A1 = 0, A8 = 7,
       C1 = 16, C8 = 23,
@@ -18,7 +20,7 @@ static class Util {
   static String i2a(int idx) {
     return "" + ('a' + idx / SIZE) + ('0' + idx % SIZE);
   }
-  
+
   static int i2row(int idx) {
     return idx & 7 + 1;
   }

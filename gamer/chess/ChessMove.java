@@ -3,11 +3,13 @@ package gamer.chess;
 import static gamer.chess.Chess.CELLS;
 import static gamer.chess.Chess.SIZE;
 
+import gamer.def.Move;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public final class ChessMove implements Move<Chess> {
-  private static String[] 
+  private static String[]
   PIECE_LETTER = {"", null, "R", "N", "B", "Q", "K"};
 
   final int from;
@@ -57,8 +59,9 @@ public final class ChessMove implements Move<Chess> {
   }
 
   static ChessMove of(int from, int to, byte promote) {
+    return promotions.get((promote * CELLS + from) + to);
   }
-  
+
   public String toString() {
     return Chess.idxToCoords(from) + "-" + Chess.idxToCoords(to) +
         PIECE_LETTER[promote];
