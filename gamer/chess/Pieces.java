@@ -32,4 +32,20 @@ class Pieces {
   static char piece2a(byte p) {
     return PIECE_NAMES[p];
   }
+
+  static boolean color(byte p) {
+    return (p & BLACK) == 0;
+  }
+
+  static boolean isWhite(byte p) {
+    return p != EMPTY && ((p & BLACK) == 0);
+  }
+
+  static boolean isBlack(byte p) {
+    return (p & BLACK) != 0;
+  }
+
+  static byte piece(byte p) {
+    return (byte) (p & PIECE_MASK);
+  }
 }

@@ -7,9 +7,13 @@ import static gamer.chess.Board.i2row;
 import static gamer.chess.Pieces.EMPTY;
 import static gamer.chess.Pieces.PAWN;
 import static gamer.chess.Pieces.ROOK;
+import static gamer.chess.Pieces.QUEEN;
 import static gamer.chess.Pieces.KING;
 import static gamer.chess.Pieces.WHITE;
 import static gamer.chess.Pieces.BLACK;
+import static gamer.chess.Pieces.isWhite;
+import static gamer.chess.Pieces.isBlack;
+import static gamer.chess.Pieces.color;
 
 import gamer.def.GameException;
 import gamer.def.GameState;
@@ -210,7 +214,78 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private List<ChessMove> generateMoves() {
-    return new ArrayList<>();
+    List<ChessMove> moves = new ArrayList<>();
+
+    for (int cell = 0; cell < 64; cell++) {
+      if (board[cell] == EMPTY ||
+          Pieces.color(board[cell]) != status.getPlayer())
+        continue;
+
+      switch (Pieces.piece(board[cell])) {
+        case PAWN:
+          addPawnMoves(moves, cell);
+          break;
+      }
+    }
+
+    return moves;
+  }
+
+  private void addPawnMoves(List<ChessMove> moves, int cell) {
+    int row = i2row(cell);
+    int col = i2col(cell);
+
+    if (status.getPlayer()) {
+
+      if (row < 7) {
+        if (board[cell + 1] == EMPTY) {
+          addIfValid(moves, ChessMove.of(cell, cell + 1));
+          if (row == 2 && board[cell + 2] == EMPTY)
+            addIfValid(moves, ChessMove.of(cell, cell + 2));
+        }
+        if (col != 1 && isBlack(board[cell - 7]))
+          addIfValid(moves, ChessMove.of(cell, cell - 7));
+        if (col != 8 && isBlack(board[cell + 9]))
+          addIfValid(moves, ChessMove.of(cell, cell + 9));
+      } else {
+        for (byte promote = ROOK; promote <= QUEEN; promote++) {
+          if (board[cell + 1] == EMPTY)
+            addIfValid(moves, ChessMove.of(cell, cell + 1, promote));
+          if (col != 1 && isBlack(board[cell - 7]))
+            addIfValid(moves, ChessMove.of(cell, cell - 7, promote));
+          if (col != 8 && isBlack(board[cell + 9]))
+            addIfValid(moves, ChessMove.of(cell, cell + 9, promote));
+        }
+      }
+
+    } else {
+
+      if (row > 2) {
+        if (board[cell - 1] == EMPTY) {
+          addIfValid(moves, ChessMove.of(cell, cell - 1));
+          if (row == 7 && board[cell - 2] == EMPTY)
+            addIfValid(moves, ChessMove.of(cell, cell - 2));
+        }
+        if (col != 1 && isBlack(board[cell - 9]))
+          addIfValid(moves, ChessMove.of(cell, cell - 9));
+        if (col != 8 && isBlack(board[cell + 7]))
+          addIfValid(moves, ChessMove.of(cell, cell + 7));
+      } else {
+        for (byte promote = ROOK; promote <= QUEEN; promote++) {
+          if (board[cell - 1] == EMPTY)
+            addIfValid(moves, ChessMove.of(cell, cell - 1, promote));
+          if (col != 1 && isBlack(board[cell - 9]))
+            addIfValid(moves, ChessMove.of(cell, cell - 9, promote));
+          if (col != 8 && isBlack(board[cell + 7]))
+            addIfValid(moves, ChessMove.of(cell, cell + 7, promote));
+        }
+      }
+
+    }
+  }
+
+  private void addIfValid(List<ChessMove> moves, ChessMove move) {
+
   }
 
   // true if check to (not by) player
