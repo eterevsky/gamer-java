@@ -10,9 +10,13 @@ class Board{
       G1 = 48, G8 = 55,
       H1 = 56, H8 = 63;
 
+  static byte get(byte[] board, String cell) {
+    return board[a2i(cell)];
+  }
+
   static int a2i(String a) {
     assert a.length() == 2;
-    return (a.charAt(0) - 'a') * SIZE + a.charAt(1) - '1';
+    return (a.charAt(0) - 'a') * 8 + a.charAt(1) - '1';
   }
 
   static int cr2i(int col, int row) {
@@ -20,7 +24,7 @@ class Board{
   }
 
   static String i2a(int idx) {
-    return "" + ('a' + idx / SIZE) + ('0' + idx % SIZE);
+    return "" + ('a' + idx / 8) + ('0' + idx % 8);
   }
 
   static int i2row(int idx) {

@@ -4,6 +4,12 @@ import static gamer.chess.Board.a2i;
 import static gamer.chess.Board.i2a;
 import static gamer.chess.Board.i2col;
 import static gamer.chess.Board.i2row;
+import static gamer.chess.Pieces.EMPTY;
+import static gamer.chess.Pieces.PAWN;
+import static gamer.chess.Pieces.ROOK;
+import static gamer.chess.Pieces.KING;
+import static gamer.chess.Pieces.WHITE;
+import static gamer.chess.Pieces.BLACK;
 
 import gamer.def.GameException;
 import gamer.def.GameState;
@@ -115,7 +121,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private byte getPiece(int cell) {
-    return (byte) (board[cell] & PIECE_MASK);
+    return (byte) (board[cell] & Pieces.PIECE_MASK);
   }
 
   private byte newCastlings(byte prevCastlings, byte[] board) {
@@ -144,18 +150,11 @@ public final class ChessState implements GameState<Chess> {
   // Apply move to the board, updating states of castlings/en passant
   private byte[] applyMove(byte[] prevBoard, int prevEnPassant, ChessMove move) {
     byte[] board = prevBoard.clone();
-    byte piece = (byte) (board[move.from] & PIECE_MASK);
+    byte piece = (byte) (board[move.from] & Pieces.PIECE_MASK);
 
     switch (piece) {
       case PAWN:
         applyPawnMove(board, prevEnPassant, move);
-        break;
-
-      case ROOK:
-      case KNIGHT:
-      case BISHOP:
-      case QUEEN:
-        applySimpleMove(board, move);
         break;
 
       case KING:
@@ -164,7 +163,11 @@ public final class ChessState implements GameState<Chess> {
         } else {
           applySimpleMove(board, move);
         }
+        break;
 
+      default:
+        applySimpleMove(board, move);
+        break;
     }
 
     return board;

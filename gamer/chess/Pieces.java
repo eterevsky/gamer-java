@@ -1,6 +1,8 @@
 package gamer.chess;
 
 class Pieces {
+  static final byte PIECE_MASK = 7;
+
   static final byte EMPTY = 0;
   static final byte PAWN = 1;
   static final byte ROOK = 2;
@@ -12,19 +14,19 @@ class Pieces {
   static final byte WHITE = 0;
   static final byte BLACK = 8;
 
-  private final char PIECE_NAMES[] = {'.', 'P', 'R', 'N', 'B', 'Q', 'K'};
+  private static final char PIECE_NAMES[] = {'.', 'P', 'R', 'N', 'B', 'Q', 'K'};
 
   static byte a2piece(String s) {
-    if (s.length != 1) {
+    if (s.length() != 1) {
       throw new RuntimeException("Unknown piece");
     }
 
-    for (int i = 0; i < PIECE_NAMES.length; i++) {
+    for (byte i = 0; i < PIECE_NAMES.length; i++) {
       if (s.charAt(i) == PIECE_NAMES[i])
         return i;
     }
 
-    throw new RuntimeException("Unknown piece");    
+    throw new RuntimeException("Unknown piece");
   }
 
   static char piece2a(byte p) {

@@ -1,5 +1,6 @@
 package gamer.chess;
 
+import static gamer.chess.Board.a2i;
 import static gamer.chess.Board.cr2i;
 import static gamer.chess.Board.i2a;
 import static gamer.chess.Board.i2col;
@@ -9,8 +10,8 @@ import static gamer.chess.Pieces.piece2a;
 
 import gamer.def.Move;
 
-import java.Board.ArrayList;
-import java.Board.List;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ChessMove implements Move<Chess> {
   private static int POSSIBLE_PROMOTIONS = 4;
@@ -59,12 +60,11 @@ public final class ChessMove implements Move<Chess> {
   }
 
   static ChessMove of(String from, String to, String promote) {
-    byte promote;
     return of(a2i(from), a2i(to), a2piece(promote));
   }
 
   static ChessMove of(int from, int to) {
-    return moves.get(from * CELLS + to);
+    return moves.get(from * 64 + to);
   }
 
   static ChessMove of(String from, String to) {
@@ -73,7 +73,7 @@ public final class ChessMove implements Move<Chess> {
 
   static ChessMove of(int from, int to, byte promote) {
     int color = i2row(to) == 8 ? 0 : 1;
-    return promotions.get((promote - 2) * 2 * SIZE + color * SIZE +
+    return promotions.get((promote - 2) * 2 * 8 + color * 8 +
                           i2col(to) - 1);
   }
 

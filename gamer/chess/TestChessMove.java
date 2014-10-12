@@ -1,8 +1,8 @@
 package gamer.chess;
 
-import static gamer.chess.Util.a2i;
-import static gamer.chess.ChessState.ROOK;
-import static gamer.chess.ChessState.KNIGHT;
+import static gamer.chess.Board.a2i;
+import static gamer.chess.Pieces.ROOK;
+import static gamer.chess.Pieces.KNIGHT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

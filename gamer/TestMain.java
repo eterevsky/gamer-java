@@ -1,6 +1,7 @@
 package gamer;
 
 import gamer.chess.TestChessMove;
+import gamer.chess.TestChessState;
 import gamer.gomoku.TestGomokuMove;
 import gamer.gomoku.TestGomokuState;
 import gamer.players.TestGenericPlayer;
@@ -22,6 +23,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
   TestChessMove.class,
+  TestChessState.class,
 
   TestGomokuMove.class,
   TestGomokuState.class,
