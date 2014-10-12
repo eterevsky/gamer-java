@@ -1,19 +1,18 @@
 package gamer.chess;
 
-import static gamer.chess.Chess.CELLS;
-import static gamer.chess.Chess.SIZE;
-import static gamer.chess.Util.cr2i;
-import static gamer.chess.Util.i2a;
-import static gamer.chess.Util.i2col;
-import static gamer.chess.Util.i2row;
+import static gamer.chess.Board.cr2i;
+import static gamer.chess.Board.i2a;
+import static gamer.chess.Board.i2col;
+import static gamer.chess.Board.i2row;
+import static gamer.chess.Pieces.a2piece;
+import static gamer.chess.Pieces.piece2a;
 
 import gamer.def.Move;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.Board.ArrayList;
+import java.Board.List;
 
 public final class ChessMove implements Move<Chess> {
-  private static String[] PIECE_LETTER = {"", null, "R", "N", "B", "Q", "K"};
   private static int POSSIBLE_PROMOTIONS = 4;
 
   final int from;
@@ -24,9 +23,9 @@ public final class ChessMove implements Move<Chess> {
   private static final List<ChessMove> promotions;
 
   static {
-    moves = new ArrayList<>(CELLS * CELLS);
-    for (int from = 0; from < CELLS; from++) {
-      for (int to = 0; to < CELLS; to++) {
+    moves = new ArrayList<>(64 * 64);
+    for (int from = 0; from < 64; from++) {
+      for (int to = 0; to < 64; to++) {
         if (from != to) {
           moves.add(new ChessMove(from, to, (byte)0));
         } else {
@@ -79,6 +78,6 @@ public final class ChessMove implements Move<Chess> {
   }
 
   public String toString() {
-    return i2a(from) + "-" + i2a(to) + PIECE_LETTER[promote];
+    return i2a(from) + "-" + i2a(to) + piece2a(promote);
   }
 }

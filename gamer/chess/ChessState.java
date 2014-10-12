@@ -1,11 +1,9 @@
 package gamer.chess;
 
-import static gamer.chess.Chess.CELLS;
-import static gamer.chess.Chess.SIZE;
-import static gamer.chess.Util.a2i;
-import static gamer.chess.Util.i2a;
-import static gamer.chess.Util.i2col;
-import static gamer.chess.Util.i2row;
+import static gamer.chess.Board.a2i;
+import static gamer.chess.Board.i2a;
+import static gamer.chess.Board.i2col;
+import static gamer.chess.Board.i2row;
 
 import gamer.def.GameException;
 import gamer.def.GameState;
@@ -17,19 +15,6 @@ import java.util.List;
 import java.util.Random;
 
 public final class ChessState implements GameState<Chess> {
-  private static final byte PIECE_MASK = 7;
-
-  static final byte EMPTY = 0;
-  static final byte PAWN = 1;
-  static final byte ROOK = 2;
-  static final byte KNIGHT = 3;
-  static final byte BISHOP = 4;
-  static final byte QUEEN = 5;
-  static final byte KING = 6;
-
-  private static final byte WHITE = 0x10;
-  private static final byte BLACK = 0;
-
   private static final byte WHITE_SHORT_CASTLING = 1;
   private static final byte WHITE_LONG_CASTLING = 2;
   private static final byte BLACK_SHORT_CASTLING = 4;
@@ -51,7 +36,7 @@ public final class ChessState implements GameState<Chess> {
   private final byte[] board;
   private final byte castlings;
   private final int enPassant;  // -1 if no en passant pawn,
-                                // otherwise the passed empty square 
+                                // otherwise the passed empty square
   private final int movesSinceCapture;
 
   private final List<ChessMove> moves;
