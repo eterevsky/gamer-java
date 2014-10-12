@@ -12,19 +12,20 @@ import gamer.def.GameState;
 import gamer.def.GameStatus;
 import gamer.def.Move;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public final class ChessState implements GameState<Chess> {
   private static final byte PIECE_MASK = 7;
 
-  private static final byte EMPTY = 0;
-  private static final byte PAWN = 1;
-  private static final byte ROOK = 2;
-  private static final byte KNIGHT = 3;
-  private static final byte BISHOP = 4;
-  private static final byte QUEEN = 5;
-  private static final byte KING = 6;
+  static final byte EMPTY = 0;
+  static final byte PAWN = 1;
+  static final byte ROOK = 2;
+  static final byte KNIGHT = 3;
+  static final byte BISHOP = 4;
+  static final byte QUEEN = 5;
+  static final byte KING = 6;
 
   private static final byte WHITE = 0x10;
   private static final byte BLACK = 0;
@@ -49,7 +50,8 @@ public final class ChessState implements GameState<Chess> {
   private final GameStatus status;
   private final byte[] board;
   private final byte castlings;
-  private final byte enPassant;  // -1 if no en passant pawn
+  private final int enPassant;  // -1 if no en passant pawn,
+                                // otherwise the passed empty square 
   private final int movesSinceCapture;
 
   private final List<ChessMove> moves;
@@ -72,8 +74,10 @@ public final class ChessState implements GameState<Chess> {
     castlings = newCastlings(prev.castlings, board);
     byte piece = prev.getPiece(move.from);
 
-    if (piece == PAWN && Math.abs(move.from - move.to) == 2) {
-      enPassant = move.to;
+    if (piece == PAWN && player && move.to - move.from == 2) {
+      enPassant = move.from + 1;
+    } else if (piece == PAWN && !player && move.from - move.to == 2) {
+      enPassant = move.to + 1;
     } else {
       enPassant = -1;
     }
@@ -86,7 +90,7 @@ public final class ChessState implements GameState<Chess> {
       movesSinceCapture = prev.movesSinceCapture + 1;
     }
 
-    moves = generateMoves(player);
+    moves = generateMoves();
 
     if (moves.size() > 0 && movesSinceCapture < MOVES_WITHOUT_CAPTURE) {
       status = player ? GameStatus.FIRST_PLAYER : GameStatus.SECOND_PLAYER;
@@ -117,8 +121,8 @@ public final class ChessState implements GameState<Chess> {
     return new ChessState(this, move);
   }
 
-  public final List<Move<Chess>> getMoves() {
-    return (List<Move<Chess>>) moves;
+  public final List<ChessMove> getMoves() {
+    return moves;
   }
 
   public ChessMove getRandomMove(Random random) {
@@ -126,41 +130,40 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private byte getPiece(int cell) {
-    return board[cell] & PIECE_MASK;
+    return (byte) (board[cell] & PIECE_MASK);
   }
 
   private byte newCastlings(byte prevCastlings, byte[] board) {
     byte castlings = prevCastlings;
-    if (board[a2i("a1")] != WHITE | ROOK)
+    if (board[a2i("a1")] != (WHITE | ROOK))
       castlings &= ~WHITE_LONG_CASTLING;
 
-    if (board[a2i("a8")] != BLACK | ROOK)
+    if (board[a2i("a8")] != (BLACK | ROOK))
       castlings &= ~BLACK_LONG_CASTLING;
 
-    if (board[a2i("h1")] != WHITE | ROOK)
+    if (board[a2i("h1")] != (WHITE | ROOK))
       castlings &= ~WHITE_SHORT_CASTLING;
 
-    if (board[a2i("h8")] != BLACK | ROOK)
+    if (board[a2i("h8")] != (BLACK | ROOK))
       castlings &= ~BLACK_SHORT_CASTLING;
 
-    if (board[a2i("e1")] != WHITE | KING)
+    if (board[a2i("e1")] != (WHITE | KING))
       castlings &= ~WHITE_LONG_CASTLING & ~WHITE_SHORT_CASTLING;
 
-    if (board[a2i("e8")] != BLACK | KING)
+    if (board[a2i("e8")] != (BLACK | KING))
       castlings &= ~BLACK_LONG_CASTLING & ~BLACK_SHORT_CASTLING;
 
     return castlings;
   }
 
   // Apply move to the board, updating states of castlings/en passant
-  private byte[] applyMove(byte[] prevBoard, byte enPassant, ChessMove move) {
+  private byte[] applyMove(byte[] prevBoard, int prevEnPassant, ChessMove move) {
     byte[] board = prevBoard.clone();
-    byte piece = board[move.from] & PIECE_MASK;
-    boolean player = status.getPlayer();
+    byte piece = (byte) (board[move.from] & PIECE_MASK);
 
     switch (piece) {
       case PAWN:
-        applyPawnMove(board, enPassant, move);
+        applyPawnMove(board, prevEnPassant, move);
         break;
 
       case ROOK:
@@ -178,6 +181,8 @@ public final class ChessState implements GameState<Chess> {
         }
 
     }
+
+    return board;
   }
 
   private void applySimpleMove(byte[] board, ChessMove move) {
@@ -185,25 +190,21 @@ public final class ChessState implements GameState<Chess> {
     board[move.from] = EMPTY;
   }
 
-  private void applyPawnMove(byte[] board, byte enPassant, ChessMove move) {
+  private void applyPawnMove(byte[] board, int prevEnPassant, ChessMove move) {
     board[move.to] = board[move.from];
     board[move.from] = EMPTY;
 
-    if (board[move.to] & WHITE) {
+    if ((board[move.to] & WHITE) != 0) {
       if (move.to == enPassant) {
         board[move.to - 1] = EMPTY;
-      } else if (move.to - move.from == 2) {
-        enPassant = move.from + 1;
       } else if (i2row(move.to) == 8) {
-        board[move.to] = move.promote & WHITE;
+        board[move.to] = (byte) (move.promote & WHITE);
       }
     } else {
-      if (move.to == enPassant) {
+      if (move.to == prevEnPassant) {
         board[move.to + 1] = EMPTY;
-      } if (move.from - move.to == 2) {
-        enPassant = move.from - 1;
       } else if (i2row(move.to) == 1) {
-        board[move.to] = move.promote & BLACK;
+        board[move.to] = (byte) (move.promote & BLACK);
       }
     }
   }
@@ -221,7 +222,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private List<ChessMove> generateMoves() {
-    return new List<>();
+    return new ArrayList<>();
   }
 
   // true if check to (not by) player

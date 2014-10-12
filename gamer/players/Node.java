@@ -220,7 +220,7 @@ final class Node<G extends Game> {
   }
 
   private boolean initChildren() {
-    List<Move<G>> moves = state.getMoves();
+    List<? extends Move<G>> moves = state.getMoves();
     children = new ArrayList<>(moves.size());
     for (Move<G> move : moves) {
       GameState<G> newState = state.play(move);

@@ -9,7 +9,7 @@ public interface GameState<G extends Game> {
 
   GameStatus status();
 
-  List<Move<G>> getMoves();
+  List<? extends Move<G>> getMoves();
 
   Move<G> getRandomMove(Random random);
 

@@ -17,12 +17,16 @@ class Util {
     return (a.charAt(0) - 'a') * SIZE + a.charAt(1) - '1';
   }
 
+  static int cr2i(int col, int row) {
+    return col * 8 + row - 9;
+  }
+
   static String i2a(int idx) {
     return "" + ('a' + idx / SIZE) + ('0' + idx % SIZE);
   }
 
   static int i2row(int idx) {
-    return idx & 7 + 1;
+    return idx % 8 + 1;
   }
 
   static int i2col(int idx) {
