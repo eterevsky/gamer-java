@@ -1,6 +1,7 @@
 package gamer.chess;
 
 import static gamer.chess.Board.a2i;
+import static gamer.chess.Board.cr2i;
 import static gamer.chess.Board.i2a;
 import static gamer.chess.Board.i2col;
 import static gamer.chess.Board.i2row;
@@ -14,6 +15,7 @@ import static gamer.chess.Pieces.BLACK;
 import static gamer.chess.Pieces.isWhite;
 import static gamer.chess.Pieces.isBlack;
 import static gamer.chess.Pieces.color;
+import static gamer.chess.Pieces.piece2a;
 
 import gamer.def.GameException;
 import gamer.def.GameState;
@@ -335,5 +337,28 @@ public final class ChessState implements GameState<Chess> {
   // true if check to (not by) player
   private boolean isCheck(byte[] board, boolean player) {
     return false;
+  }
+
+  public String moveToString(ChessMove move) {
+    byte piece = getPiece(move.from);
+    if (piece == KING) {
+      if (move.to == move.from + 16) {
+        return "O-O";
+      }
+      if (move.to == move.from - 16) {
+        return "O-O-O";
+      }
+    }
+  }
+
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    for (int row = 8; row >= 1; row--) {
+      for (int col = 1; col <= 8; col++) {
+        builder.append(" " + piece2a(board[cr2i(col, row)]));
+      }
+      builder.append("\n");
+    }
+    return builder.toString();
   }
 }

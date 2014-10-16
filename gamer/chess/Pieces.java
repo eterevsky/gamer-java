@@ -14,7 +14,9 @@ class Pieces {
   static final byte WHITE = 0;
   static final byte BLACK = 8;
 
-  private static final char PIECE_NAMES[] = {'.', 'P', 'R', 'N', 'B', 'Q', 'K'};
+  private static final char PIECE_NAMES[] = {
+      '.', 'P', 'R', 'N', 'B', 'Q', 'K', '?', '?', 'p', 'r', 'n', 'b', 'q', 'k'
+    };
 
   static byte a2piece(String s) {
     if (s.length() != 1) {
