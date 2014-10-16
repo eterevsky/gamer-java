@@ -14,6 +14,10 @@ class Board{
     return board[a2i(cell)];
   }
 
+  static byte getPiece(byte[] board, int cell) {
+    return Pieces.piece(board[cell]);
+  }
+
   static int a2i(String a) {
     assert a.length() == 2;
     return (a.charAt(0) - 'a') * 8 + a.charAt(1) - '1';
@@ -24,7 +28,7 @@ class Board{
   }
 
   static String i2a(int idx) {
-    return "" + ('a' + idx / 8) + ('0' + idx % 8);
+    return String.format("%c%c", 'a' + idx / 8, '1' + idx % 8);
   }
 
   static int i2row(int idx) {

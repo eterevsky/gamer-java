@@ -33,14 +33,14 @@ public final class ChessState implements GameState<Chess> {
   private static final int MOVES_WITHOUT_CAPTURE = 150;
 
   private static final byte[] INITIAL_BOARD = Util.hexStringToByteArray(
-      "1211000000000102" +
-      "1311000000000103" +
-      "1411000000000104" +
-      "1511000000000105" +
-      "1611000000000106" +
-      "1411000000000104" +
-      "1311000000000103" +
-      "1211000000000102");
+      "020100000000090a" +
+      "030100000000090b" +
+      "040100000000090c" +
+      "050100000000090d" +
+      "060100000000090e" +
+      "040100000000090c" +
+      "030100000000090b" +
+      "020100000000090a");
 
   private final GameStatus status;
   private final byte[] board;
@@ -59,7 +59,7 @@ public final class ChessState implements GameState<Chess> {
     enPassant = -1;
     movesSinceCapture = 0;
 
-    moves = generateMoves();
+    moves = generateMoves(true);
   }
 
   private ChessState(ChessState prev, ChessMove move) {
@@ -85,7 +85,7 @@ public final class ChessState implements GameState<Chess> {
       movesSinceCapture = prev.movesSinceCapture + 1;
     }
 
-    moves = generateMoves();
+    moves = generateMoves(player);
 
     if (moves.size() > 0 && movesSinceCapture < MOVES_WITHOUT_CAPTURE) {
       status = player ? GameStatus.FIRST_PLAYER : GameStatus.SECOND_PLAYER;
@@ -213,17 +213,17 @@ public final class ChessState implements GameState<Chess> {
     }
   }
 
-  private List<ChessMove> generateMoves() {
+  private List<ChessMove> generateMoves(boolean player) {
     List<ChessMove> moves = new ArrayList<>();
 
     for (int cell = 0; cell < 64; cell++) {
       if (board[cell] == EMPTY ||
-          Pieces.color(board[cell]) != status.getPlayer())
+          Pieces.color(board[cell]) != player)
         continue;
 
       switch (Pieces.piece(board[cell])) {
         case PAWN:
-          addPawnMoves(moves, cell);
+          addPawnMoves(moves, cell, player);
           break;
       }
     }
@@ -231,11 +231,11 @@ public final class ChessState implements GameState<Chess> {
     return moves;
   }
 
-  private void addPawnMoves(List<ChessMove> moves, int cell) {
+  private void addPawnMoves(List<ChessMove> moves, int cell, boolean player) {
     int row = i2row(cell);
     int col = i2col(cell);
 
-    if (status.getPlayer()) {
+    if (player) {
 
       if (row < 7) {
         if (board[cell + 1] == EMPTY) {
@@ -285,7 +285,51 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private void addIfValid(List<ChessMove> moves, ChessMove move) {
+    boolean player = isWhite(board[move.from]);
+    int undoCell1 = -1, undoCell2 = -1, undoCell3 = -1, undoCell4 = -1;
+    byte undoPiece1 = EMPTY, undoPiece2 = EMPTY, undoPiece3 = EMPTY,
+         undoPiece4 = EMPTY;
 
+    undoCell1  = move.from;
+    undoCell2  = move.to;
+    undoPiece1 = board[undoCell1];
+    undoPiece2 = board[undoCell2];
+
+    if (move.to == enPassant &&
+        getPiece(move.from) == PAWN &&
+        Math.abs(move.from - move.to) > 2) {
+      undoCell3 = move.to + (player ? -1 : +1);
+      undoPiece3 = board[undoCell3];
+    }
+
+    if (i2col(move.from) == 5 &&
+        getPiece(move.from) == KING) {
+      if (i2col(move.to) == 7) {
+        undoCell3 = move.from + 8;
+        undoCell4 = move.to + 8;
+        undoPiece3 = board[undoCell3];
+        undoPiece4 = board[undoCell4];
+      } else if (i2col(move.to) == 3) {
+        undoCell3 = move.from - 8;
+        undoCell4 = move.to - 16;
+        undoPiece3 = board[undoCell3];
+        undoPiece4 = board[undoCell4];
+      }
+    }
+
+    applyMove(board, enPassant, move);
+    if (!isCheck(board, player)) {
+      moves.add(move);
+    }
+
+    board[undoCell1] = undoPiece1;
+    board[undoCell2] = undoPiece2;
+    if (undoCell3 >= 0) {
+      board[undoCell3] = undoPiece3;
+      if (undoCell4 >= 0) {
+        board[undoCell4] = undoPiece4;
+      }
+    }
   }
 
   // true if check to (not by) player

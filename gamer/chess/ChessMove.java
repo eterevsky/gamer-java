@@ -7,6 +7,7 @@ import static gamer.chess.Board.i2col;
 import static gamer.chess.Board.i2row;
 import static gamer.chess.Pieces.a2piece;
 import static gamer.chess.Pieces.piece2a;
+import static gamer.chess.Pieces.EMPTY;
 
 import gamer.def.Move;
 
@@ -78,6 +79,7 @@ public final class ChessMove implements Move<Chess> {
   }
 
   public String toString() {
-    return i2a(from) + "-" + i2a(to) + piece2a(promote);
+    return i2a(from) + "-" + i2a(to) +
+           ((promote != EMPTY) ? piece2a(promote) : "");
   }
 }
