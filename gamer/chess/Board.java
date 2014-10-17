@@ -13,6 +13,16 @@ final class Board {
     return new Board(board.clone());
   }
 
+  static Board ownBytes(byte[] board) {
+    return new Board(board);
+  }
+
+
+  MutableBoard mutableClone() {
+    return MutableBoard.fromBytes(board.clone());
+  }
+
+
   byte get(int cell) {
     return board[cell];
   }
@@ -37,14 +47,14 @@ final class Board {
     return piece(get(cell));
   }
 
-  byte[] toBytes() {
-    return board.clone();
-  }
-
 
   static int a2i(String a) {
     assert a.length() == 2;
     return (a.charAt(0) - 'a') * 8 + a.charAt(1) - '1';
+  }
+
+  static int cr2i(int col, int row) {
+    return col * 8 + row - 9;
   }
 
   static String i2a(int idx) {

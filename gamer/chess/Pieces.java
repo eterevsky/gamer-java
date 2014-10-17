@@ -50,4 +50,12 @@ class Pieces {
   static byte piece(byte p) {
     return (byte) (p & PIECE_MASK);
   }
+
+  static byte white(byte p) {
+    return p;
+  }
+
+  static byte black(byte p) {
+    return (byte) (p | BLACK);
+  }
 }

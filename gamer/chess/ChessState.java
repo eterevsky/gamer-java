@@ -1,10 +1,5 @@
 package gamer.chess;
 
-import static gamer.chess.Board.a2i;
-import static gamer.chess.Board.cr2i;
-import static gamer.chess.Board.i2a;
-import static gamer.chess.Board.i2col;
-import static gamer.chess.Board.i2row;
 import static gamer.chess.Pieces.EMPTY;
 import static gamer.chess.Pieces.PAWN;
 import static gamer.chess.Pieces.ROOK;
@@ -12,9 +7,6 @@ import static gamer.chess.Pieces.QUEEN;
 import static gamer.chess.Pieces.KING;
 import static gamer.chess.Pieces.WHITE;
 import static gamer.chess.Pieces.BLACK;
-import static gamer.chess.Pieces.isWhite;
-import static gamer.chess.Pieces.isBlack;
-import static gamer.chess.Pieces.color;
 import static gamer.chess.Pieces.piece2a;
 
 import gamer.def.GameException;
@@ -45,18 +37,21 @@ public final class ChessState implements GameState<Chess> {
 
   ChessState() {
     status = GameStatus.FIRST_PLAYER;
-    board = INITIAL_BOARD;
+    MutableBoard board = MutableBoard.INITIAL_BOARD;
     castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
                 BLACK_LONG_CASTLING | BLACK_SHORT_CASTLING;
     enPassant = -1;
     movesSinceCapture = 0;
 
-    moves = generateMoves(true);
+    moves = generateMoves(board, true);
+    this.board = board.toBoard();
   }
 
   private ChessState(ChessState prev, ChessMove move) {
     boolean player = !prev.status.getPlayer();
-    board = applyMove(prev.board, prev.enPassant, move);
+
+    MutableBoard board = prev.board.mutableClone();
+    applyMove(board, prev.enPassant, move);
 
     castlings = newCastlings(prev.castlings, board);
     byte piece = prev.getPiece(move.from);
@@ -71,13 +66,14 @@ public final class ChessState implements GameState<Chess> {
 
     if (piece == PAWN ||
         prev.getPiece(move.to) != EMPTY ||
-        prev.enPassant > 0 && board[prev.enPassant] == EMPTY) {
+        prev.enPassant > 0 && board.isEmpty(prev.enPassant)) {
       movesSinceCapture = 0;
     } else {
       movesSinceCapture = prev.movesSinceCapture + 1;
     }
 
-    moves = generateMoves(player);
+    moves = generateMoves(board, player);
+    this.board = board.toBoard();
 
     if (moves.size() > 0 && movesSinceCapture < MOVES_WITHOUT_CAPTURE) {
       status = player ? GameStatus.FIRST_PLAYER : GameStatus.SECOND_PLAYER;
@@ -117,36 +113,36 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private byte getPiece(int cell) {
-    return (byte) (board[cell] & Pieces.PIECE_MASK);
+    return board.getPiece(cell);
   }
 
-  private byte newCastlings(byte prevCastlings, byte[] board) {
+  private byte newCastlings(byte prevCastlings, MutableBoard board) {
     byte castlings = prevCastlings;
-    if (board[a2i("a1")] != (WHITE | ROOK))
+    if (board.get("a1") != (WHITE | ROOK))
       castlings &= ~WHITE_LONG_CASTLING;
 
-    if (board[a2i("a8")] != (BLACK | ROOK))
+    if (board.get("a8") != (BLACK | ROOK))
       castlings &= ~BLACK_LONG_CASTLING;
 
-    if (board[a2i("h1")] != (WHITE | ROOK))
+    if (board.get("h1") != (WHITE | ROOK))
       castlings &= ~WHITE_SHORT_CASTLING;
 
-    if (board[a2i("h8")] != (BLACK | ROOK))
+    if (board.get("h8") != (BLACK | ROOK))
       castlings &= ~BLACK_SHORT_CASTLING;
 
-    if (board[a2i("e1")] != (WHITE | KING))
+    if (board.get("e1") != (WHITE | KING))
       castlings &= ~WHITE_LONG_CASTLING & ~WHITE_SHORT_CASTLING;
 
-    if (board[a2i("e8")] != (BLACK | KING))
+    if (board.get("e8") != (BLACK | KING))
       castlings &= ~BLACK_LONG_CASTLING & ~BLACK_SHORT_CASTLING;
 
     return castlings;
   }
 
   // Apply move to the board, updating states of castlings/en passant
-  private byte[] applyMove(byte[] prevBoard, int prevEnPassant, ChessMove move) {
-    byte[] board = prevBoard.clone();
-    byte piece = (byte) (board[move.from] & Pieces.PIECE_MASK);
+  private void applyMove(
+      MutableBoard board, int prevEnPassant, ChessMove move) {
+    byte piece = board.getPiece(move.from);
 
     switch (piece) {
       case PAWN:
@@ -157,155 +153,152 @@ public final class ChessState implements GameState<Chess> {
         if (Math.abs(move.from - move.to) > 12) {
           applyCastling(board, move);
         } else {
-          applySimpleMove(board, move);
+          board.move(move.from, move.to);
         }
         break;
 
       default:
-        applySimpleMove(board, move);
+        board.move(move.from, move.to);
         break;
     }
-
-    return board;
   }
 
-  private void applySimpleMove(byte[] board, ChessMove move) {
-    board[move.to] = board[move.from];
-    board[move.from] = EMPTY;
-  }
+  private void applyPawnMove(
+      MutableBoard board, int prevEnPassant, ChessMove move) {
+    boolean player = board.color(move.from);
+    board.move(move.from, move.to);
 
-  private void applyPawnMove(byte[] board, int prevEnPassant, ChessMove move) {
-    board[move.to] = board[move.from];
-    board[move.from] = EMPTY;
-
-    if ((board[move.to] & WHITE) != 0) {
-      if (move.to == enPassant) {
-        board[move.to - 1] = EMPTY;
-      } else if (i2row(move.to) == 8) {
-        board[move.to] = (byte) (move.promote & WHITE);
+    if (player) {
+      if (move.to == prevEnPassant) {
+        board.set(move.to - 1, EMPTY);
+      } else if (Board.i2row(move.to) == 8) {
+        board.set(move.to, Pieces.white(move.promote));
       }
     } else {
       if (move.to == prevEnPassant) {
-        board[move.to + 1] = EMPTY;
-      } else if (i2row(move.to) == 1) {
-        board[move.to] = (byte) (move.promote & BLACK);
+        board.set(move.to + 1, EMPTY);
+      } else if (Board.i2row(move.to) == 1) {
+        board.set(move.to, Pieces.black(move.promote));
       }
     }
   }
 
-  private void applyCastling(byte[] board, ChessMove move) {
-    board[move.to] = board[move.from];
-    board[move.from] = EMPTY;
+  private void applyCastling(MutableBoard board, ChessMove move) {
+    board.move(move.from, move.to);
+
     if (move.to > move.from) {
-      board[move.from + 8] = board[move.from + 24];
-      board[move.from + 24] = EMPTY;
+      board.move(move.from + 24, move.from + 8);
     } else {
-      board[move.from - 8] = board[move.from - 32];
-      board[move.from - 32] = EMPTY;
+      board.move(move.from - 32, move.from - 8);
     }
   }
 
-  private List<ChessMove> generateMoves(boolean player) {
+  private List<ChessMove> generateMoves(MutableBoard board, boolean player) {
     List<ChessMove> moves = new ArrayList<>();
 
     for (int cell = 0; cell < 64; cell++) {
-      if (board[cell] == EMPTY ||
-          Pieces.color(board[cell]) != player)
+      if (board.isEmpty(cell) || board.color(cell) != player)
         continue;
 
-      switch (Pieces.piece(board[cell])) {
+      switch (board.getPiece(cell)) {
         case PAWN:
-          addPawnMoves(moves, cell, player);
+          addPawnMoves(board, moves, cell, player);
           break;
+
+        default:
+          throw new UnsupportedOperationException(
+              "Can't generate moves for this piece!");
       }
     }
 
     return moves;
   }
 
-  private void addPawnMoves(List<ChessMove> moves, int cell, boolean player) {
-    int row = i2row(cell);
-    int col = i2col(cell);
+  private void addPawnMoves(
+      MutableBoard board, List<ChessMove> moves, int cell, boolean player) {
+    int row = Board.i2row(cell);
+    int col = Board.i2col(cell);
 
     if (player) {
 
       if (row < 7) {
-        if (board[cell + 1] == EMPTY) {
-          addIfValid(moves, ChessMove.of(cell, cell + 1));
-          if (row == 2 && board[cell + 2] == EMPTY)
-            addIfValid(moves, ChessMove.of(cell, cell + 2));
+        if (board.isEmpty(cell + 1)) {
+          addIfValid(board, moves, ChessMove.of(cell, cell + 1));
+          if (row == 2 && board.isEmpty(cell + 2))
+            addIfValid(board, moves, ChessMove.of(cell, cell + 2));
         }
-        if (col != 1 && isBlack(board[cell - 7]))
-          addIfValid(moves, ChessMove.of(cell, cell - 7));
-        if (col != 8 && isBlack(board[cell + 9]))
-          addIfValid(moves, ChessMove.of(cell, cell + 9));
+        if (col != 1 && board.isBlack(cell - 7))
+          addIfValid(board, moves, ChessMove.of(cell, cell - 7));
+        if (col != 8 && board.isBlack(cell + 9))
+          addIfValid(board, moves, ChessMove.of(cell, cell + 9));
       } else {
         for (byte promote = ROOK; promote <= QUEEN; promote++) {
-          if (board[cell + 1] == EMPTY)
-            addIfValid(moves, ChessMove.of(cell, cell + 1, promote));
-          if (col != 1 && isBlack(board[cell - 7]))
-            addIfValid(moves, ChessMove.of(cell, cell - 7, promote));
-          if (col != 8 && isBlack(board[cell + 9]))
-            addIfValid(moves, ChessMove.of(cell, cell + 9, promote));
+          if (board.isEmpty(cell + 1))
+            addIfValid(board, moves, ChessMove.of(cell, cell + 1, promote));
+          if (col != 1 && board.isBlack(cell - 7))
+            addIfValid(board, moves, ChessMove.of(cell, cell - 7, promote));
+          if (col != 8 && board.isBlack(cell + 9))
+            addIfValid(board, moves, ChessMove.of(cell, cell + 9, promote));
         }
       }
 
     } else {
 
       if (row > 2) {
-        if (board[cell - 1] == EMPTY) {
-          addIfValid(moves, ChessMove.of(cell, cell - 1));
-          if (row == 7 && board[cell - 2] == EMPTY)
-            addIfValid(moves, ChessMove.of(cell, cell - 2));
+        if (board.isEmpty(cell - 1)) {
+          addIfValid(board, moves, ChessMove.of(cell, cell - 1));
+          if (row == 7 && board.isEmpty(cell - 2))
+            addIfValid(board, moves, ChessMove.of(cell, cell - 2));
         }
-        if (col != 1 && isBlack(board[cell - 9]))
-          addIfValid(moves, ChessMove.of(cell, cell - 9));
-        if (col != 8 && isBlack(board[cell + 7]))
-          addIfValid(moves, ChessMove.of(cell, cell + 7));
+        if (col != 1 && board.isWhite(cell - 9))
+          addIfValid(board, moves, ChessMove.of(cell, cell - 9));
+        if (col != 8 && board.isWhite(cell + 7))
+          addIfValid(board, moves, ChessMove.of(cell, cell + 7));
       } else {
         for (byte promote = ROOK; promote <= QUEEN; promote++) {
-          if (board[cell - 1] == EMPTY)
-            addIfValid(moves, ChessMove.of(cell, cell - 1, promote));
-          if (col != 1 && isBlack(board[cell - 9]))
-            addIfValid(moves, ChessMove.of(cell, cell - 9, promote));
-          if (col != 8 && isBlack(board[cell + 7]))
-            addIfValid(moves, ChessMove.of(cell, cell + 7, promote));
+          if (board.isEmpty(cell - 1))
+            addIfValid(board, moves, ChessMove.of(cell, cell - 1, promote));
+          if (col != 1 && board.isWhite(cell - 9))
+            addIfValid(board, moves, ChessMove.of(cell, cell - 9, promote));
+          if (col != 8 && board.isWhite(cell + 7))
+            addIfValid(board, moves, ChessMove.of(cell, cell + 7, promote));
         }
       }
 
     }
   }
 
-  private void addIfValid(List<ChessMove> moves, ChessMove move) {
-    boolean player = isWhite(board[move.from]);
+  private void addIfValid(
+      MutableBoard board, List<ChessMove> moves, ChessMove move) {
+    boolean player = board.isWhite(move.from);
     int undoCell1 = -1, undoCell2 = -1, undoCell3 = -1, undoCell4 = -1;
     byte undoPiece1 = EMPTY, undoPiece2 = EMPTY, undoPiece3 = EMPTY,
          undoPiece4 = EMPTY;
 
     undoCell1  = move.from;
     undoCell2  = move.to;
-    undoPiece1 = board[undoCell1];
-    undoPiece2 = board[undoCell2];
+    undoPiece1 = board.get(undoCell1);
+    undoPiece2 = board.get(undoCell2);
 
     if (move.to == enPassant &&
-        getPiece(move.from) == PAWN &&
+        board.getPiece(move.from) == PAWN &&
         Math.abs(move.from - move.to) > 2) {
       undoCell3 = move.to + (player ? -1 : +1);
-      undoPiece3 = board[undoCell3];
+      undoPiece3 = board.get(undoCell3);
     }
 
-    if (i2col(move.from) == 5 &&
-        getPiece(move.from) == KING) {
-      if (i2col(move.to) == 7) {
+    if (Board.i2col(move.from) == 5 &&
+        board.getPiece(move.from) == KING) {
+      if (Board.i2col(move.to) == 7) {
         undoCell3 = move.from + 8;
         undoCell4 = move.to + 8;
-        undoPiece3 = board[undoCell3];
-        undoPiece4 = board[undoCell4];
-      } else if (i2col(move.to) == 3) {
+        undoPiece3 = board.get(undoCell3);
+        undoPiece4 = board.get(undoCell4);
+      } else if (Board.i2col(move.to) == 3) {
         undoCell3 = move.from - 8;
         undoCell4 = move.to - 16;
-        undoPiece3 = board[undoCell3];
-        undoPiece4 = board[undoCell4];
+        undoPiece3 = board.get(undoCell3);
+        undoPiece4 = board.get(undoCell4);
       }
     }
 
@@ -314,18 +307,18 @@ public final class ChessState implements GameState<Chess> {
       moves.add(move);
     }
 
-    board[undoCell1] = undoPiece1;
-    board[undoCell2] = undoPiece2;
+    board.set(undoCell1, undoPiece1);
+    board.set(undoCell2, undoPiece2);
     if (undoCell3 >= 0) {
-      board[undoCell3] = undoPiece3;
+      board.set(undoCell3, undoPiece3);
       if (undoCell4 >= 0) {
-        board[undoCell4] = undoPiece4;
+        board.set(undoCell4, undoPiece4);
       }
     }
   }
 
   // true if check to (not by) player
-  private boolean isCheck(byte[] board, boolean player) {
+  private boolean isCheck(MutableBoard board, boolean player) {
     return false;
   }
 
@@ -339,13 +332,15 @@ public final class ChessState implements GameState<Chess> {
         return "O-O-O";
       }
     }
+
+    return null;
   }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (int row = 8; row >= 1; row--) {
       for (int col = 1; col <= 8; col++) {
-        builder.append(" " + piece2a(board[cr2i(col, row)]));
+        builder.append(" " + piece2a(board.get(col, row)));
       }
       builder.append("\n");
     }
