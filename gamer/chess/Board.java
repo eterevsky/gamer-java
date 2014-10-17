@@ -1,30 +1,50 @@
 package gamer.chess;
 
-class Board{
-  static final int
-      A1 = 0, A8 = 7,
-      C1 = 16, C8 = 23,
-      D1 = 24, D8 = 31,
-      E1 = 32, E8 = 39,
-      F1 = 40, F8 = 47,
-      G1 = 48, G8 = 55,
-      H1 = 56, H8 = 63;
+import static gamer.chess.Pieces.piece;
 
-  static byte get(byte[] board, String cell) {
+final class Board {
+  private final byte[] board;
+
+  private Board(byte[] board) {
+    this.board = board;
+  }
+
+  static Board fromBytes(byte[] board) {
+    return new Board(board.clone());
+  }
+
+  byte get(int cell) {
+    return board[cell];
+  }
+
+  byte get(int col, int row) {
+    return board[col * 8 + row - 9];
+  }
+
+  byte get(String cell) {
     return board[a2i(cell)];
   }
 
-  static byte getPiece(byte[] board, int cell) {
-    return Pieces.piece(board[cell]);
+  byte getPiece(int cell) {
+    return piece(get(cell));
   }
+
+  byte getPiece(int col, int row) {
+    return piece(get(col, row));
+  }
+
+  byte getPiece(String cell) {
+    return piece(get(cell));
+  }
+
+  byte[] toBytes() {
+    return board.clone();
+  }
+
 
   static int a2i(String a) {
     assert a.length() == 2;
     return (a.charAt(0) - 'a') * 8 + a.charAt(1) - '1';
-  }
-
-  static int cr2i(int col, int row) {
-    return col * 8 + row - 9;
   }
 
   static String i2a(int idx) {

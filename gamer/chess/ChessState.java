@@ -34,18 +34,8 @@ public final class ChessState implements GameState<Chess> {
 
   private static final int MOVES_WITHOUT_CAPTURE = 150;
 
-  private static final byte[] INITIAL_BOARD = Util.hexStringToByteArray(
-      "020100000000090a" +
-      "030100000000090b" +
-      "040100000000090c" +
-      "050100000000090d" +
-      "060100000000090e" +
-      "040100000000090c" +
-      "030100000000090b" +
-      "020100000000090a");
-
   private final GameStatus status;
-  private final byte[] board;
+  private final Board board;
   private final byte castlings;
   private final int enPassant;  // -1 if no en passant pawn,
                                 // otherwise the passed empty square
