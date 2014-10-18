@@ -53,6 +53,10 @@ final class MutableBoard {
     return board[cell] == Pieces.EMPTY;
   }
 
+  boolean isEmpty(int col, int row) {
+    return isEmpty(Board.cr2i(col, row));
+  }
+
   boolean isWhite(int cell) {
     return Pieces.isWhite(board[cell]);
   }
@@ -65,9 +69,13 @@ final class MutableBoard {
     return Pieces.color(board[cell]);
   }
 
+  boolean color(int col, int row) {
+    return color(Board.cr2i(col, row));
+  }
+
   Board toBoard() {
     byte[] temp = board;
     board = null;
-    return Board.ownBytes(board);
+    return Board.ownBytes(temp);
   }
 }

@@ -15,7 +15,8 @@ class Pieces {
   static final byte BLACK = 8;
 
   private static final char PIECE_NAMES[] = {
-      '.', 'P', 'R', 'N', 'B', 'Q', 'K', '?', '?', 'p', 'r', 'n', 'b', 'q', 'k'
+      '\u00B7', '\u2659', '\u2656', '\u2658', '\u2657', '\u2655', '\u2654', '?',
+      '?', '\u265F', '\u265C', '\u265E', '\u265D', '\u265B', '\u265A'
     };
 
   static byte a2piece(String s) {

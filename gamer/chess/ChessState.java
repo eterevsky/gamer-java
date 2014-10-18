@@ -3,6 +3,8 @@ package gamer.chess;
 import static gamer.chess.Pieces.EMPTY;
 import static gamer.chess.Pieces.PAWN;
 import static gamer.chess.Pieces.ROOK;
+import static gamer.chess.Pieces.KNIGHT;
+import static gamer.chess.Pieces.BISHOP;
 import static gamer.chess.Pieces.QUEEN;
 import static gamer.chess.Pieces.KING;
 import static gamer.chess.Pieces.WHITE;
@@ -139,7 +141,6 @@ public final class ChessState implements GameState<Chess> {
     return castlings;
   }
 
-  // Apply move to the board, updating states of castlings/en passant
   private void applyMove(
       MutableBoard board, int prevEnPassant, ChessMove move) {
     byte piece = board.getPiece(move.from);
@@ -193,6 +194,17 @@ public final class ChessState implements GameState<Chess> {
     }
   }
 
+  private final int[] ROOK_DELTA_COL = {0, 1, 0, -1};
+  private final int[] ROOK_DELTA_ROW = {1, 0, -1, 0};
+  private final int[] KNIGHT_DELTA_COL = {1, 2, 2, 1, -1, -2, -2, -1};
+  private final int[] KNIGHT_DELTA_ROW = {2, 1, -1, -2, -2, -1, 1, 2};
+  private final int[] BISHOP_DELTA_COL = {1, 1, -1, -1};
+  private final int[] BISHOP_DELTA_ROW = {1, -1, -1, 1};
+  private final int[] QUEEN_DELTA_COL = {0, 1, 1, 1, 0, -1, -1, -1};
+  private final int[] QUEEN_DELTA_ROW = {0, 1, 1, 1, 0, -1, -1, -1};
+  private final int[] KING_DELTA_COL = {0, 1, 1, 1, 0, -1, -1, -1};
+  private final int[] KING_DELTA_ROW = {0, 1, 1, 1, 0, -1, -1, -1};
+
   private List<ChessMove> generateMoves(MutableBoard board, boolean player) {
     List<ChessMove> moves = new ArrayList<>();
 
@@ -205,9 +217,33 @@ public final class ChessState implements GameState<Chess> {
           addPawnMoves(board, moves, cell, player);
           break;
 
+        case ROOK:
+          addLinearMoves(
+              board, moves, cell, player, ROOK_DELTA_COL, ROOK_DELTA_ROW);
+          break;
+
+        case KNIGHT:
+          addSpotMoves(
+              board, moves, cell, player, KNIGHT_DELTA_COL, KNIGHT_DELTA_ROW);
+          break;
+
+        case BISHOP:
+          addLinearMoves(
+              board, moves, cell, player, BISHOP_DELTA_COL, BISHOP_DELTA_ROW);
+          break;
+
+        case QUEEN:
+          addLinearMoves(
+              board, moves, cell, player, QUEEN_DELTA_COL, QUEEN_DELTA_ROW);
+          break;
+
+        case KING:
+          addSpotMoves(
+              board, moves, cell, player, KING_DELTA_COL, KING_DELTA_ROW);
+          break;
+
         default:
-          throw new UnsupportedOperationException(
-              "Can't generate moves for this piece!");
+          throw new RuntimeException("WTF is this piece?!");
       }
     }
 
@@ -265,6 +301,62 @@ public final class ChessState implements GameState<Chess> {
         }
       }
 
+    }
+  }
+
+  private void addLinearMoves(
+      MutableBoard board,
+      List<ChessMove> moves,
+      int cell,
+      boolean player,
+      int[] colDelta,
+      int[] rowDelta) {
+    for (int idelta = 0; idelta < colDelta.length; idelta++) {
+      int dc = colDelta[idelta];
+      int dr = rowDelta[idelta];
+
+      int col = Board.i2col(cell);
+      int row = Board.i2row(cell);
+
+      while (true) {
+        col += dc;
+        row += dr;
+
+        if (col > 8 || col < 1 || row > 8 || row < 1)
+          break;
+
+        int currentCell = Board.cr2i(col, row);
+        byte piece = board.get(currentCell);
+
+        if (piece == EMPTY) {
+          addIfValid(board, moves, ChessMove.of(cell, currentCell));
+        } else if (Pieces.color(piece) != player) {
+          addIfValid(board, moves, ChessMove.of(cell, currentCell));
+          break;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  private void addSpotMoves(
+      MutableBoard board,
+      List<ChessMove> moves,
+      int cell,
+      boolean player,
+      int[] colDelta,
+      int[] rowDelta) {
+    for (int idelta = 0; idelta < colDelta.length; idelta++) {
+      int dr = rowDelta[idelta];
+
+      int col = Board.i2col(cell) + colDelta[idelta];
+      int row = Board.i2row(cell) + rowDelta[idelta];
+
+      if (col >= 1 && col <= 8 && row >= 1 && row <= 8 &&
+          (board.isEmpty(col, row) || board.color(col, row) != player)) {
+        addIfValid(board, moves, ChessMove.of(cell, Board.cr2i(col, row)));
+      }
     }
   }
 

@@ -28,7 +28,7 @@ final class Board {
   }
 
   byte get(int col, int row) {
-    return board[col * 8 + row - 9];
+    return board[cr2i(col, row)];
   }
 
   byte get(String cell) {
