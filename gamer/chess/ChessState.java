@@ -201,9 +201,9 @@ public final class ChessState implements GameState<Chess> {
   private final int[] BISHOP_DELTA_COL = {1, 1, -1, -1};
   private final int[] BISHOP_DELTA_ROW = {1, -1, -1, 1};
   private final int[] QUEEN_DELTA_COL = {0, 1, 1, 1, 0, -1, -1, -1};
-  private final int[] QUEEN_DELTA_ROW = {0, 1, 1, 1, 0, -1, -1, -1};
+  private final int[] QUEEN_DELTA_ROW = {1, 1, 0, -1, -1, -1, 0, 1};
   private final int[] KING_DELTA_COL = {0, 1, 1, 1, 0, -1, -1, -1};
-  private final int[] KING_DELTA_ROW = {0, 1, 1, 1, 0, -1, -1, -1};
+  private final int[] KING_DELTA_ROW = {1, 1, 0, -1, -1, -1, 0, 1};
 
   private List<ChessMove> generateMoves(MutableBoard board, boolean player) {
     List<ChessMove> moves = new ArrayList<>();
@@ -411,7 +411,12 @@ public final class ChessState implements GameState<Chess> {
 
   // true if check to (not by) player
   private boolean isCheck(MutableBoard board, boolean player) {
-    return false;
+    byte king = Pieces.withColor(KING, player);
+    int cell;
+    for (cell = 0; cell < 64; cell++) {
+      if (board.get(cell) == king)
+        break;
+    }
   }
 
   public String moveToString(ChessMove move) {
@@ -425,7 +430,27 @@ public final class ChessState implements GameState<Chess> {
       }
     }
 
-    return null;
+    StringBuilder builder = new StringBuilder();
+    if (piece != PAWN) {
+      builder.append(Pieces.PIECE_LETTER[piece]);
+    } else if (!board.isEmpty(move.to)) {
+      builder.append(Board.i2cola(move.from));
+    }
+
+    // TODO: disambiguation
+
+    if (!board.isEmpty(move.to)) {
+      builder.append("x");
+    }
+
+    builder.append(Board.i2a(move.to));
+
+    if (move.promote != 0) {
+      builder.append("=");
+      builder.append(Pieces.PIECE_LETTER[move.promote]);
+    }
+
+    return builder.toString();
   }
 
   public String toString() {

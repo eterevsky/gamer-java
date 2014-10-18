@@ -19,6 +19,10 @@ class Pieces {
       '?', '\u265F', '\u265C', '\u265E', '\u265D', '\u265B', '\u265A'
     };
 
+  static final char PIECE_LETTER[] = {
+    '?', 'p', 'R', 'N', 'B', 'Q', 'K'
+  };
+
   static byte a2piece(String s) {
     if (s.length() != 1) {
       throw new RuntimeException("Unknown piece");
@@ -58,5 +62,9 @@ class Pieces {
 
   static byte black(byte p) {
     return (byte) (p | BLACK);
+  }
+
+  static byte withColor(byte p, boolean player) {
+    return player ? p & PIECE_MASK : p | BLACK;
   }
 }

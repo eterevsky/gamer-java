@@ -47,6 +47,10 @@ final class Board {
     return piece(get(cell));
   }
 
+  boolean isEmpty(int cell) {
+    return board[cell] == Pieces.EMPTY;
+  }
+
 
   static int a2i(String a) {
     assert a.length() == 2;
@@ -67,5 +71,9 @@ final class Board {
 
   static int i2col(int idx) {
     return idx / 8 + 1;
+  }
+
+  static String i2cola(int idx) {
+    return String.format("%c", 'a' + idx / 8);
   }
 }
