@@ -1,5 +1,6 @@
 package gamer;
 
+import gamer.chess.Chess;
 import gamer.gomoku.Gomoku;
 import gamer.players.MonteCarloUcb;
 import gamer.players.MonteCarloUct;
@@ -101,16 +102,25 @@ class App {
     System.out.format("Found %d cores.\n", cores);
 
     Gomoku gomoku = Gomoku.getInstance();
-    Tournament<Gomoku> tournament = new Tournament<Gomoku>(gomoku, false);
+    Chess chess = Chess.getInstance();
+    Tournament<Chess> tournament = new Tournament<>(chess, true);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
-    tournament.setTimeout(1000);
+    tournament.setTimeout(25000);
     tournament.setExecutor(executor);
     tournament.setGameThreads(1);
     tournament.setThreadsPerPlayer(cores);
     tournament.setRounds(1);
 
-    addPlayers(tournament);
+//    addPlayers(tournament);
+    tournament.addPlayer(new MonteCarloUct<Chess>()
+        .setChildrenThreshold(1)
+        .setSamplesBatch(1)
+        .setFindExact(true));
+    tournament.addPlayer(new MonteCarloUct<Chess>()
+        .setChildrenThreshold(1)
+        .setSamplesBatch(2)
+        .setFindExact(true));
 
     tournament.play();
     executor.shutdown();

@@ -32,12 +32,20 @@ final class MutableBoard {
     return board[cell];
   }
 
+  byte get(int col, int row) {
+    return board[Board.cr2i(col, row)];
+  }
+
   byte get(String cell) {
     return board[Board.a2i(cell)];
   }
 
   byte getPiece(int cell) {
     return piece(get(cell));
+  }
+
+  byte getPiece(int col, int row) {
+    return getPiece(Board.cr2i(col, row));
   }
 
   void set(int cell, byte value) {

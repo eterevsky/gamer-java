@@ -65,6 +65,6 @@ class Pieces {
   }
 
   static byte withColor(byte p, boolean player) {
-    return player ? p & PIECE_MASK : p | BLACK;
+    return (byte) (player ? p & PIECE_MASK : p | BLACK);
   }
 }

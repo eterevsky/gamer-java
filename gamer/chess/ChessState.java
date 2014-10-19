@@ -66,19 +66,16 @@ public final class ChessState implements GameState<Chess> {
       enPassant = -1;
     }
 
-    if (piece == PAWN ||
-        prev.getPiece(move.to) != EMPTY ||
-        prev.enPassant > 0 && board.isEmpty(prev.enPassant)) {
+    if (piece == PAWN || prev.getPiece(move.to) != EMPTY) {
       movesSinceCapture = 0;
     } else {
       movesSinceCapture = prev.movesSinceCapture + 1;
     }
 
     moves = generateMoves(board, player);
-    this.board = board.toBoard();
-
     if (moves.size() > 0 && movesSinceCapture < MOVES_WITHOUT_CAPTURE) {
       status = player ? GameStatus.FIRST_PLAYER : GameStatus.SECOND_PLAYER;
+      this.board = board.toBoard();
       return;
     }
 
@@ -87,6 +84,8 @@ public final class ChessState implements GameState<Chess> {
     } else {
       status = GameStatus.DRAW;
     }
+
+    this.board = board.toBoard();
   }
 
   public GameStatus status() {
@@ -417,6 +416,98 @@ public final class ChessState implements GameState<Chess> {
       if (board.get(cell) == king)
         break;
     }
+
+    int col = Board.i2col(cell);
+    int row = Board.i2row(cell);
+
+    if (player && row < 7 &&
+        (col > 1 && board.get(col - 1, row + 1) == (BLACK | PAWN) ||
+         col < 8 && board.get(col + 1, row + 1) == (BLACK | PAWN))) {
+      return true;
+    }
+
+    if (!player && row > 2 &&
+        (col > 1 && board.get(col - 1, row - 1) == (WHITE | PAWN) ||
+         col < 8 && board.get(col + 1, row - 1) == (WHITE | PAWN))) {
+      return true;
+    }
+
+    for (int i = 0; i < KNIGHT_DELTA_ROW.length; i++) {
+      int knightCol = col + KNIGHT_DELTA_COL[i];
+      int knightRow = row + KNIGHT_DELTA_ROW[i];
+
+      if (knightCol >= 1 && knightCol <= 8 &&
+          knightRow >= 1 && knightRow <= 8 &&
+          board.getPiece(knightCol, knightRow) == KNIGHT &&
+          board.color(knightCol, knightRow) != player) {
+        return true;
+      }
+    }
+
+    for (int i = 0; i < KING_DELTA_ROW.length; i++) {
+      int kingCol = col + KING_DELTA_COL[i];
+      int kingRow = row + KING_DELTA_ROW[i];
+
+      if (kingCol >= 1 && kingCol <= 8 &&
+          kingRow >= 1 && kingRow <= 8 &&
+          board.getPiece(kingCol, kingRow) == KING) {
+        return true;
+      }
+    }
+
+    for (int i = 0; i < ROOK_DELTA_ROW.length; i++) {
+      int colDelta = ROOK_DELTA_COL[i];
+      int rowDelta = ROOK_DELTA_ROW[i];
+
+      int currentCol = col;
+      int currentRow = row;
+      while (true) {
+        currentCol += colDelta;
+        currentRow += rowDelta;
+        if (currentCol > 8 || currentCol < 1 ||
+            currentRow > 8 || currentRow < 1) {
+          break;
+        }
+
+        byte piece = board.get(currentCol, currentRow);
+        if (Pieces.isWhite(piece) != player &&
+            (Pieces.piece(piece) == ROOK ||
+            Pieces.piece(piece) == QUEEN)) {
+          return true;
+        }
+
+        if (piece != EMPTY)
+          break;
+      }
+    }
+
+    for (int i = 0; i < BISHOP_DELTA_ROW.length; i++) {
+      int colDelta = BISHOP_DELTA_COL[i];
+      int rowDelta = BISHOP_DELTA_ROW[i];
+
+      int currentCol = col;
+      int currentRow = row;
+      while (true) {
+        currentCol += colDelta;
+        currentRow += rowDelta;
+        if (currentCol > 8 || currentCol < 1 ||
+            currentRow > 8 || currentRow < 1) {
+          break;
+        }
+
+        byte piece = board.get(currentCol, currentRow);
+        if (Pieces.color(piece) != player &&
+            (Pieces.piece(piece) == BISHOP ||
+            Pieces.piece(piece) == QUEEN)) {
+          return true;
+        }
+
+        if (piece != EMPTY)
+          break;
+      }
+    }
+
+    return false;
   }
 
   public String moveToString(ChessMove move) {
