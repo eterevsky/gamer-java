@@ -3,6 +3,8 @@ package gamer;
 import gamer.def.GameState;
 import gamer.def.Move;
 import gamer.def.Player;
+import gamer.chess.Chess;
+import gamer.chess.ChessState;
 import gamer.gomoku.Gomoku;
 import gamer.gomoku.GomokuMove;
 import gamer.gomoku.GomokuState;
@@ -96,21 +98,23 @@ class Benchmark {
     System.out.format("Cores: %d\n", cores);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
-    Player<Gomoku> player = new MonteCarloUct<Gomoku>()
+    Player<Chess> player = new MonteCarloUct<Chess>()
         .setSamplesLimit(200000)
         .setTimeout(-1)
-        .setSamplesBatch(16)
-        .setFindExact(false)
+        .setSamplesBatch(1)
+        .setFindExact(true)
         .setExecutor(executor, cores);
 
-    for (GameState<Gomoku> s : testStates) {
+    ChessState s = Chess.getInstance().newGame();
+    // for (GameState<Gomoku> s : testStates) {
       long startTime = System.currentTimeMillis();
-      Move<Gomoku> move = player.selectMove(s);
+      Move<Chess> move = player.selectMove(s);
       moveTime.add(System.currentTimeMillis() - startTime);
+      System.out.println(move);
       System.out.println(moveTime.get(moveTime.size() - 1));
-    }
+    // }
 
     executor.shutdownNow();
-    System.out.format("Median/mean: %d / %d\n", median(moveTime), mean(moveTime));
+//    System.out.format("Median/mean: %d / %d\n", median(moveTime), mean(moveTime));
   }
 }
