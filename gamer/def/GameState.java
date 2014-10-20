@@ -14,4 +14,6 @@ public interface GameState<G extends Game> {
   Move<G> getRandomMove(Random random);
 
   GameState<G> play(Move<G> move);
+
+  String moveToString(Move<G> move, boolean showMoveNumber);
 }

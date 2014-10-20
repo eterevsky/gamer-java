@@ -43,12 +43,13 @@ public final class GomokuMove implements Move<Gomoku> {
     this.player = player;
   }
 
+  private static final String COL_LETTER = "abcdefghjklmnopqrstuvwxyz";
+
   @Override
   public String toString() {
-    return String.format("%s (%d, %d)",
-                         (this.player ? "X" : "0"),
-                         cell / Gomoku.SIZE,
-                         cell % Gomoku.SIZE);
+    int col = cell % Gomoku.SIZE;
+    int row = cell % Gomoku.SIZE + 1;
+    return String.format("%c%d", COL_LETTER.charAt(col), row);
   }
 
   @Override

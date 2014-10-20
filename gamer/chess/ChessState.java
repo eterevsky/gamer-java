@@ -34,6 +34,7 @@ public final class ChessState implements GameState<Chess> {
   private final int enPassant;  // -1 if no en passant pawn,
                                 // otherwise the passed empty square
   private final int movesSinceCapture;
+  private final int totalHalfMoves;
 
   private final List<ChessMove> moves;
 
@@ -44,6 +45,7 @@ public final class ChessState implements GameState<Chess> {
                 BLACK_LONG_CASTLING | BLACK_SHORT_CASTLING;
     enPassant = -1;
     movesSinceCapture = 0;
+    totalHalfMoves = 0;
 
     moves = generateMoves(board, true);
     this.board = board.toBoard();
@@ -51,6 +53,7 @@ public final class ChessState implements GameState<Chess> {
 
   private ChessState(ChessState prev, ChessMove move) {
     boolean player = !prev.status.getPlayer();
+    totalHalfMoves = prev.totalHalfMoves + 1;
 
     MutableBoard board = prev.board.mutableClone();
     applyMove(board, prev.enPassant, move);
@@ -518,6 +521,25 @@ public final class ChessState implements GameState<Chess> {
     return false;
   }
 
+  public String moveToString(Move<Chess> moveI, boolean withMoveNumber) {
+    ChessMove move = (ChessMove) moveI;
+
+    if (!withMoveNumber) {
+      return moveToString(move);
+    }
+
+    StringBuilder builder = new StringBuilder();
+    int moves = totalHalfMoves / 2 + 1;
+    builder.append(moves);
+    builder.append(". ");
+
+    if (status == GameStatus.SECOND_PLAYER)
+      builder.append("... ");
+
+    builder.append(moveToString(move));
+    return builder.toString();
+  }
+
   public String moveToString(ChessMove move) {
     byte piece = getPiece(move.from);
     if (piece == KING) {
@@ -530,6 +552,7 @@ public final class ChessState implements GameState<Chess> {
     }
 
     StringBuilder builder = new StringBuilder();
+
     if (piece != PAWN) {
       builder.append(Pieces.PIECE_LETTER[piece]);
     } else if (!board.isEmpty(move.to)) {

@@ -76,4 +76,8 @@ public final class TreeGameState implements GameState<TreeGame> {
     return node.equals(oState.node);
   }
 
+  @Override
+  public String moveToString(Move<TreeGame> move, boolean _) {
+    return move.toString();
+  }
 }
