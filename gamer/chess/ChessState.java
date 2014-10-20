@@ -73,6 +73,14 @@ public final class ChessState implements GameState<Chess> {
     }
 
     moves = generateMoves(board, player);
+
+    GameStatus byMaterial = statusByMaterial(board, player);
+    if (byMaterial != null) {
+      status = byMaterial;
+      this.board = board.toBoard();
+      return;
+    }
+
     if (moves.size() > 0 && movesSinceCapture < MOVES_WITHOUT_CAPTURE) {
       status = player ? GameStatus.FIRST_PLAYER : GameStatus.SECOND_PLAYER;
       this.board = board.toBoard();
@@ -553,5 +561,35 @@ public final class ChessState implements GameState<Chess> {
       builder.append("\n");
     }
     return builder.toString();
+  }
+
+  private GameStatus statusByMaterial(MutableBoard board, boolean player) {
+    byte leftPiece = EMPTY;
+
+    for (int cell = 0; cell < 64; cell++) {
+      byte piece = board.get(cell);
+      if (piece == EMPTY || Pieces.piece(piece) == KING)
+        continue;
+      if (Pieces.color(piece) != player || leftPiece != EMPTY)
+        return null;
+      leftPiece = Pieces.piece(piece);
+    }
+
+    switch (leftPiece) {
+      case EMPTY:
+      case KNIGHT:
+      case BISHOP:
+        return GameStatus.DRAW;
+
+      case ROOK:
+      case QUEEN:
+        return player ? GameStatus.WIN : GameStatus.LOSS;
+
+      case PAWN:
+        return null;
+
+      default:
+        throw new RuntimeException("can't happen");
+    }
   }
 }
