@@ -29,7 +29,7 @@ public final class ChessMove implements Move<Chess> {
     for (int from = 0; from < 64; from++) {
       for (int to = 0; to < 64; to++) {
         if (from != to) {
-          moves.add(new ChessMove(from, to, (byte)0));
+          moves.add(new ChessMove(from, to, Pieces.EMPTY));
         } else {
           moves.add(null);
         }

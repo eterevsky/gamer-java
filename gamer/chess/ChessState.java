@@ -17,7 +17,9 @@ import gamer.def.GameStatus;
 import gamer.def.Move;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 public final class ChessState implements GameState<Chess> {
@@ -48,7 +50,7 @@ public final class ChessState implements GameState<Chess> {
     totalHalfMoves = 0;
 
     moves = generateMoves(board, true);
-    this.board = board.toBoard();
+    this.board = Board.fromBytes(board.toBytes());
   }
 
   private ChessState(ChessState prev, ChessMove move) {
@@ -116,6 +118,11 @@ public final class ChessState implements GameState<Chess> {
     return new ChessState(this, move);
   }
 
+  public ChessState play(String moveStr) {
+    ChessMove move = parseAlgebraic(moveStr);
+    return play(move);
+  }
+
   public final List<ChessMove> getMoves() {
     return moves;
   }
@@ -124,7 +131,7 @@ public final class ChessState implements GameState<Chess> {
     return moves.get(random.nextInt(moves.size()));
   }
 
-  private byte getPiece(int cell) {
+  byte getPiece(int cell) {
     return board.getPiece(cell);
   }
 
@@ -575,6 +582,10 @@ public final class ChessState implements GameState<Chess> {
     return builder.toString();
   }
 
+  ChessMove parseAlgebraic(String moveStr) {
+    return AlgebraicNotation.parse(this, moveStr);
+  }
+
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (int row = 8; row >= 1; row--) {
@@ -614,5 +625,38 @@ public final class ChessState implements GameState<Chess> {
       default:
         throw new RuntimeException("can't happen");
     }
+  }
+
+  Iterable<Integer> iterate(final byte piece, final boolean player) {
+    return new Iterable<Integer>() {
+      private final byte pieceWithColor = Pieces.withColor(piece, player);
+
+      public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+          private int idx = 0;
+
+          private void findNext() {
+            while (idx < 64 && board.get(idx) != pieceWithColor) {
+              idx++;
+            }
+          }
+
+          public boolean hasNext() {
+            findNext();
+            return idx < 64;
+          }
+
+          public Integer next() {
+            if (!hasNext())
+              throw new NoSuchElementException();
+            return idx++;
+          }
+
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
+        };
+      }
+    };
   }
 }
