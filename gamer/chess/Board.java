@@ -49,7 +49,7 @@ final class Board {
   }
 
   byte[] toBytes() {
-    return board;
+    return board.clone();
   }
 
   byte[] toBytesDisown() {

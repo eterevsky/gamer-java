@@ -35,21 +35,22 @@ public final class ChessState implements GameState<Chess> {
   private final int enPassant;  // -1 if no en passant pawn,
                                 // otherwise the passed empty square
   private final int movesSinceCapture;
-  private final int totalHalfMoves;
+  private final int movesCount;
 
   private final List<ChessMove> moves;
 
   ChessState() {
-    status = GameStatus.FIRST_PLAYER;
-    Board board = new Board();
-    castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
-                BLACK_LONG_CASTLING | BLACK_SHORT_CASTLING;
-    enPassant = -1;
-    movesSinceCapture = 0;
-    totalHalfMoves = 0;
+    StateBuilder builder = new StateBuilder(new Board());
 
-    moves = generateMoves(board, true);
-    this.boardBytes = board.toBytes().clone();
+    status = GameStatus.FIRST_PLAYER;
+    boardBytes = builder.getBoard().toBytes();
+    castlings = builder.getCastlings();
+    enPassant = builder.getEnPassant();
+    movesSinceCapture = builder.getMovesSinceCapture();
+    totalHalfMoves = builder.getTotalHalfMoves();
+    movesCount = builder.getMovesCount();
+
+    moves = builder.generateMoves();
   }
 
   private ChessState(ChessState prev, ChessMove move) {
@@ -110,7 +111,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   public ChessState play(String moveStr) {
-    ChessMove move = parseAlgebraic(moveStr);
+    ChessMove move = AlgebraicNotation.parse(this, moveStr);
     return play(move);
   }
 
@@ -571,10 +572,6 @@ public final class ChessState implements GameState<Chess> {
     }
 
     return builder.toString();
-  }
-
-  ChessMove parseAlgebraic(String moveStr) {
-    return AlgebraicNotation.parse(this, moveStr);
   }
 
   public String toString() {
