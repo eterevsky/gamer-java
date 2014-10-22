@@ -41,7 +41,7 @@ public final class ChessState implements GameState<Chess> {
 
   ChessState() {
     status = GameStatus.FIRST_PLAYER;
-    MutableBoard board = MutableBoard.INITIAL_BOARD;
+    Board board = new Board();
     castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
                 BLACK_LONG_CASTLING | BLACK_SHORT_CASTLING;
     enPassant = -1;
@@ -56,7 +56,7 @@ public final class ChessState implements GameState<Chess> {
     boolean player = !prev.status.getPlayer();
     totalHalfMoves = prev.totalHalfMoves + 1;
 
-    MutableBoard board = MutableBoard.fromBytes(prev.boardBytes.clone());
+    Board board = new Board(prev.boardBytes.clone());
     applyMove(board, prev.enPassant, move);
 
     castlings = newCastlings(prev.castlings, board);
@@ -126,7 +126,7 @@ public final class ChessState implements GameState<Chess> {
     return Pieces.piece(boardBytes[cell]);
   }
 
-  private byte newCastlings(byte prevCastlings, MutableBoard board) {
+  private byte newCastlings(byte prevCastlings, Board board) {
     byte castlings = prevCastlings;
     if (board.get("a1") != (WHITE | ROOK))
       castlings &= ~WHITE_LONG_CASTLING;
@@ -150,7 +150,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private void applyMove(
-      MutableBoard board, int prevEnPassant, ChessMove move) {
+      Board board, int prevEnPassant, ChessMove move) {
     byte piece = board.getPiece(move.from);
 
     switch (piece) {
@@ -173,7 +173,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private void applyPawnMove(
-      MutableBoard board, int prevEnPassant, ChessMove move) {
+      Board board, int prevEnPassant, ChessMove move) {
     boolean player = board.color(move.from);
     board.move(move.from, move.to);
 
@@ -192,7 +192,7 @@ public final class ChessState implements GameState<Chess> {
     }
   }
 
-  private void applyCastling(MutableBoard board, ChessMove move) {
+  private void applyCastling(Board board, ChessMove move) {
     board.move(move.from, move.to);
 
     if (move.to > move.from) {
@@ -213,7 +213,7 @@ public final class ChessState implements GameState<Chess> {
   private final int[] KING_DELTA_COL = {0, 1, 1, 1, 0, -1, -1, -1};
   private final int[] KING_DELTA_ROW = {1, 1, 0, -1, -1, -1, 0, 1};
 
-  private List<ChessMove> generateMoves(MutableBoard board, boolean player) {
+  private List<ChessMove> generateMoves(Board board, boolean player) {
     List<ChessMove> moves = new ArrayList<>();
 
     for (int cell = 0; cell < 64; cell++) {
@@ -259,7 +259,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private void addPawnMoves(
-      MutableBoard board, List<ChessMove> moves, int cell, boolean player) {
+      Board board, List<ChessMove> moves, int cell, boolean player) {
     int row = Board.i2row(cell);
     int col = Board.i2col(cell);
 
@@ -313,7 +313,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private void addLinearMoves(
-      MutableBoard board,
+      Board board,
       List<ChessMove> moves,
       int cell,
       boolean player,
@@ -349,7 +349,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private void addSpotMoves(
-      MutableBoard board,
+      Board board,
       List<ChessMove> moves,
       int cell,
       boolean player,
@@ -369,7 +369,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   private void addIfValid(
-      MutableBoard board, List<ChessMove> moves, ChessMove move) {
+      Board board, List<ChessMove> moves, ChessMove move) {
     boolean player = board.isWhite(move.from);
     int undoCell1 = -1, undoCell2 = -1, undoCell3 = -1, undoCell4 = -1;
     byte undoPiece1 = EMPTY, undoPiece2 = EMPTY, undoPiece3 = EMPTY,
@@ -418,7 +418,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   // true if check to (not by) player
-  private boolean isCheck(MutableBoard board, boolean player) {
+  private boolean isCheck(Board board, boolean player) {
     byte king = Pieces.withColor(KING, player);
     int cell;
     for (cell = 0; cell < 64; cell++) {
@@ -588,7 +588,7 @@ public final class ChessState implements GameState<Chess> {
     return builder.toString();
   }
 
-  private GameStatus statusByMaterial(MutableBoard board, boolean player) {
+  private GameStatus statusByMaterial(Board board, boolean player) {
     byte leftPiece = EMPTY;
 
     for (int cell = 0; cell < 64; cell++) {
