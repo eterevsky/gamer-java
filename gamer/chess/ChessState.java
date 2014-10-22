@@ -9,7 +9,6 @@ import static gamer.chess.Pieces.QUEEN;
 import static gamer.chess.Pieces.KING;
 import static gamer.chess.Pieces.WHITE;
 import static gamer.chess.Pieces.BLACK;
-import static gamer.chess.Pieces.piece2a;
 
 import gamer.def.GameException;
 import gamer.def.GameState;
@@ -31,7 +30,7 @@ public final class ChessState implements GameState<Chess> {
   private static final int MOVES_WITHOUT_CAPTURE = 150;
 
   private final GameStatus status;
-  private final Board board;
+  private final byte[] boardBytes;
   private final byte castlings;
   private final int enPassant;  // -1 if no en passant pawn,
                                 // otherwise the passed empty square
@@ -50,14 +49,14 @@ public final class ChessState implements GameState<Chess> {
     totalHalfMoves = 0;
 
     moves = generateMoves(board, true);
-    this.board = Board.fromBytes(board.toBytes());
+    this.boardBytes = board.toBytes().clone();
   }
 
   private ChessState(ChessState prev, ChessMove move) {
     boolean player = !prev.status.getPlayer();
     totalHalfMoves = prev.totalHalfMoves + 1;
 
-    MutableBoard board = prev.board.mutableClone();
+    MutableBoard board = MutableBoard.fromBytes(prev.boardBytes.clone());
     applyMove(board, prev.enPassant, move);
 
     castlings = newCastlings(prev.castlings, board);
@@ -82,23 +81,15 @@ public final class ChessState implements GameState<Chess> {
     GameStatus byMaterial = statusByMaterial(board, player);
     if (byMaterial != null) {
       status = byMaterial;
-      this.board = board.toBoard();
-      return;
-    }
-
-    if (moves.size() > 0 && movesSinceCapture < MOVES_WITHOUT_CAPTURE) {
+    } else if (moves.size() > 0 && movesSinceCapture < MOVES_WITHOUT_CAPTURE) {
       status = player ? GameStatus.FIRST_PLAYER : GameStatus.SECOND_PLAYER;
-      this.board = board.toBoard();
-      return;
-    }
-
-    if (isCheck(board, player) && moves.size() == 0) {
+    } else if (isCheck(board, player) && moves.size() == 0) {
       status = player ? GameStatus.LOSS : GameStatus.WIN;
     } else {
       status = GameStatus.DRAW;
     }
 
-    this.board = board.toBoard();
+    this.boardBytes = board.toBytesDisown();
   }
 
   public GameStatus status() {
@@ -132,7 +123,7 @@ public final class ChessState implements GameState<Chess> {
   }
 
   byte getPiece(int cell) {
-    return board.getPiece(cell);
+    return Pieces.piece(boardBytes[cell]);
   }
 
   private byte newCastlings(byte prevCastlings, MutableBoard board) {
@@ -562,13 +553,13 @@ public final class ChessState implements GameState<Chess> {
 
     if (piece != PAWN) {
       builder.append(Pieces.PIECE_LETTER[piece]);
-    } else if (!board.isEmpty(move.to)) {
+    } else if (boardBytes[move.to] != EMPTY) {
       builder.append(Board.i2cola(move.from));
     }
 
     // TODO: disambiguation
 
-    if (!board.isEmpty(move.to)) {
+    if (boardBytes[move.to] != EMPTY) {
       builder.append("x");
     }
 
@@ -590,7 +581,7 @@ public final class ChessState implements GameState<Chess> {
     StringBuilder builder = new StringBuilder();
     for (int row = 8; row >= 1; row--) {
       for (int col = 1; col <= 8; col++) {
-        builder.append(" " + piece2a(board.get(col, row)));
+        builder.append(" " + Pieces.piece2a(boardBytes[Board.cr2i(col, row)]));
       }
       builder.append("\n");
     }
@@ -636,7 +627,7 @@ public final class ChessState implements GameState<Chess> {
           private int idx = 0;
 
           private void findNext() {
-            while (idx < 64 && board.get(idx) != pieceWithColor) {
+            while (idx < 64 && boardBytes[idx] != pieceWithColor) {
               idx++;
             }
           }

@@ -28,6 +28,12 @@ final class MutableBoard {
     return board;
   }
 
+  byte[] toBytesDisown() {
+    byte[] temp = board;
+    board = null;
+    return temp;
+  }
+
   byte get(int cell) {
     return board[cell];
   }
