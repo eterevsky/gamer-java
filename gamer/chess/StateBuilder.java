@@ -32,6 +32,7 @@ class StateBuilder implements State {
   private int undoCell1, undoCell2, undoCell3, undoCell4;
   private byte undoPiece1, undoPiece2, undoPiece3, undoPiece4;
 
+  private boolean check = false;
   private int kingCellCache = -1;
 
   StateBuilder() {
@@ -222,6 +223,7 @@ class StateBuilder implements State {
   private final int[] KING_DELTA_ROW = {1, 1, 0, -1, -1, -1, 0, 1};
 
   private void generateMoves() {
+    check = isCheck();
     moves = new ArrayList<>();
 
     for (int cell = 0; cell < 64; cell++) {
@@ -354,17 +356,7 @@ class StateBuilder implements State {
     }
   }
 
-  private void addIfValid(ChessMove move) {
-    applyToBoard(move);
-
-    if (!isCheck())
-      moves.add(move);
-
-    undoApplyToBoard();
-  }
-
-  // true if check to (not by) player
-  private boolean isCheck() {
+  private int findKing() {
     byte king = Pieces.withColor(KING, player);
 
     if (kingCellCache < 0 || board.get(kingCellCache) != king) {
@@ -374,7 +366,78 @@ class StateBuilder implements State {
       }
     }
 
-    int cell = kingCellCache;
+    return kingCellCache;
+  }
+
+  private void addIfValid(ChessMove move) {
+    applyToBoard(move);
+
+    int kingCell = findKing();
+    int kingCol = i2col(kingCell);
+    int kingRow = i2row(kingCell);
+    int fromCol = i2col(move.from);
+    int fromRow = i2row(move.from);
+    boolean valid;
+
+    if (check || move.to == kingCell) {
+      valid = !isCheck();
+    } else if (kingRow == fromRow && kingRow != i2row(move.to)) {
+      if (fromCol > kingCol) {
+        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, 1, 0);
+      } else {
+        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, -1, 0);
+      }
+    } else if (kingCol == fromCol && kingCol != i2col(move.to)) {
+      if (fromRow > kingRow) {
+        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, 0, 1);
+      } else {
+        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, 0, -1);
+      }
+    } else if (fromCol - kingCol == fromRow - kingRow) {
+      if (fromCol > kingCol) {
+        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, 1, 1);
+      } else {
+        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, -1, -1);
+      }
+    } else if (fromCol - kingCol == kingRow - fromRow) {
+      if (fromCol > kingCol) {
+        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, 1, -1);
+      } else {
+        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, -1, 1);
+      }
+    } else {
+      valid = true;
+    }
+
+    if (valid)
+      moves.add(move);
+
+    undoApplyToBoard();
+  }
+
+  private boolean checkByLinearPiece(
+      int col, int row, byte attackingPiece, int cd, int rd) {
+    attackingPiece = Pieces.withColor(attackingPiece, !player);
+    byte queen = Pieces.withColor(QUEEN, !player);
+    while (true) {
+      col += cd;
+      row += rd;
+      if (col > 8 || col < 1 || row > 8 || row < 1)
+        return false;
+
+      byte piece = board.get(col, row);
+
+      if (piece == attackingPiece || piece == queen)
+        return true;
+
+      if (piece != EMPTY)
+        return false;
+    }
+  }
+
+  // true if check to (not by) player
+  private boolean isCheck() {
+    int cell = findKing();
     int col = i2col(cell);
     int row = i2row(cell);
 
