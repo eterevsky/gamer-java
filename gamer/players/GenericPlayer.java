@@ -136,7 +136,7 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
 
     report = String.format(
         "%s : %f over %d (%d)",
-        state.moveToString(bestNode.getMove(), true),
+        state.moveToString(bestNode.getMove()),
         bestNode.getValue(), bestNode.getSamples(), root.getSamples());
 
     return bestNode.getMove();

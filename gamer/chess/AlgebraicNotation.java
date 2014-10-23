@@ -144,13 +144,14 @@ class AlgebraicNotation {
     }
   }
 
-  static ChessMove parse(ChessState state, String moveStr) {
+  static ChessMove parse(State state, String moveStr) {
     MoveComponents components = new MoveComponents(moveStr);
     ChessMove move = null;
+    Board board = state.getBoard();
 
     for (ChessMove m : state.getMoves()) {
       if (m.to == components.to &&
-          state.getPiece(m.from) == components.piece &&
+          board.getPiece(m.from) == components.piece &&
           m.promote == components.promote &&
           (components.fromCell == -1 || m.from == components.fromCell) &&
           (components.fromRow == 0 ||

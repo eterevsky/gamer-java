@@ -160,21 +160,8 @@ public final class GomokuState implements GameState<Gomoku> {
     }
   }
 
-  public String moveToString(Move<Gomoku> move, boolean showMoveNumber) {
-    String moveNumber = "";
-    if (showMoveNumber) {
-      int nonEmpty = 0;
-      for (int i = 0; i < CELLS; i++) {
-        if (marked.get(i))
-          nonEmpty++;
-      }
-
-      moveNumber = String.format("%d. ", nonEmpty / 2 + 1);
-      if (status == GameStatus.SECOND_PLAYER)
-        moveNumber += "... ";
-    }
-
-    return moveNumber + move.toString();
+  public String moveToString(Move<Gomoku> move) {
+    return move.toString();
   }
 
 }

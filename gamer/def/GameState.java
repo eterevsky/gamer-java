@@ -15,5 +15,5 @@ public interface GameState<G extends Game> {
 
   GameState<G> play(Move<G> move);
 
-  String moveToString(Move<G> move, boolean showMoveNumber);
+  String moveToString(Move<G> move);
 }
