@@ -98,6 +98,38 @@ class StateBuilder implements State {
     return moves;
   }
 
+  public void set(int cell, byte piece) {
+    board.set(cell, piece);
+  }
+
+  public void set(int cell, int piece) {
+    set(cell, (byte)piece);
+  }
+
+  public void setCastlings(byte castlings) {
+    this.castlings = castlings;
+  }
+
+  public boolean getPlayer() {
+    return player;
+  }
+
+  public void setPlayer(boolean player) {
+    this.player = player;
+  }
+
+  public void setEnPassant(int cell) {
+    enPassant = cell;
+  }
+
+  public void setMovesSinceCapture(int moves) {
+    movesSinceCapture = moves;
+  }
+
+  public void setMovesCount(int moves) {
+    movesCount = moves;
+  }
+
   List<ChessMove> disownMoves() {
     if (moves == null)
       generateMoves();
@@ -379,7 +411,7 @@ class StateBuilder implements State {
     int fromRow = i2row(move.from);
     boolean valid = true;
 
-    if (check || move.to == kingCell) {
+    if (check || move.to == kingCell || move.to == enPassant) {
       valid = !isCheck();
     } else if (kingRow == fromRow && kingRow != i2row(move.to)) {
       if (fromCol > kingCol) {

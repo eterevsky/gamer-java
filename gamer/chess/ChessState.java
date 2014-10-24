@@ -35,6 +35,10 @@ public final class ChessState implements GameState<Chess>, State {
     this(new StateBuilder());
   }
 
+  static ChessState fromFen(String fen) {
+    return new ChessState(Fen.parse(fen));
+  }
+
   // State implementation
 
   // @Override

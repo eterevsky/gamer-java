@@ -112,7 +112,6 @@ class App {
     tournament.setThreadsPerPlayer(cores);
     tournament.setRounds(1);
 
-//    addPlayers(tournament);
     tournament.addPlayer(new MonteCarloUct<Chess>()
         .setChildrenThreshold(1)
         .setSamplesBatch(1)
