@@ -377,7 +377,7 @@ class StateBuilder implements State {
     int kingRow = i2row(kingCell);
     int fromCol = i2col(move.from);
     int fromRow = i2row(move.from);
-    boolean valid;
+    boolean valid = true;
 
     if (check || move.to == kingCell) {
       valid = !isCheck();
@@ -405,8 +405,6 @@ class StateBuilder implements State {
       } else {
         valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, -1, 1);
       }
-    } else {
-      valid = true;
     }
 
     if (valid)

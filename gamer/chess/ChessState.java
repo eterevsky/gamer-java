@@ -103,42 +103,9 @@ public final class ChessState implements GameState<Chess>, State {
     return play(move);
   }
 
-  // TODO: move the bulk of the code to AlgebraicNotation
   // @Override
-  public String moveToString(Move<Chess> moveI) {
-    ChessMove move = (ChessMove) moveI;
-    byte piece = Pieces.piece(boardBytes[move.from]);
-    if (piece == Pieces.KING) {
-      if (move.to == move.from + 16) {
-        return "O-O";
-      }
-      if (move.to == move.from - 16) {
-        return "O-O-O";
-      }
-    }
-
-    StringBuilder builder = new StringBuilder();
-
-    if (piece != Pieces.PAWN) {
-      builder.append(Pieces.PIECE_LETTER[piece]);
-    } else if (boardBytes[move.to] != Pieces.EMPTY) {
-      builder.append(Board.i2cola(move.from));
-    }
-
-    // TODO: disambiguation
-
-    if (boardBytes[move.to] != Pieces.EMPTY) {
-      builder.append("x");
-    }
-
-    builder.append(Board.i2a(move.to));
-
-    if (move.promote != 0) {
-      builder.append("=");
-      builder.append(Pieces.PIECE_LETTER[move.promote]);
-    }
-
-    return builder.toString();
+  public String moveToString(Move<Chess> move) {
+    return AlgebraicNotation.moveToString(this, (ChessMove) move);
   }
 
   // @Override

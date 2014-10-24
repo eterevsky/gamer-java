@@ -172,4 +172,41 @@ class AlgebraicNotation {
 
     return move;
   }
+
+  static String moveToString(State state, ChessMove move) {
+    Board board = state.getBoard();
+    byte piece = board.getPiece(move.from);
+    if (piece == Pieces.KING) {
+      if (move.to == move.from + 16) {
+        return "O-O";
+      }
+      if (move.to == move.from - 16) {
+        return "O-O-O";
+      }
+    }
+
+    StringBuilder builder = new StringBuilder();
+
+    if (piece != Pieces.PAWN) {
+      builder.append(Pieces.PIECE_LETTER[piece]);
+    } else if (!board.isEmpty(move.to)) {
+      builder.append(Board.i2cola(move.from));
+    }
+
+    // TODO: disambiguation
+
+    if (!board.isEmpty(move.to)) {
+      builder.append("x");
+    }
+
+    builder.append(Board.i2a(move.to));
+
+    if (move.promote != 0) {
+      builder.append("=");
+      builder.append(Pieces.PIECE_LETTER[move.promote]);
+    }
+
+    return builder.toString();
+  }
+
 }
