@@ -157,9 +157,9 @@ class StateBuilder implements State {
 
     enPassant = -1;
     if (piece == PAWN) {
-      if (player && move.to - move.from == 2)
+      if (!player && move.to - move.from == 2)
         enPassant = move.from + 1;
-      if (!player && move.from - move.to == 2)
+      if (player && move.from - move.to == 2)
         enPassant = move.to + 1;
     }
 
@@ -207,6 +207,7 @@ class StateBuilder implements State {
         int takenCell = player ? move.to - 1 : move.to + 1;
         undoCell3 = takenCell;
         undoPiece3 = board.get(undoCell3);
+        board.set(takenCell, EMPTY);
       } else if (i2row(move.to) == 1 || i2row(move.to) == 8) {
         board.set(move.to, Pieces.withColor(move.promote, player));
       }
@@ -285,10 +286,56 @@ class StateBuilder implements State {
 
         case KING:
           addSpotMoves(cell, KING_DELTA_COL, KING_DELTA_ROW);
+          if (!check)
+            addCastlings();
           break;
 
         default:
           throw new RuntimeException("WTF is this piece?!");
+      }
+    }
+  }
+
+  private void addCastlings() {
+    if (player) {
+      if ((castlings & WHITE_SHORT_CASTLING) != 0 &&
+          board.isEmpty("f1") && board.isEmpty("g1") &&
+          moves.contains(ChessMove.of("e1", "f1"))) {
+        assert board.get("e1") == (WHITE | KING);
+        assert board.isEmpty("f1");
+        assert board.isEmpty("g1");
+        assert board.get("h1") == (WHITE | ROOK);
+        addIfValid(ChessMove.of("e1", "g1"));
+      }
+      if ((castlings & WHITE_LONG_CASTLING) != 0 &&
+          board.isEmpty("b1") && board.isEmpty("c1") && board.isEmpty("d1") &&
+          moves.contains(ChessMove.of("e1", "d1"))) {
+        assert board.get("e1") == (WHITE | KING);
+        assert board.isEmpty("d1");
+        assert board.isEmpty("c1");
+        assert board.isEmpty("b1");
+        assert board.get("a1") == (WHITE | ROOK);
+        addIfValid(ChessMove.of("e1", "c1"));
+      }
+    } else {
+      if ((castlings & BLACK_SHORT_CASTLING) != 0 &&
+          board.isEmpty("f8") && board.isEmpty("g8") &&
+          moves.contains(ChessMove.of("e8", "f8"))) {
+        assert board.get("e8") == (BLACK | KING);
+        assert board.isEmpty("f8");
+        assert board.isEmpty("g8");
+        assert board.get("h8") == (BLACK | ROOK);
+        addIfValid(ChessMove.of("e8", "g8"));
+      }
+      if ((castlings & BLACK_LONG_CASTLING) != 0 &&
+          board.isEmpty("b8") && board.isEmpty("c8") && board.isEmpty("d8") &&
+          moves.contains(ChessMove.of("e8", "d8"))) {
+        assert board.get("e8") == (BLACK | KING);
+        assert board.isEmpty("d8");
+        assert board.isEmpty("c8");
+        assert board.isEmpty("b8");
+        assert board.get("a8") == (BLACK | ROOK);
+        addIfValid(ChessMove.of("e8", "c8"));
       }
     }
   }
@@ -305,10 +352,12 @@ class StateBuilder implements State {
           if (row == 2 && board.isEmpty(cell + 2))
             addIfValid(ChessMove.of(cell, cell + 2));
         }
-        if (col != 1 && board.isBlack(cell - 7))
+        if (col != 1 && (board.isBlack(cell - 7) || cell - 7 == enPassant)) {
           addIfValid(ChessMove.of(cell, cell - 7));
-        if (col != 8 && board.isBlack(cell + 9))
+        }
+        if (col != 8 && (board.isBlack(cell + 9) || cell + 9 == enPassant)) {
           addIfValid(ChessMove.of(cell, cell + 9));
+        }
       } else {
         for (byte promote = ROOK; promote <= QUEEN; promote++) {
           if (board.isEmpty(cell + 1))
@@ -328,9 +377,9 @@ class StateBuilder implements State {
           if (row == 7 && board.isEmpty(cell - 2))
             addIfValid(ChessMove.of(cell, cell - 2));
         }
-        if (col != 1 && board.isWhite(cell - 9))
+        if (col != 1 && (board.isWhite(cell - 9) || cell - 9 == enPassant))
           addIfValid(ChessMove.of(cell, cell - 9));
-        if (col != 8 && board.isWhite(cell + 7))
+        if (col != 8 && (board.isWhite(cell + 7) || cell + 7 == enPassant))
           addIfValid(ChessMove.of(cell, cell + 7));
       } else {
         for (byte promote = ROOK; promote <= QUEEN; promote++) {
@@ -410,6 +459,11 @@ class StateBuilder implements State {
     int fromCol = i2col(move.from);
     int fromRow = i2row(move.from);
     boolean valid = true;
+
+    // if (move.to == enPassant && board.getPiece(move.to) == PAWN && !player) {
+    //   System.out.format("%s %s\n", move, isCheck());
+    //   System.out.println(new ChessState(this));
+    // }
 
     if (check || move.to == kingCell || move.to == enPassant) {
       valid = !isCheck();

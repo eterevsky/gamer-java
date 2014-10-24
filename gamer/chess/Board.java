@@ -95,8 +95,16 @@ final class Board {
     return isEmpty(Board.cr2i(col, row));
   }
 
+  boolean isEmpty(String cell) {
+    return isEmpty(a2i(cell));
+  }
+
   boolean isWhite(int cell) {
-    return Pieces.isWhite(board[cell]);
+    return !isEmpty(cell) && Pieces.isWhite(board[cell]);
+  }
+
+  boolean isWhite(int col, int row) {
+    return isWhite(cr2i(col, row));
   }
 
   boolean isBlack(int cell) {

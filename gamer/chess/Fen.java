@@ -95,7 +95,7 @@ class Fen {
 
     static private int tp(int cell) {
       int row = 8 - cell / 8;
-      int col = cell % 8;
+      int col = cell % 8 + 1;
       return Board.cr2i(col, row);
     }
 
