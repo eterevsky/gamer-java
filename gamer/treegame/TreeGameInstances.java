@@ -47,4 +47,19 @@ public final class TreeGameInstances {
           .addLastMove(3, 6, WIN).addLastMove(3, 7, LOSS)
           .addLastMove(5, 8, WIN).addLastMove(5, 9, LOSS)
           .toGame();
+
+  // See game4.svg
+  public static final TreeGame GAME4 =
+      TreeGame.newBuilder().setRoot(0)
+          .addMove(0, 1).addMove(0, 2).addMove(0, 3)
+          .addMove(1, 0)
+          .addMove(2, 4).addMove(2, 5)
+          .addLastMove(3, 6, LOSS).addMove(3, 10)
+          .addMove(4, 2).addMove(4, 7).addMove(4, 8)
+          .addMove(5, 9).addLastMove(5, 13, WIN)
+          .addMove(7, 10)
+          .addMove(8, 4).addMove(8, 0)
+          .addMove(9, 10).addLastMove(9, 11, LOSS)
+          .addLastMove(10, 12, WIN)
+          .toGame();
 }

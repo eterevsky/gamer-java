@@ -2,6 +2,7 @@ package gamer.players;
 
 import gamer.def.Game;
 import gamer.def.GameState;
+import gamer.def.Helper;
 import gamer.def.Move;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 final class Node<G extends Game> {
-  private final NodeContext context;
+  private final NodeContext<G> context;
   private final Node<G> parent;
   private List<Node<G>> children = null;
   private final GameState<G> state;
@@ -42,7 +43,7 @@ final class Node<G extends Game> {
        GameState<G> state,
        Move<G> move,
        Selector<G> selector,
-       NodeContext context) {
+       NodeContext<G> context) {
     this.context = context;
     this.parent = parent;
     this.state = state;
@@ -54,6 +55,11 @@ final class Node<G extends Game> {
 
     if (state != null) {
       this.exactValue = state.status().valueInt();
+      if (this.exactValue == 3 && context.helper != null) {
+        Helper.Result result = context.helper.evaluate(state);
+        if (result != null)
+          this.exactValue = result.status.valueInt();
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 package gamer.players;
 
 import static gamer.def.GameStatus.WIN;
+import static gamer.def.GameStatus.LOSS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -8,7 +9,9 @@ import static org.junit.Assert.assertTrue;
 
 import gamer.def.GameState;
 import gamer.def.GameStatus;
+import gamer.def.Helper;
 import gamer.treegame.TreeGame;
+import gamer.treegame.TreeGameInstances;
 import gamer.treegame.TreeGameMove;
 import gamer.treegame.TreeGameState;
 
@@ -74,19 +77,52 @@ public final class TestGenericPlayer {
 
   @Test(timeout=500)
   public void selectMove() {
-
     TreeGame game = TreeGame.newBuilder().setRoot(0)
         .addMove(0, 1).addMove(0, 2).addMove(0, 3)
         .toGame();
 
     Node<TreeGame> root = new Node<TreeGame>(
         null, game.newGame(), null, new NaiveMonteCarlo.Selector<TreeGame>(),
-        NodeContext.BASIC);
+        new NodeContext<TreeGame>());
 
     MockSampler sampler = new MockSampler(root);
     MockPlayer player = new MockPlayer(root, sampler);
     player.setTimeout(239).setSamplesLimit(234).setSamplesBatch(12);
     TreeGameMove move = (TreeGameMove) player.selectMove(root.getState());
     assertEquals("-> 2", move.toString());
+  }
+
+  private class MockHelper implements Helper<TreeGame> {
+    public Helper.Result evaluate(GameState<TreeGame> stateI) {
+      TreeGameState state = (TreeGameState) stateI;
+      switch (state.getId()) {
+        case 4: return new Helper.Result(WIN, 3);
+        case 5: return new Helper.Result(WIN, 1);
+        case 7: return new Helper.Result(WIN, 2);
+        case 8: return new Helper.Result(WIN, 6);
+        case 9: return new Helper.Result(LOSS, 1);
+        case 10: return new Helper.Result(WIN, 1);
+        default: return null;
+      }
+    }
+  }
+
+  @Test
+  public void useHelper() {
+    TreeGame game = TreeGameInstances.GAME4;
+    MonteCarloUct<TreeGame> player = new MonteCarloUct<TreeGame>();
+    player.setHelper(new MockHelper());
+    player.setSamplesLimit(100);
+    player.setFindExact(true);
+
+    TreeGameState state = game.newGame();
+    state = state.play(player.selectMove(state));
+    assertEquals(2, state.getId());
+    state = state.play(player.selectMove(state));
+    assertEquals(4, state.getId());
+    state = state.play(player.selectMove(state));
+    assertEquals(7, state.getId());
+    state = state.play(player.selectMove(state));
+    assertEquals(10, state.getId());
   }
 }

@@ -1,0 +1,36 @@
+digraph G {
+  node [shape=circle];
+  0 [color=red]
+  1 [color=blue]
+  2 [color=blue]
+  3 [color=blue]
+  4 [color=red]
+  5 [color=red]
+  6 [shape=square, color=blue, style=bold];
+  7 [color=blue]
+  8 [color=blue]
+  9 [color=blue]
+  10 [color=red]
+  11 [shape=square, color=blue, style=bold];
+  12 [shape=square, color=red, style=bold];
+  13 [shape=square, color=red, style=bold];
+  0 -> 1;
+  0 -> 2;
+  0 -> 3;
+  1 -> 0;
+  2 -> 4;
+  2 -> 5;
+  3 -> 6;
+  3 -> 10;
+  4 -> 2;
+  4 -> 7;
+  4 -> 8;
+  5 -> 9;
+  5 -> 13;
+  7 -> 10;
+  10 -> 12;
+  8 -> 0;
+  8 -> 4;
+  9 -> 10;
+  9 -> 11;
+}

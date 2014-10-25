@@ -64,11 +64,17 @@ public class TestChessPerft {
     assertEquals(2039, perft(KIWIPETE, 2));
   }
 
-  @Test
-  public void kiwi3() {
-    perft(KIWIPETE, 3);
-    assertEquals(97862, perft(KIWIPETE, 3));
-  }
+  // @Test
+  // public void kiwi3() {
+  //   perft(KIWIPETE, 3);
+  //   assertEquals(97862, perft(KIWIPETE, 3));
+  // }
+
+  // @Test
+  // public void kiwi4() {
+  //   perft(KIWIPETE, 4);
+  //   assertEquals(4085603, perft(KIWIPETE, 4));
+  // }
 
   ChessState POSITION3 = ChessState.fromFen(
       "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
@@ -98,6 +104,11 @@ public class TestChessPerft {
   //   assertEquals(674624, perft(POSITION3, 5));
   // }
 
+  // @Test
+  // public void pos36() {
+  //   assertEquals(11030083, perft(POSITION3, 6));
+  // }
+
   ChessState POSITION4 = ChessState.fromFen(
       "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
 
@@ -118,9 +129,14 @@ public class TestChessPerft {
 
   // @Test
   // public void pos44() {
-  //   perft(POSITION4, 4);
   //   System.out.println(castlings);
   //   assertEquals(422333, perft(POSITION4, 4));
+  // }
+
+  // @Test
+  // public void pos45() {
+  //   System.out.println(castlings);
+  //   assertEquals(15833292, perft(POSITION4, 5));
   // }
 
   ChessState POSITION4_MIRROR = ChessState.fromFen(
@@ -179,9 +195,14 @@ public class TestChessPerft {
     assertEquals(2079, perft(POSITION6, 2));
   }
 
-  @Test
-  public void pos63() {
-    assertEquals(89890, perft(POSITION6, 3));
-  }
+  // @Test
+  // public void pos63() {
+  //   assertEquals(89890, perft(POSITION6, 3));
+  // }
+
+  // @Test
+  // public void pos63() {
+  //   assertEquals(3894594, perft(POSITION6, 3));
+  // }
 
 }

@@ -5,6 +5,7 @@ import gamer.def.Move;
 import gamer.def.Player;
 import gamer.chess.Chess;
 import gamer.chess.ChessState;
+import gamer.chess.ChessEndingHelper;
 import gamer.gomoku.Gomoku;
 import gamer.gomoku.GomokuMove;
 import gamer.gomoku.GomokuState;
@@ -103,7 +104,8 @@ class Benchmark {
         .setTimeout(-1)
         .setSamplesBatch(1)
         .setFindExact(true)
-        .setExecutor(executor, cores);
+        .setExecutor(executor, cores)
+        .setHelper(new ChessEndingHelper());
 
     ChessState s = Chess.getInstance().newGame();
     // for (GameState<Gomoku> s : testStates) {

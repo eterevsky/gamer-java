@@ -26,7 +26,7 @@ public final class TestNode {
         TreeGameInstances.GAME0.newGame(),
         null,
         new LeafSelector<TreeGame>(),
-        NodeContext.BASIC);
+        new NodeContext<TreeGame>());
 
     assertNull(node.getParent());
     assertNull(node.getMove());
@@ -109,7 +109,7 @@ public final class TestNode {
     TreeGameState rootState = TreeGameInstances.GAME0.newGame();
 
     Node<TreeGame> root = new Node<TreeGame>(
-        null, rootState, null, rootSelector, NodeContext.BASIC);
+        null, rootState, null, rootSelector, new NodeContext<TreeGame>());
 
     assertNull(root.selectChildOrAddPending(1));
     assertEquals(1, root.getTotalSamples());
@@ -214,7 +214,8 @@ public final class TestNode {
     TreeGameState rootState = TreeGameInstances.GAME0.newGame();
 
     Node<TreeGame> root = new Node<TreeGame>(
-        null, rootState, null, rootSelector, new NodeContext(true));
+        null, rootState, null, rootSelector,
+        new NodeContext<TreeGame>(true, null));
 
     TreeGameState state1 = rootState.play(rootState.getMoveToNode(1));
     TreeGameState state2 = rootState.play(rootState.getMoveToNode(2));
@@ -244,7 +245,8 @@ public final class TestNode {
     TestSelector rootSelector = new TestSelector();
     TreeGameState rootState = TreeGameInstances.GAME3.newGame();
     Node<TreeGame> root = new Node<TreeGame>(
-        null, rootState, null, rootSelector, new NodeContext(true));
+        null, rootState, null, rootSelector,
+        new NodeContext<TreeGame>(true, null));
 
     assertFalse(root.knowExactValue());
 

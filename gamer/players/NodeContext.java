@@ -1,11 +1,19 @@
 package gamer.players;
 
-final class NodeContext {
+import gamer.def.Game;
+import gamer.def.Helper;
+
+final class NodeContext<G extends Game> {
   final boolean propagateExact;
+  final Helper<G> helper;
 
-  static NodeContext BASIC = new NodeContext(false);
+  NodeContext() {
+    propagateExact = false;
+    helper = null;
+  }
 
-  NodeContext(boolean propagateExact) {
+  NodeContext(boolean propagateExact, Helper<G> helper) {
     this.propagateExact = propagateExact;
+    this.helper = helper;
   }
 }

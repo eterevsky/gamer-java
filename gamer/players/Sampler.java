@@ -2,6 +2,7 @@ package gamer.players;
 
 import gamer.def.Game;
 import gamer.def.GameState;
+import gamer.def.Helper;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -12,6 +13,7 @@ class Sampler<G extends Game> implements Runnable {
   private final long maxSamples;
   private final int samplesBatch;
   private final Random random;
+  private Helper<G> helper = null;
 
   Sampler(
       Node<G> root, long finishTime, long maxSamples, int samplesBatch,
@@ -21,6 +23,10 @@ class Sampler<G extends Game> implements Runnable {
     this.maxSamples = maxSamples;
     this.samplesBatch = samplesBatch;
     this.random = random;
+  }
+
+  void setHelper(Helper<G> helper) {
+    this.helper = helper;
   }
 
   public void run() {
@@ -42,11 +48,17 @@ class Sampler<G extends Game> implements Runnable {
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
         GameState<G> state = node.getState();
+        Helper.Result hResult;
         do {
           state = state.play(state.getRandomMove(rnd));
-        } while (!state.status().isTerminal());
+          hResult = helper != null ? helper.evaluate(state) : null;
+        } while (!state.status().isTerminal() && hResult == null);
 
-        value += state.status().value();
+        if (state.status().isTerminal()) {
+          value += state.status().value();
+        } else {
+          value += hResult.value();
+        }
       }
       node.addSamples(samplesBatch, value / samplesBatch);
     }

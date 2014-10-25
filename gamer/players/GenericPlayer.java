@@ -2,6 +2,8 @@ package gamer.players;
 
 import gamer.def.Game;
 import gamer.def.GameState;
+import gamer.def.GameStatus;
+import gamer.def.Helper;
 import gamer.def.Move;
 import gamer.def.Player;
 
@@ -18,10 +20,11 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   private long timeout = 1000;
   private ExecutorService executor = null;
   private int workers = 1;
-  protected NodeContext nodeContext = NodeContext.BASIC;
+  protected NodeContext<G> nodeContext = new NodeContext<G>();
   private Random random = null;
   private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
   protected String name = null;
+  private Helper<G> helper = null;
 
   @Override
   public final GenericPlayer<G> setTimeout(long timeout) {
@@ -61,7 +64,14 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   }
 
   public GenericPlayer<G> setFindExact(boolean exact) {
-    this.nodeContext = new NodeContext(exact);
+    this.nodeContext = new NodeContext<G>(exact, helper);
+    return this;
+  }
+
+  public GenericPlayer<G> setHelper(Helper<G> helper) {
+    this.helper = helper;
+    this.nodeContext =
+        new NodeContext<G>(this.nodeContext.propagateExact, helper);
     return this;
   }
 
@@ -77,6 +87,9 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
     if (this.nodeContext.propagateExact)
       s += " +exact";
 
+    if (this.helper != null)
+      s += " " + this.helper.getClass().getSimpleName();
+
     return s;
   }
 
@@ -85,7 +98,11 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   protected Sampler<G> newSampler(
       Node<G> root, long finishTime, long samplesLimit, int samplesBatch,
       Random random) {
-    return new Sampler<G>(root, finishTime, samplesLimit, samplesBatch, random);
+    Sampler<G> sampler = new Sampler<G>(
+        root, finishTime, samplesLimit, samplesBatch, random);
+    if (helper != null)
+      sampler.setHelper(helper);
+    return sampler;
   }
 
   protected long getCurrentTime() {
@@ -99,8 +116,39 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
     return report;
   }
 
+  private Move<G> selectMoveUsingHelper(
+      GameState<G> state, Helper.Result result) {
+    GameStatus status = result.status;
+    double value = result.status.value(state.status().getPlayer());
+    boolean winning = value > 0.5;
+    boolean loosing = value < 0.5;
+
+    for (Move<G> move : state.getMoves()) {
+      GameState<G> next = state.play(move);
+      Helper.Result nextResult = helper.evaluate(next);
+      if (nextResult == null || nextResult.status != status) {
+        assert winning;
+        continue;
+      }
+
+      if (winning && nextResult.moves < result.moves ||
+          loosing && nextResult.moves >= result.moves - 1 ||
+          !winning && !loosing) {
+        return move;
+      }
+    }
+
+    throw new RuntimeException("Internal error");
+  }
+
   @Override
   public Move<G> selectMove(GameState<G> state) {
+    if (helper != null) {
+      Helper.Result result = helper.evaluate(state);
+      if (result != null)
+        return selectMoveUsingHelper(state, result);
+    }
+
     Node<G> root = getRoot(state);
 
     long finishTime = timeout > 0 ? getCurrentTime() + timeout : -1;

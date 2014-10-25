@@ -1,6 +1,7 @@
 package gamer;
 
 import gamer.chess.Chess;
+import gamer.chess.ChessEndingHelper;
 import gamer.gomoku.Gomoku;
 import gamer.players.MonteCarloUcb;
 import gamer.players.MonteCarloUct;
@@ -106,7 +107,7 @@ class App {
     Tournament<Chess> tournament = new Tournament<>(chess, true);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
-    tournament.setTimeout(25000);
+    tournament.setTimeout(10000);
     tournament.setExecutor(executor);
     tournament.setGameThreads(1);
     tournament.setThreadsPerPlayer(cores);
@@ -115,10 +116,11 @@ class App {
     tournament.addPlayer(new MonteCarloUct<Chess>()
         .setChildrenThreshold(1)
         .setSamplesBatch(1)
+        .setHelper(new ChessEndingHelper())
         .setFindExact(true));
     tournament.addPlayer(new MonteCarloUct<Chess>()
         .setChildrenThreshold(1)
-        .setSamplesBatch(2)
+        .setSamplesBatch(1)
         .setFindExact(true));
 
     tournament.play();

@@ -1,0 +1,3 @@
+200000 samples Chess (AMD x6)
+
+2bcef2 52154
