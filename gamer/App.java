@@ -52,7 +52,7 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
 
-    Tournament<Chess> tournament = new Tournament<>(chess, true);
+    Tournament<Gomoku> tournament = new Tournament<>(gomoku, true);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
     tournament.setTimeout(10000);
