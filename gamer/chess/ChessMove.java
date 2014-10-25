@@ -36,20 +36,21 @@ public final class ChessMove implements Move<Chess> {
       }
     }
 
-    promotions = new ArrayList<>(POSSIBLE_PROMOTIONS * 2 * 8);
+    promotions = new ArrayList<>(POSSIBLE_PROMOTIONS * 2 * 8 * 8);
     for (byte promote = 0; promote < POSSIBLE_PROMOTIONS; promote++) {
       for (int color = 0; color < 2; color++) {
-        for (int col = 1; col <= 8; col++) {
-          int from, to;
-          if (color == 0) {
-            from = cr2i(col, 7);
-            to = cr2i(col, 8);
-          } else {
-            from = cr2i(col, 2);
-            to = cr2i(col, 1);
+        for (int colFrom = 1; colFrom <= 8; colFrom++)
+          for (int colTo = 1; colTo <= 8; colTo++) {
+            int from, to;
+            if (color == 0) {
+              from = cr2i(colFrom, 7);
+              to = cr2i(colTo, 8);
+            } else {
+              from = cr2i(colFrom, 2);
+              to = cr2i(colTo, 1);
+            }
+            promotions.add(new ChessMove(from, to, (byte)(promote + 2)));
           }
-          promotions.add(new ChessMove(from, to, (byte)(promote + 2)));
-        }
       }
     }
   }
@@ -74,8 +75,8 @@ public final class ChessMove implements Move<Chess> {
 
   static ChessMove of(int from, int to, byte promote) {
     int color = i2row(to) == 8 ? 0 : 1;
-    return promotions.get((promote - 2) * 2 * 8 + color * 8 +
-                          i2col(to) - 1);
+    return promotions.get((promote - 2) * 2 * 8 * 8 + color * 8 * 8 +
+                          (i2col(from) - 1) * 8 + i2col(to) - 1);
   }
 
   public String toString() {

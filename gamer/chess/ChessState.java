@@ -14,6 +14,7 @@ public final class ChessState implements GameState<Chess>, State {
   private final GameStatus status;
   private final byte[] boardBytes;
   private final byte castlings;
+  private final boolean player;
   private final int enPassant;  // -1 if no en passant pawn,
                                 // otherwise the passed empty square
   private final int movesSinceCapture;
@@ -29,14 +30,19 @@ public final class ChessState implements GameState<Chess>, State {
     movesSinceCapture = builder.getMovesSinceCapture();
     movesCount = builder.getMovesCount();
     moves = builder.disownMoves();
+    player = builder.getPlayer();
   }
 
   ChessState() {
     this(new StateBuilder());
   }
 
-  static ChessState fromFen(String fen) {
+  public static ChessState fromFen(String fen) {
     return new ChessState(Fen.parse(fen));
+  }
+
+  public String asFen() {
+    return Fen.toFen(this);
   }
 
   // State implementation
@@ -64,6 +70,11 @@ public final class ChessState implements GameState<Chess>, State {
   // @Override
   public int getMovesCount() {
     return movesCount;
+  }
+
+  // @Override
+  public boolean getPlayer() {
+    return player;
   }
 
   // GameState<> implementation

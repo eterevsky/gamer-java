@@ -117,4 +117,77 @@ class Fen {
     Parser parser = new Parser(fen);
     return parser.parse();
   }
+
+  static String toFen(State state) {
+    StringBuilder builder = new StringBuilder();
+    Board board = state.getBoard();
+
+    int nempty = 0;
+
+    for (int cell = 0; cell < 64; cell++) {
+      int row = 8 - cell / 8;
+      int col = cell % 8 + 1;
+      byte piece = board.get(col, row);
+
+      if (piece != EMPTY && nempty > 0) {
+        builder.append(nempty);
+        nempty = 0;
+      }
+
+      switch (piece) {
+        case WHITE | PAWN: builder.append('P'); break;
+        case WHITE | ROOK: builder.append('R'); break;
+        case WHITE | KNIGHT: builder.append('N'); break;
+        case WHITE | BISHOP: builder.append('B'); break;
+        case WHITE | QUEEN: builder.append('Q'); break;
+        case WHITE | KING: builder.append('K'); break;
+        case BLACK | PAWN: builder.append('p'); break;
+        case BLACK | ROOK: builder.append('r'); break;
+        case BLACK | KNIGHT: builder.append('n'); break;
+        case BLACK | BISHOP: builder.append('b'); break;
+        case BLACK | QUEEN: builder.append('q'); break;
+        case BLACK | KING: builder.append('k'); break;
+        case EMPTY: nempty++;
+      }
+
+      if (col == 8 && nempty > 0) {
+        builder.append(nempty);
+        nempty = 0;
+      }
+
+      if (col == 8 && row > 1)
+        builder.append('/');
+    }
+
+    builder.append(state.getPlayer() ? " w " : " b ");
+    int castlings = state.getCastlings();
+
+    if (castlings == 0) {
+      builder.append('-');
+    } else {
+      if ((castlings & State.WHITE_SHORT_CASTLING) != 0)
+        builder.append('K');
+      if ((castlings & State.WHITE_LONG_CASTLING) != 0)
+        builder.append('Q');
+      if ((castlings & State.BLACK_SHORT_CASTLING) != 0)
+        builder.append('k');
+      if ((castlings & State.BLACK_LONG_CASTLING) != 0)
+        builder.append('q');
+    }
+
+    builder.append(' ');
+
+    if (state.getEnPassant() >= 0) {
+      builder.append(Board.i2a(state.getEnPassant()));
+    } else {
+      builder.append('-');
+    }
+
+    builder.append(' ');
+    builder.append(state.getMovesSinceCapture());
+    builder.append(' ');
+    builder.append(state.getMovesCount() / 2);
+
+    return builder.toString();
+  }
 }

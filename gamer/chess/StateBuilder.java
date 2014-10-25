@@ -460,11 +460,6 @@ class StateBuilder implements State {
     int fromRow = i2row(move.from);
     boolean valid = true;
 
-    // if (move.to == enPassant && board.getPiece(move.to) == PAWN && !player) {
-    //   System.out.format("%s %s\n", move, isCheck());
-    //   System.out.println(new ChessState(this));
-    // }
-
     if (check || move.to == kingCell || move.to == enPassant) {
       valid = !isCheck();
     } else if (kingRow == fromRow && kingRow != i2row(move.to)) {

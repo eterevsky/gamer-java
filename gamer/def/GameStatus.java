@@ -43,8 +43,13 @@ public enum GameStatus {
 
   public boolean getPlayer() {
     switch (this) {
-      case FIRST_PLAYER: return true;
-      case SECOND_PLAYER: return false;
+      case LOSS:
+      case FIRST_PLAYER:
+        return true;
+
+      case WIN:
+      case SECOND_PLAYER:
+        return false;
       default: throw new RuntimeException("can't happen");
     }
   }
