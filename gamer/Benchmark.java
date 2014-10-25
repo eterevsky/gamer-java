@@ -92,9 +92,7 @@ class Benchmark {
     return sum / l.size();
   }
 
-  public static void main(String[] args) throws Exception {
-    List<Long> moveTime = new ArrayList<>();
-
+  static void chessBenchmark() {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Cores: %d\n", cores);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
@@ -108,15 +106,40 @@ class Benchmark {
         .setHelper(new ChessEndingHelper());
 
     ChessState s = Chess.getInstance().newGame();
-    // for (GameState<Gomoku> s : testStates) {
-      long startTime = System.currentTimeMillis();
-      Move<Chess> move = player.selectMove(s);
-      moveTime.add(System.currentTimeMillis() - startTime);
-      System.out.println(move);
-      System.out.println(moveTime.get(moveTime.size() - 1));
-    // }
+    long startTime = System.currentTimeMillis();
+    Move<Chess> move = player.selectMove(s);
+    System.out.println(s.moveToString(move));
+    System.out.println(System.currentTimeMillis() - startTime);
 
     executor.shutdownNow();
-//    System.out.format("Median/mean: %d / %d\n", median(moveTime), mean(moveTime));
+  }
+
+  static void gomokuBenchmark() {
+    List<Long> moveTime = new ArrayList<>();
+
+    int cores = Runtime.getRuntime().availableProcessors();
+    System.out.format("Cores: %d\n", cores);
+    ExecutorService executor = Executors.newFixedThreadPool(cores);
+
+    Player<Gomoku> player = new MonteCarloUct<Gomoku>()
+        .setSamplesLimit(200000)
+        .setTimeout(-1)
+        .setSamplesBatch(1)
+        .setFindExact(true)
+        .setExecutor(executor, cores);
+
+    for (GameState<Gomoku> s : testStates) {
+      long startTime = System.currentTimeMillis();
+      Move<Gomoku> move = player.selectMove(s);
+      moveTime.add(System.currentTimeMillis() - startTime);
+      System.out.println(moveTime.get(moveTime.size() - 1));
+    }
+
+    executor.shutdownNow();
+    System.out.format("Median/mean: %d / %d\n", median(moveTime), mean(moveTime));
+  }
+
+  public static void main(String[] args) throws Exception {
+    gomokuBenchmark();
   }
 }

@@ -8,7 +8,7 @@ final class NodeContext<G extends Game> {
   final Helper<G> helper;
 
   NodeContext() {
-    propagateExact = false;
+    propagateExact = true;
     helper = null;
   }
 

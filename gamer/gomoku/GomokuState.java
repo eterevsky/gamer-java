@@ -114,42 +114,55 @@ public final class GomokuState implements GameState<Gomoku> {
 
   private boolean checkLine(int center, int left, int right, int delta) {
     boolean player = markedx.get(center);
-
-    int cell = center;
-    int i;
-    for (i = 0; i < left; i++) {
-      cell -= delta;
+    int l = 1;
+    for (int cell = center - delta; cell >= left; cell -= delta) {
       if (!marked.get(cell) || markedx.get(cell) != player)
         break;
+      l++;
     }
-    int leftTail = i;
 
-    cell = center;
-    for (i = 0; i < right; i++) {
-      cell += delta;
+    for (int cell = center + delta; cell <= right; cell += delta) {
       if (!marked.get(cell) || markedx.get(cell) != player)
         break;
+      l++;
     }
-    int rightTail = i;
 
-    return leftTail + rightTail >= 4;
+    return l >= 5;
+  }
+
+  static int[] limLeft = new int[CELLS], limRight = new int[CELLS];
+  static int[] limTop = new int[CELLS], limBottom = new int[CELLS];
+  static int[] limLT = new int[CELLS], limRB = new int[CELLS];
+  static int[] limRT = new int[CELLS], limLB = new int[CELLS];
+
+  static {
+    for (int cell = 0; cell < CELLS; cell++) {
+      int x = cell % SIZE;
+      int y = cell / SIZE;
+
+      int left = min(x, 4);
+      int right = min(SIZE - x - 1, 4);
+      int top = min(y, 4);
+      int bottom = min(SIZE - y - 1, 4);
+
+      limLeft[cell] = cell - left;
+      limRight[cell] = cell + right;
+      limTop[cell] = cell - SIZE * top;
+      limBottom[cell] = cell + SIZE * bottom;
+      limLT[cell] = cell - (SIZE + 1) * min(left, top);
+      limRB[cell] = cell + (SIZE + 1) * min(right, bottom);
+      limRT[cell] = cell - (SIZE - 1) * min(right, top);
+      limLB[cell] = cell + (SIZE - 1) * min(left, bottom);
+    }
   }
 
   private GameStatus updateStatus(GomokuMove move) {
     int cell = move.cell;
-    int x = cell % SIZE;
-    int y = cell / SIZE;
-
-    int left = min(x, 4);
-    int right = min(SIZE - x - 1, 4);
-    int top = min(y, 4);
-    int bottom = min(SIZE - y - 1, 4);
-
     boolean won =
-        checkLine(cell, left, right, 1) ||
-        checkLine(cell, top, bottom, SIZE) ||
-        checkLine(cell, min(left, top), min(right, bottom), SIZE + 1) ||
-        checkLine(cell, min(right, top), min(left, bottom), SIZE - 1);
+        checkLine(cell, limLeft[cell], limRight[cell], 1) ||
+        checkLine(cell, limTop[cell], limBottom[cell], SIZE) ||
+        checkLine(cell, limLT[cell], limRB[cell], SIZE + 1) ||
+        checkLine(cell, limRT[cell], limLB[cell], SIZE - 1);
 
     if (won) {
       return move.player ? GameStatus.WIN : GameStatus.LOSS;
