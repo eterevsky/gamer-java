@@ -33,7 +33,7 @@ class StateBuilder implements State {
   private byte undoPiece1, undoPiece2, undoPiece3, undoPiece4;
 
   private boolean check = false;
-  private int kingCellCache = -1;
+  private int kingCell = -1;
 
   StateBuilder() {
     this.board = new Board();
@@ -256,6 +256,7 @@ class StateBuilder implements State {
   private final int[] KING_DELTA_ROW = {1, 1, 0, -1, -1, -1, 0, 1};
 
   private void generateMoves() {
+    findKing();
     check = isCheck();
     moves = new ArrayList<>();
 
@@ -305,7 +306,7 @@ class StateBuilder implements State {
         assert board.isEmpty("f1");
         assert board.isEmpty("g1");
         assert board.get("h1") == (WHITE | ROOK);
-        addIfValid(ChessMove.of("e1", "g1"));
+        addKingMoveIfValid(ChessMove.of("e1", "g1"));
       }
       if ((castlings & WHITE_LONG_CASTLING) != 0 &&
           board.isEmpty("b1") && board.isEmpty("c1") && board.isEmpty("d1") &&
@@ -315,7 +316,7 @@ class StateBuilder implements State {
         assert board.isEmpty("c1");
         assert board.isEmpty("b1");
         assert board.get("a1") == (WHITE | ROOK);
-        addIfValid(ChessMove.of("e1", "c1"));
+        addKingMoveIfValid(ChessMove.of("e1", "c1"));
       }
     } else {
       if ((castlings & BLACK_SHORT_CASTLING) != 0 &&
@@ -325,7 +326,7 @@ class StateBuilder implements State {
         assert board.isEmpty("f8");
         assert board.isEmpty("g8");
         assert board.get("h8") == (BLACK | ROOK);
-        addIfValid(ChessMove.of("e8", "g8"));
+        addKingMoveIfValid(ChessMove.of("e8", "g8"));
       }
       if ((castlings & BLACK_LONG_CASTLING) != 0 &&
           board.isEmpty("b8") && board.isEmpty("c8") && board.isEmpty("d8") &&
@@ -335,7 +336,7 @@ class StateBuilder implements State {
         assert board.isEmpty("c8");
         assert board.isEmpty("b8");
         assert board.get("a8") == (BLACK | ROOK);
-        addIfValid(ChessMove.of("e8", "c8"));
+        addKingMoveIfValid(ChessMove.of("e8", "c8"));
       }
     }
   }
@@ -426,97 +427,125 @@ class StateBuilder implements State {
   }
 
   private void addSpotMoves(int cell, int[] colDelta, int[] rowDelta) {
+    boolean isKing = (board.getPiece(cell) == KING);
+
     for (int idelta = 0; idelta < colDelta.length; idelta++) {
       int col = i2col(cell) + colDelta[idelta];
       int row = i2row(cell) + rowDelta[idelta];
 
       if (col >= 1 && col <= 8 && row >= 1 && row <= 8 &&
           (board.isEmpty(col, row) || board.color(col, row) != player)) {
-        addIfValid(ChessMove.of(cell, Board.cr2i(col, row)));
+        ChessMove move = ChessMove.of(cell, Board.cr2i(col, row));
+        if (isKing) {
+          addKingMoveIfValid(move);
+        } else {
+          addIfValid(move);
+        }
       }
     }
   }
 
-  private int findKing() {
+  private void findKing() {
     byte king = Pieces.withColor(KING, player);
 
-    if (kingCellCache < 0 || board.get(kingCellCache) != king) {
-      for (kingCellCache = 0; kingCellCache < 64; kingCellCache++) {
-        if (board.get(kingCellCache) == king)
+    if (kingCell < 0 || board.get(kingCell) != king) {
+      for (kingCell = 0; kingCell < 64; kingCell++) {
+        if (board.get(kingCell) == king)
           break;
       }
     }
+  }
 
-    return kingCellCache;
+  private void addKingMoveIfValid(ChessMove move) {
+    assert board.getPiece(move.from) == KING;
+    applyToBoard(move);
+
+    if (!isCheck(move.to))
+      moves.add(move);
+
+    undoApplyToBoard();
   }
 
   private void addIfValid(ChessMove move) {
-    applyToBoard(move);
+    assert board.getPiece(move.from) != KING;
 
-    int kingCell = findKing();
+    if (check || move.to == enPassant) {
+      applyToBoard(move);
+      if (!isCheck(kingCell))
+        moves.add(move);
+      undoApplyToBoard();
+      return;
+    }
+
     int kingCol = i2col(kingCell);
     int kingRow = i2row(kingCell);
     int fromCol = i2col(move.from);
     int fromRow = i2row(move.from);
     boolean valid = true;
 
-    if (check || move.to == kingCell || move.to == enPassant) {
-      valid = !isCheck();
-    } else if (kingRow == fromRow && kingRow != i2row(move.to)) {
+    if (kingRow == fromRow && kingRow != i2row(move.to)) {
       if (fromCol > kingCol) {
-        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, 1, 0);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, ROOK, 1, 0);
       } else {
-        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, -1, 0);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, ROOK, -1, 0);
       }
     } else if (kingCol == fromCol && kingCol != i2col(move.to)) {
       if (fromRow > kingRow) {
-        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, 0, 1);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, ROOK, 0, 1);
       } else {
-        valid = !checkByLinearPiece(kingCol, kingRow, ROOK, 0, -1);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, ROOK, 0, -1);
       }
     } else if (fromCol - kingCol == fromRow - kingRow) {
       if (fromCol > kingCol) {
-        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, 1, 1);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, BISHOP, 1, 1);
       } else {
-        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, -1, -1);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, BISHOP, -1, -1);
       }
     } else if (fromCol - kingCol == kingRow - fromRow) {
       if (fromCol > kingCol) {
-        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, 1, -1);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, BISHOP, 1, -1);
       } else {
-        valid = !checkByLinearPiece(kingCol, kingRow, BISHOP, -1, 1);
+        valid = !checkByLinearPiece(move, kingCol, kingRow, BISHOP, -1, 1);
       }
     }
 
     if (valid)
       moves.add(move);
-
-    undoApplyToBoard();
   }
 
   private boolean checkByLinearPiece(
-      int col, int row, byte attackingPiece, int cd, int rd) {
+      ChessMove move, int col, int row, byte attackingPiece, int cd, int rd) {
+    applyToBoard(move);
+
     attackingPiece = Pieces.withColor(attackingPiece, !player);
     byte queen = Pieces.withColor(QUEEN, !player);
     while (true) {
       col += cd;
       row += rd;
       if (col > 8 || col < 1 || row > 8 || row < 1)
-        return false;
+        break;
 
       byte piece = board.get(col, row);
 
-      if (piece == attackingPiece || piece == queen)
+      if (piece == attackingPiece || piece == queen) {
+        undoApplyToBoard();
         return true;
+      }
 
       if (piece != EMPTY)
-        return false;
+        break;
     }
+
+    undoApplyToBoard();
+    return false;
   }
 
   // true if check to (not by) player
   private boolean isCheck() {
-    int cell = findKing();
+    return isCheck(kingCell);
+  }
+
+  private boolean isCheck(int cell) {
     int col = i2col(cell);
     int row = i2row(cell);
 
