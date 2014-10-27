@@ -117,7 +117,7 @@ public class TestGomokuState {
     state = state.play(GomokuMove.create('X', 1, 1));
   }
 
-  @Test(expected = GameException.class, timeout=10)
+  @Test(expected = GameException.class, timeout=50)
   public void playTwoMovesBySamePlayer() {
     GomokuState state = new GomokuState();
     state = state.play(GomokuMove.create('X', 2, 3));
@@ -155,7 +155,7 @@ public class TestGomokuState {
     assertEquals(GameStatus.DRAW, state.status());
   }
 
-  @Test(timeout=50)
+  @Test(timeout=100)
   public void playRandomMoves() {
     GomokuState state = new GomokuState();
     Random random = new Random(1234567890L);
