@@ -72,12 +72,12 @@ class App {
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
     MonteCarloUct<G> player1 = new MonteCarloUct<>();
-    player1.setTimeout(10000L);
+    player1.setTimeout(300000L);
     player1.setExecutor(executor, cores);
     player1.setSamplesBatch(1);
     player1.setChildrenThreshold(2);
     MonteCarloUct<G> player2 = new MonteCarloUct<>();
-    player2.setTimeout(10000L);
+    player2.setTimeout(300000L);
     player2.setExecutor(executor, cores);
     player2.setSamplesBatch(4);
     Match<G> match = new Match<>(game, player1, player2);
@@ -89,6 +89,6 @@ class App {
   }
 
   public static void main(String[] args) throws Exception {
-    runGame(gomoku);
+    runGame(chess);
   }
 }
