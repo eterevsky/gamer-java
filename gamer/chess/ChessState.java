@@ -107,7 +107,7 @@ public final class ChessState implements GameState<Chess>, State {
       throw new GameException("Illegal move");
     }
 
-    StateBuilder builder = new StateBuilder(this);
+    StateBuilder builder = this.toBuilder();
     builder.applyMove(move);
     return new ChessState(builder);
   }
@@ -136,6 +136,10 @@ public final class ChessState implements GameState<Chess>, State {
   }
 
   // GameState implementation ends here.
+
+  StateBuilder toBuilder() {
+    return new StateBuilder(this);
+  }
 
   String moveToStringWithNumber(ChessMove move) {
     StringBuilder builder = new StringBuilder();
