@@ -141,6 +141,10 @@ public final class ChessState implements GameState<Chess>, State {
     return new StateBuilder(this);
   }
 
+  boolean isCapture(ChessMove move) {
+    return boardBytes[move.to] != Pieces.EMPTY;
+  }
+
   String moveToStringWithNumber(ChessMove move) {
     StringBuilder builder = new StringBuilder();
     int moves = movesCount / 2 + 1;

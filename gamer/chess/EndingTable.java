@@ -12,7 +12,7 @@ class EndingTable {
   private EndingTable previous;
   private byte[] table;
 
-  private enum EndingStatus {
+  enum EndingStatus {
     UNKNOWN,
     WIN,
     LOSS,
@@ -35,10 +35,12 @@ class EndingTable {
         case DRAW:
           return other == LOSS;
       }
+
+      throw new RuntimeException("Can't happen");
     }
   }
 
-  private static class EndingValue {
+  static class EndingValue {
     final EndingStatus status;
     final int moves;
     final byte byteValue;
@@ -113,6 +115,8 @@ class EndingTable {
         case ILLEGAL:
           return -1;
       }
+
+      throw new RuntimeException("Can't happen");
     }
 
     static {
@@ -138,6 +142,14 @@ class EndingTable {
     this.previous = previous;
   }
 
+  private EndingValue get(int idx) {
+    return EndingValue.fromByte(table[idx]);
+  }
+
+  EndingValue get(ChessState state) {
+    return get(encode(state));
+  }
+
   long length() {
     long t = 1;
     for (int i = 64; i > 64 - n; i--) {
@@ -155,10 +167,6 @@ class EndingTable {
     }
 
     return t;
-  }
-
-  ChessState decode(long idx) {
-    return new ChessState();
   }
 
   void generate() {
@@ -248,5 +256,24 @@ class EndingTable {
     }
 
     System.out.format("Draws from unknown: %d\n", draw);
+  }
+
+  static private ThreadLocal<List<Integer>> pieceCount = null;
+
+  private int encode(ChessState state) {
+    List<Integer> pieceCount = this.pieceCount.get();
+    if (pieceCount == null) {
+      piececCount = new ArrayList<>();
+      for (int i = 0; i < 16; i++)
+        pieceCount.add(0);
+      this.pieceCount.set(pieceCount);
+    }
+
+    for (int i = 0; i < 16; i++)
+      pieceCount.set(i, 0);
+
+  }
+
+  private ChessState decode(int idx) {
   }
 }
