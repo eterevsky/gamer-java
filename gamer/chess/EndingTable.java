@@ -258,20 +258,19 @@ class EndingTable {
     System.out.format("Draws from unknown: %d\n", draw);
   }
 
-  static private ThreadLocal<List<Integer>> pieceCount = null;
+  private List<PieceSquare> getPieces(ChessState state) {
+    List<PieceSquare> pieces = new ArrayList<>(n);
+    for (int i = 0; i < 64; i++) {
+      byte piece = state.get(i);
+      if (piece == EMPTY)
+        continue;
+      pieces.add(PieceSquare.of(piece, i));
+    }
+    return pieces;
+  }
 
   private int encode(ChessState state) {
-    List<Integer> pieceCount = this.pieceCount.get();
-    if (pieceCount == null) {
-      piececCount = new ArrayList<>();
-      for (int i = 0; i < 16; i++)
-        pieceCount.add(0);
-      this.pieceCount.set(pieceCount);
-    }
-
-    for (int i = 0; i < 16; i++)
-      pieceCount.set(i, 0);
-
+    List<PieceSquare> pieces = getPieces(state);
   }
 
   private ChessState decode(int idx) {
