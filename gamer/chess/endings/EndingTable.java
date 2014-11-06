@@ -1,5 +1,8 @@
-package gamer.chess;
+package gamer.chess.endings;
 
+import gamer.chess.ChessMove;
+import gamer.chess.ChessState;
+import gamer.chess.StateBuilder;
 import gamer.def.GameStatus;
 
 import java.util.ArrayList;
@@ -10,6 +13,7 @@ import java.util.Map;
 class EndingTable {
   private int n;
   private EndingTable previous;
+  private EndingTable dual;
   private byte[] table;
 
   enum EndingStatus {
@@ -142,6 +146,10 @@ class EndingTable {
     this.previous = previous;
   }
 
+  void setDual(EndingTable dualTable) {
+    dual = dualTable;
+  }
+
   private EndingValue get(int idx) {
     return EndingValue.fromByte(table[idx]);
   }
@@ -213,9 +221,7 @@ class EndingTable {
               status = this.previous.get(next).status;
             }
           } else {
-            int inext = encode(next);
-            EndingValue nextValue = EndingValue.fromByte(table[inext]);
-            status = nextValue.status;
+            status = dual.get(next).status;
           }
           assert status != EndingStatus.ILLEGAL;
 
@@ -258,21 +264,11 @@ class EndingTable {
     System.out.format("Draws from unknown: %d\n", draw);
   }
 
-  private List<PieceSquare> getPieces(ChessState state) {
-    List<PieceSquare> pieces = new ArrayList<>(n);
-    for (int i = 0; i < 64; i++) {
-      byte piece = state.get(i);
-      if (piece == EMPTY)
-        continue;
-      pieces.add(PieceSquare.of(piece, i));
-    }
-    return pieces;
-  }
-
   private int encode(ChessState state) {
-    List<PieceSquare> pieces = getPieces(state);
+    return 0;
   }
 
   private ChessState decode(int idx) {
+    return new ChessState(new StateBuilder());
   }
 }

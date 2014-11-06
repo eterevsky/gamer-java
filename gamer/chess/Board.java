@@ -26,23 +26,9 @@ final class Board {
     return String.format("%c", 'a' + idx / 8);
   }
 
+  private byte[] board = new byte[64];
 
-  private byte[] board;
-
-
-  private static final byte[] INITIAL_BOARD = Util.hexStringToByteArray(
-      "020100000000090a" +
-      "030100000000090b" +
-      "040100000000090c" +
-      "050100000000090d" +
-      "060100000000090e" +
-      "040100000000090c" +
-      "030100000000090b" +
-      "020100000000090a");
-
-  Board() {
-    this.board = INITIAL_BOARD.clone();
-  }
+  Board() {}
 
   Board(byte[] board) {
     this.board = board;

@@ -12,7 +12,7 @@ final class PieceSquare implements Comparable<PieceSquare> {
   static {
     for (byte p = 0; p <= Pieces.MAX; p++) {
       for (int c = 0; c < 64; c++) {
-        instances.add(new PieceSquare(p, s));
+        instances.add(new PieceSquare(p, c));
       }
     }
   }

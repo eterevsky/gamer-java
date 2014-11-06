@@ -1,4 +1,4 @@
-package gamer.chess;
+package gamer.chess.endings;
 
 class GenerateEndingTables {
   public static void main(String[] args) {

@@ -1,7 +1,7 @@
 package gamer;
 
 import gamer.chess.Chess;
-import gamer.chess.ChessEndingHelper;
+import gamer.chess.endings.ChessEndingHelper;
 import gamer.def.Game;
 import gamer.def.Match;
 import gamer.gomoku.Gomoku;

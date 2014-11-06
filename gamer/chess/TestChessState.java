@@ -22,7 +22,7 @@ public class TestChessState {
 
   @Test
   public void foolsMate() {
-    ChessState state0 = new ChessState();
+    ChessState state0 = Chess.getInstance().newGame();
     ChessState state1 = state0.play(ChessMove.of("f2", "f3"));
     ChessState state2 = state1.play(ChessMove.of("e7", "e5"));
     ChessState state3 = state2.play(ChessMove.of("g2", "g4"));
@@ -36,7 +36,7 @@ public class TestChessState {
     List<String> moves = Arrays.asList(
         "e4", "e5", "Qh5", "Nc6", "Bc4", "Nf6", "Qxf7");
 
-    ChessState state = new ChessState();
+    ChessState state = Chess.getInstance().newGame();
 
     for (String move : moves) {
       state = state.play(move);

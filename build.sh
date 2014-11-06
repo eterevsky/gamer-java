@@ -5,6 +5,7 @@ rm -f *.jar `find gamer -name \*.class`
 
 CLASSPATH=.:./lib/junit-4.11.jar:./lib/hamcrest-core-1.3.jar
 
-javac -cp $CLASSPATH -Xlint:unchecked gamer/*.java gamer/*/*.java
+javac -cp $CLASSPATH -Xlint:unchecked gamer/*.java gamer/*/*.java \
+    gamer/*/*/*.java
 java -ea -esa -cp $CLASSPATH org.junit.runner.JUnitCore gamer.TestMain
 jar cfe gamer.jar gamer.App `find gamer -name \*.class | grep -v /Test`

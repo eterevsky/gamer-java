@@ -4,6 +4,8 @@ import gamer.def.Game;
 
 public final class Chess implements Game<Chess> {
   private static final Chess INSTANCE = new Chess();
+  private static final ChessState INITIAL = ChessState.fromFen(
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
   private Chess() {}
 
@@ -12,6 +14,6 @@ public final class Chess implements Game<Chess> {
   }
 
   public ChessState newGame() {
-    return new ChessState();
+    return INITIAL;
   }
 }

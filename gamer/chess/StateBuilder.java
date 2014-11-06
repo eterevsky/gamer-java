@@ -17,7 +17,7 @@ import gamer.def.GameStatus;
 import java.util.ArrayList;
 import java.util.List;
 
-class StateBuilder implements State {
+public class StateBuilder implements State {
   private Board board;
   private boolean player = true;
   private byte castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
@@ -35,7 +35,7 @@ class StateBuilder implements State {
   private boolean check = false;
   private int kingCell = -1;
 
-  StateBuilder() {
+  public StateBuilder() {
     this.board = new Board();
   }
 

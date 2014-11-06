@@ -22,7 +22,7 @@ public final class ChessState implements GameState<Chess>, State {
 
   private final List<ChessMove> moves;
 
-  ChessState(StateBuilder builder) {
+  public ChessState(StateBuilder builder) {
     status = builder.status();
     boardBytes = builder.getBoard().toBytes().clone();
     castlings = builder.getCastlings();
@@ -31,10 +31,6 @@ public final class ChessState implements GameState<Chess>, State {
     movesCount = builder.getMovesCount();
     moves = builder.disownMoves();
     player = builder.getPlayer();
-  }
-
-  ChessState() {
-    this(new StateBuilder());
   }
 
   public static ChessState fromFen(String fen) {
@@ -141,7 +137,7 @@ public final class ChessState implements GameState<Chess>, State {
     return new StateBuilder(this);
   }
 
-  boolean isCapture(ChessMove move) {
+  public boolean isCapture(ChessMove move) {
     return boardBytes[move.to] != Pieces.EMPTY;
   }
 

@@ -5,7 +5,7 @@ import gamer.def.Move;
 import gamer.def.Player;
 import gamer.chess.Chess;
 import gamer.chess.ChessState;
-import gamer.chess.ChessEndingHelper;
+import gamer.chess.endings.ChessEndingHelper;
 import gamer.gomoku.Gomoku;
 import gamer.gomoku.GomokuMove;
 import gamer.gomoku.GomokuState;
