@@ -1,9 +1,0 @@
-200000 samples Chess (AMD x6)
-
-2bcef2  52154
-ff3347  50591
-
-
-Chess Perft (AMD x6)
-
-ff3347  24.993
