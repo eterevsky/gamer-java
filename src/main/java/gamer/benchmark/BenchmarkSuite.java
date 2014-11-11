@@ -28,6 +28,9 @@ public final class BenchmarkSuite {
     double interval;
   }
 
+  static final double STUDENT_95 = 12.71;
+  static final double STUDENT_99 = 63.66;
+
   private static Stats genStats(List<Double> samples) {
     Stats stats = new Stats();
     stats.mean = 0;
@@ -49,7 +52,7 @@ public final class BenchmarkSuite {
     }
     stats.variance = Math.sqrt(stats.variance / (samples.size() - 1));
 
-    stats.interval = 12.71 * stats.variance / Math.sqrt(samples.size());
+    stats.interval = STUDENT_95 * stats.variance / Math.sqrt(samples.size());
     return stats;
   }
 
@@ -57,16 +60,16 @@ public final class BenchmarkSuite {
     try {
       int reps = 1;
 
-      while (reps < 1000000000 && singleRun(benchmark, reps) < 0.2) {
+      while (reps < 1000000000 && singleRun(benchmark, reps) < 0.3) {
         reps *= 2;
       }
 
       singleRun(benchmark, reps);  // warmup
       List<Double> times = new ArrayList<>();
-      long startTime = System.currentTimeMillis();
+      long startTime = System.nanoTime();
 
       while (times.size() < 4 ||
-             (System.currentTimeMillis() - startTime < 30000 &&
+             (System.nanoTime() - startTime < 6E10 &&
               genStats(times).interval / genStats(times).mean > 0.05)) {
         double t = singleRun(benchmark, reps);
         times.add(t / reps);
@@ -80,9 +83,9 @@ public final class BenchmarkSuite {
 
   private static double singleRun(Method benchmark, int reps)
       throws IllegalAccessException, InvocationTargetException {
-    long startTime = System.currentTimeMillis();
+    long startTime = System.nanoTime();
     benchmark.invoke(null, reps);
-    return (System.currentTimeMillis() - startTime) / 1000.0;
+    return (System.nanoTime() - startTime) / 1E9;
   }
 
   private static void printResults(Method benchmark, List<Double> samples) {
@@ -108,10 +111,11 @@ public final class BenchmarkSuite {
                       benchmark.getName();
 
     System.out.format(
-        "%-50s %.1f±%.1f %s\n",
+        "%-50s %.1f±%.1f %s (%.1f%%)\n",
         fullName,
         stats.mean * scale,
         stats.interval * scale,
-        unit);
+        unit,
+        stats.interval / stats.mean * 100);
   }
 }
