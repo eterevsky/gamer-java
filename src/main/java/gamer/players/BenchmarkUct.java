@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 
 public class BenchmarkUct {
   @Benchmark
-  public static Move<Chess> uctChess20kSamples(int reps) {
+  public static Move<Chess> uctChess20kSamplesMuti(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
@@ -34,7 +34,24 @@ public class BenchmarkUct {
   }
 
   @Benchmark
-  public static Move<Gomoku> uctGomoku20kSamples(int reps) {
+  public static Move<Chess> uctChess20kSamplesSingle(int reps) {
+    Player<Chess> player = new MonteCarloUct<Chess>()
+        .setSamplesLimit(20000)
+        .setTimeout(-1)
+        .setSamplesBatch(1)
+        .setFindExact(true);
+
+    Move<Chess> move = null;
+    for (int i = 0; i < reps; i++) {
+      GameState<Chess> s = Chess.getInstance().newGame();
+      move = player.selectMove(s);
+    }
+
+    return move;
+  }
+
+  @Benchmark
+  public static Move<Gomoku> uctGomoku20kSamplesMulti(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
@@ -52,6 +69,23 @@ public class BenchmarkUct {
     }
 
     executor.shutdownNow();
+    return move;
+  }
+
+  @Benchmark
+  public static Move<Gomoku> uctGomoku20kSamplesSingle(int reps) {
+    Player<Gomoku> player = new MonteCarloUct<Gomoku>()
+        .setSamplesLimit(20000)
+        .setTimeout(-1)
+        .setSamplesBatch(1)
+        .setFindExact(true);
+
+    Move<Gomoku> move = null;
+    for (int i = 0; i < reps; i++) {
+      GameState<Gomoku> s = Gomoku.getInstance().newGame();
+      move = player.selectMove(s);
+    }
+
     return move;
   }
 }
