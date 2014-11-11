@@ -1,11 +1,15 @@
 package gamer;
 
+import gamer.benchmark.Benchmark;
+import gamer.benchmark.BenchmarkSuite;
 import gamer.def.GameState;
 import gamer.def.Move;
 import gamer.def.Player;
+import gamer.chess.BenchmarkPerft;
 import gamer.chess.Chess;
 import gamer.chess.ChessState;
 import gamer.chess.endings.ChessEndingHelper;
+import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
 import gamer.gomoku.GomokuMove;
 import gamer.gomoku.GomokuState;
@@ -21,7 +25,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-class Benchmark {
+public final class Benchmarks {
   static final List<GomokuState> testStates;
 
   static {
@@ -139,7 +143,27 @@ class Benchmark {
     System.out.format("Median/mean: %d / %d\n", median(moveTime), mean(moveTime));
   }
 
-  public static void main(String[] args) throws Exception {
-    gomokuBenchmark();
+  @Benchmark
+  public static long testBenchmark(int reps) {
+    long total = 0;
+
+    for (int irep = 0; irep < reps; irep++) {
+      long s = 0;
+      for (int i = 0; i < 10000; i++) {
+        s += i;
+      }
+      total += s;
+    }
+
+    return total;
+  }
+
+  public static void main(String[] args) {
+    BenchmarkSuite suite = new BenchmarkSuite();
+    suite.add(Benchmarks.class);
+    suite.add(BenchmarkGomoku.class);
+    suite.add(BenchmarkPerft.class);
+
+    suite.run();
   }
 }

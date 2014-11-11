@@ -1,12 +1,13 @@
 package gamer.chess;
 
+import gamer.benchmark.Benchmark;
 import gamer.chess.ChessMove;
 import gamer.chess.ChessState;
 
 import java.util.Arrays;
 import java.util.List;
 
-class BenchmarkPerft {
+public class BenchmarkPerft {
   private static List<String> STATES = Arrays.asList(
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
       "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
@@ -29,17 +30,13 @@ class BenchmarkPerft {
     return total;
   }
 
-  public static void main(String[] args) throws Exception {
-    for (String stateFen : STATES) {
-      ChessState state = ChessState.fromFen(stateFen);
-      System.out.println(state);
-      for (int i = 1; i < 5; i++) {
-        long startTime = System.currentTimeMillis();
-        long p = perft(state, i);
-        long t = System.currentTimeMillis() - startTime;
-        System.out.format("%d %9d %8.3f\n", i, p, t / 1000.0);
-      }
-      System.out.println();
+  @Benchmark
+  public static long timePerftInitial2(int reps) {
+    ChessState state = ChessState.fromFen(STATES.get(0));
+    long l = 0;
+    for (int i = 0; i < reps; i++) {
+      l += perft(state, 2);
     }
+    return l;
   }
 }
