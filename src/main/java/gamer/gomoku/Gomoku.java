@@ -4,7 +4,7 @@ import gamer.def.Game;
 
 public final class Gomoku implements Game<Gomoku> {
   static final int SIZE = 19;
-  static final int CELLS = SIZE * SIZE;
+  static final int POINTS = SIZE * SIZE;
   private static final Gomoku INSTANCE = new Gomoku();
 
   private Gomoku() {}

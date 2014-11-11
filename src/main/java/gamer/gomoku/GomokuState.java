@@ -1,6 +1,6 @@
 package gamer.gomoku;
 
-import static gamer.gomoku.Gomoku.CELLS;
+import static gamer.gomoku.Gomoku.POINTS;
 import static gamer.gomoku.Gomoku.SIZE;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -33,12 +33,8 @@ public final class GomokuState implements GameState<Gomoku> {
       throw new IllegalMoveException(this, move, "state is terminal");
     }
 
-    if (marked.get(move.cell)) {
+    if (marked.get(move.point)) {
       throw new IllegalMoveException(this, move, "cell is not empty");
-    }
-
-    if (move.player != status.getPlayer()) {
-      throw new IllegalMoveException(this, move, "wrong player");
     }
 
     return new GomokuState(this, move);
@@ -50,9 +46,9 @@ public final class GomokuState implements GameState<Gomoku> {
 
   public List<Move<Gomoku>> getMoves() {
     List<Move<Gomoku>> moves = new ArrayList<>();
-    for (int i = 0; i < CELLS; i++) {
+    for (int i = 0; i < POINTS; i++) {
       if (!marked.get(i)) {
-        moves.add(GomokuMove.of(i, status.getPlayer()));
+        moves.add(GomokuMove.of(i));
       }
     }
 
@@ -65,33 +61,33 @@ public final class GomokuState implements GameState<Gomoku> {
 
     int i;
     do {
-      i = random.nextInt(CELLS);
+      i = random.nextInt(POINTS);
     } while (marked.get(i));
 
-    return GomokuMove.of(i, status.getPlayer());
+    return GomokuMove.of(i);
   }
 
   GomokuState() {
-    marked = new BitSet(CELLS);
-    markedx = new BitSet(CELLS);
+    marked = new BitSet(POINTS);
+    markedx = new BitSet(POINTS);
     status = GameStatus.FIRST_PLAYER;
   }
 
   private GomokuState(GomokuState other, GomokuMove move) {
     marked = (BitSet) other.marked.clone();
-    marked.set(move.cell);
-    if (move.player) {
+    marked.set(move.point);
+    if (other.status().getPlayer()) {
       markedx = (BitSet) other.markedx.clone();
-      markedx.set(move.cell);
+      markedx.set(move.point);
     } else {
       markedx = other.markedx;
     }
-    status = updateStatus(move);
+    status = updateStatus(other.status().getPlayer(), move);
   }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < CELLS; i++) {
+    for (int i = 0; i < POINTS; i++) {
       if (marked.get(i)) {
         if (markedx.get(i)) {
           builder.append('X');
@@ -130,13 +126,13 @@ public final class GomokuState implements GameState<Gomoku> {
     return l >= 5;
   }
 
-  static int[] limLeft = new int[CELLS], limRight = new int[CELLS];
-  static int[] limTop = new int[CELLS], limBottom = new int[CELLS];
-  static int[] limLT = new int[CELLS], limRB = new int[CELLS];
-  static int[] limRT = new int[CELLS], limLB = new int[CELLS];
+  static int[] limLeft = new int[POINTS], limRight = new int[POINTS];
+  static int[] limTop = new int[POINTS], limBottom = new int[POINTS];
+  static int[] limLT = new int[POINTS], limRB = new int[POINTS];
+  static int[] limRT = new int[POINTS], limLB = new int[POINTS];
 
   static {
-    for (int cell = 0; cell < CELLS; cell++) {
+    for (int cell = 0; cell < POINTS; cell++) {
       int x = cell % SIZE;
       int y = cell / SIZE;
 
@@ -156,8 +152,8 @@ public final class GomokuState implements GameState<Gomoku> {
     }
   }
 
-  private GameStatus updateStatus(GomokuMove move) {
-    int cell = move.cell;
+  private GameStatus updateStatus(boolean player, GomokuMove move) {
+    int cell = move.point;
     boolean won =
         checkLine(cell, limLeft[cell], limRight[cell], 1) ||
         checkLine(cell, limTop[cell], limBottom[cell], SIZE) ||
@@ -165,11 +161,11 @@ public final class GomokuState implements GameState<Gomoku> {
         checkLine(cell, limRT[cell], limLB[cell], SIZE - 1);
 
     if (won) {
-      return move.player ? GameStatus.WIN : GameStatus.LOSS;
-    } else if (marked.nextClearBit(0) == CELLS) {
+      return player ? GameStatus.WIN : GameStatus.LOSS;
+    } else if (marked.nextClearBit(0) == POINTS) {
       return GameStatus.DRAW;
     } else {
-      return move.player ? GameStatus.SECOND_PLAYER : GameStatus.FIRST_PLAYER;
+      return player ? GameStatus.SECOND_PLAYER : GameStatus.FIRST_PLAYER;
     }
   }
 
