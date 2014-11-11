@@ -68,7 +68,7 @@ public final class BenchmarkSuite {
       List<Double> times = new ArrayList<>();
       long startTime = System.nanoTime();
 
-      while (times.size() < 4 ||
+      while (times.size() < 6 ||
              (System.nanoTime() - startTime < 3E10 &&
               genStats(times).interval / genStats(times).mean > 0.05)) {
         double t = singleRun(benchmark, reps);
