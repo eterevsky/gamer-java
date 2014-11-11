@@ -1,8 +1,10 @@
 package gamer.players;
 
+import gamer.chess.Chess;
 import gamer.def.Game;
 import gamer.def.GameState;
 import gamer.def.Move;
+import gamer.gomoku.Gomoku;
 
 public class MonteCarloUct<G extends Game> extends GenericPlayer<G> {
   private int childrenThreshold = -1;
