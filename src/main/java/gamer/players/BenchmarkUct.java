@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class BenchmarkUct {
-  @Benchmark
-  public static Move<Chess> uctChess20kSamplesMuti(int reps) {
+  // @Benchmark
+  public static Move<Chess> uctChess20kSamplesMulti(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
@@ -33,7 +33,7 @@ public class BenchmarkUct {
     return move;
   }
 
-  @Benchmark
+  // @Benchmark
   public static Move<Chess> uctChess20kSamplesSingle(int reps) {
     Player<Chess> player = new MonteCarloUct<Chess>()
         .setSamplesLimit(20000)
@@ -51,12 +51,12 @@ public class BenchmarkUct {
   }
 
   @Benchmark
-  public static Move<Gomoku> uctGomoku20kSamplesMulti(int reps) {
+  public static Move<Gomoku> uctGomoku200kSamplesMulti(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
     Player<Gomoku> player = new MonteCarloUct<Gomoku>()
-        .setSamplesLimit(20000)
+        .setSamplesLimit(200000)
         .setTimeout(-1)
         .setSamplesBatch(1)
         .setFindExact(true)
@@ -73,9 +73,9 @@ public class BenchmarkUct {
   }
 
   @Benchmark
-  public static Move<Gomoku> uctGomoku20kSamplesSingle(int reps) {
+  public static Move<Gomoku> uctGomoku200kSamplesSingle(int reps) {
     Player<Gomoku> player = new MonteCarloUct<Gomoku>()
-        .setSamplesLimit(20000)
+        .setSamplesLimit(200000)
         .setTimeout(-1)
         .setSamplesBatch(1)
         .setFindExact(true);

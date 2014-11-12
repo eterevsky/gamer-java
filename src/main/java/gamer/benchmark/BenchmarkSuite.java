@@ -69,7 +69,7 @@ public final class BenchmarkSuite {
       long startTime = System.nanoTime();
 
       while (times.size() < 6 ||
-             (System.nanoTime() - startTime < 3E10 &&
+             (System.nanoTime() - startTime < 3E11 &&
               genStats(times).interval / genStats(times).mean > 0.05)) {
         double t = singleRun(benchmark, reps);
         times.add(t / reps);
