@@ -6,6 +6,7 @@ public final class Gomoku implements Game<Gomoku> {
   static final int SIZE = 19;
   static final int POINTS = SIZE * SIZE;
   private static final Gomoku INSTANCE = new Gomoku();
+  private static final GomokuState INITIAL_STATE = new GomokuState();
 
   private Gomoku() {}
 
@@ -14,6 +15,6 @@ public final class Gomoku implements Game<Gomoku> {
   }
 
   public GomokuState newGame() {
-    return new GomokuState();
+    return INITIAL_STATE;
   }
 }
