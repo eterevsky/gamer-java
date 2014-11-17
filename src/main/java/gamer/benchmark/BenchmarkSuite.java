@@ -93,13 +93,13 @@ public final class BenchmarkSuite {
     double scale = 1.0;
     String unit = "s";
 
-    if (stats.mean >= 1.0) {
+    if (stats.mean >= 2.0) {
       scale = 1.0;
       unit = "s";
-    } else if (stats.mean >= 0.001) {
+    } else if (stats.mean >= 0.002) {
       scale = 1000.0;
       unit = "ms";
-    } else if (stats.mean >= 1E-6) {
+    } else if (stats.mean >= 2E-6) {
       scale = 1E6;
       unit = "µs";
     } else {

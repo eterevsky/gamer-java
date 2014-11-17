@@ -13,7 +13,39 @@ public final class GomokuMove implements Move<Gomoku> {
   }
 
   public static GomokuMove of(int col, int row) {
+    if (col < 0 || col >= Gomoku.SIZE || row < 0 || row > Gomoku.SIZE) {
+      throw new RuntimeException(
+          String.format("Wrong coodinates: %d %d", col, row));
+    }
     return GomokuMove.of(col * Gomoku.SIZE + row);
+  }
+
+  public static GomokuMove of(String moveStr) {
+    char colChar = moveStr.charAt(0);
+    int col;
+    if ('a' <= colChar && colChar <= 'h') {
+      col = colChar - 'a';
+    } else if ('j' <= colChar && colChar <= 'z') {
+      col = colChar - 'a' - 1;
+    } else if ('A' <= colChar && colChar <= 'H') {
+      col = colChar - 'A';
+    } else if ('J' <= colChar && colChar <= 'Z') {
+      col = colChar - 'A' - 1;
+    } else {
+      throw new RuntimeException("Can't parse: " + moveStr);
+    }
+
+    int row = 0;
+    for (int i = 1; i < moveStr.length(); i++) {
+      char c = moveStr.charAt(i);
+      if (c < '0' || c > '9') {
+        throw new RuntimeException("Can't parse: " + moveStr);
+      }
+
+      row = 10 * row + (c - '0');
+    }
+
+    return of(col, row - 1);
   }
 
   @Override
@@ -23,14 +55,6 @@ public final class GomokuMove implements Move<Gomoku> {
     return String.format("%c%d", COL_LETTER.charAt(col), row);
   }
 
-  // @Override
-  // public boolean equals(Object o) {
-  //   if (!(o instanceof GomokuMove))
-  //     return false;
-  //   GomokuMove oMove = (GomokuMove) o;
-  //   return point == oMove.point;
-  // }
-  //
   @Override
   public int hashCode() {
     return point;
