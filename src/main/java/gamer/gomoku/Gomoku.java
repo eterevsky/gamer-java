@@ -17,4 +17,8 @@ public final class Gomoku implements Game<Gomoku> {
   public GomokuState newGame() {
     return INITIAL_STATE;
   }
+
+  public GomokuStateMut newGameMut() {
+    return new GomokuStateMut();
+  }
 }

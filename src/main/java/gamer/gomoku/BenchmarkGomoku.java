@@ -30,6 +30,22 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
+  public static GameStatus timeRandomGameMut(int reps) {
+    GameStatus status = null;
+
+    for (int i = 0; i < reps; i++) {
+      Random random = new Random();
+      GomokuStateMut state = Gomoku.getInstance().newGameMut();
+      while (!state.isTerminal()) {
+        state.playInPlace(state.getRandomMove(random));
+      }
+      status = state.status();
+    }
+
+    return status;
+  }
+
+  @Benchmark
   public static double averageOver200k(int reps) {
     double sum = 0;
     Random random = new Random();
@@ -39,6 +55,25 @@ public class BenchmarkGomoku {
         GomokuState state = Gomoku.getInstance().newGame();
         while (!state.isTerminal()) {
           state = state.play(state.getRandomMove(random));
+        }
+        sum += state.status().value();
+      }
+    }
+
+    return sum;
+  }
+
+  @Benchmark
+  public static double averageOver200kMut(int reps) {
+    double sum = 0;
+    Random random = new Random();
+
+    for (int i = 0; i < reps; i++) {
+      GomokuStateMut state = Gomoku.getInstance().newGameMut();
+      for (int isamples = 0; isamples < 200000; isamples++) {
+        state.reset();
+        while (!state.isTerminal()) {
+          state.playInPlace(state.getRandomMove(random));
         }
         sum += state.status().value();
       }

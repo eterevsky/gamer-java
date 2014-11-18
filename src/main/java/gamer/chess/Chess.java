@@ -1,6 +1,7 @@
 package gamer.chess;
 
 import gamer.def.Game;
+import gamer.def.GameStateMut;
 
 public final class Chess implements Game<Chess> {
   private static final Chess INSTANCE = new Chess();
@@ -15,5 +16,9 @@ public final class Chess implements Game<Chess> {
 
   public ChessState newGame() {
     return INITIAL;
+  }
+
+  public GameStateMut<Chess> newGameMut() {
+    throw new RuntimeException("Not implemented.");
   }
 }
