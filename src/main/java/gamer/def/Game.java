@@ -1,6 +1,11 @@
 package gamer.def;
 
-public interface Game<T extends Game<T>> {
-  GameState<T> newGame();
-  GameStateMut<T> newGameMut();
+public interface Game {
+  Position<?, ?> newGame();
+
+  MutablePosition<?, ?> newGameMut();
+
+  int getPlayers();
+
+  boolean hasRandomPlayer();
 }
