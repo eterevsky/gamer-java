@@ -3,7 +3,7 @@ package gamer.def;
 public interface Game {
   Position<?, ?> newGame();
 
-  MutablePosition<?, ?> newGameMut();
+  PositionMut<?, ?> newGameMut();
 
   int getPlayers();
 
