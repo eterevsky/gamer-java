@@ -1,7 +1,6 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.GameState;
+import gamer.def.Position;
 import gamer.def.Move;
 import gamer.def.Player;
 
@@ -9,31 +8,26 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class RandomPlayer<G extends Game> implements Player<G> {
+public final class RandomPlayer implements Player {
   private Random random = null;
 
-  public Move<G> selectMove(GameState<G> state) {
-    return state.getRandomMove(
+  @Override
+  public <M extends Move, P extends Position<P, M>> M selectMove(P position) {
+    return position.getRandomMove(
         random == null ? ThreadLocalRandom.current() : random);
   }
 
-  public RandomPlayer<G> setTimeout(long timeout) {
+  @Override
+  public void setTimeout(long timeout) {
     return this;
   }
 
-  public RandomPlayer<G> setSamplesLimit(long samplesLimit) {
+  @Override
+  public void setSamplesLimit(long samplesLimit) {
     return this;
   }
 
-  public RandomPlayer<G> setSamplesBatch(int samplesBatch) {
-    return this;
-  }
-
-  public RandomPlayer<G> setExecutor(ExecutorService executor, int maxWorkers) {
-    return this;
-  }
-
-  public RandomPlayer<G> setName(String name) {
+  public void setName(String name) {
     return this;
   }
 
@@ -46,9 +40,8 @@ public final class RandomPlayer<G extends Game> implements Player<G> {
     return "";
   }
 
-  public RandomPlayer<G> setRandom(Random random) {
+  public void setRandom(Random random) {
     this.random = random;
     return this;
   }
-
 }

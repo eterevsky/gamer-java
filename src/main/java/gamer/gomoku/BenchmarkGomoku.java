@@ -1,7 +1,6 @@
 package gamer.gomoku;
 
 import gamer.benchmark.Benchmark;
-import gamer.def.GameStatus;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -14,8 +13,8 @@ import java.util.Random;
 
 public class BenchmarkGomoku {
   @Benchmark
-  public static GameStatus timeRandomGame(int reps) {
-    GameStatus status = null;
+  public static int timeRandomGame(int reps) {
+    int payoff;
 
     for (int i = 0; i < reps; i++) {
       Random random = new Random();
@@ -23,15 +22,15 @@ public class BenchmarkGomoku {
       while (!state.isTerminal()) {
         state = state.play(state.getRandomMove(random));
       }
-      status = state.status();
+      payoff = state.getPayoff();
     }
 
     return status;
   }
 
   @Benchmark
-  public static GameStatus timeRandomGameMut(int reps) {
-    GameStatus status = null;
+  public static int timeRandomGameMut(int reps) {
+    int payoff;
 
     for (int i = 0; i < reps; i++) {
       Random random = new Random();
@@ -39,7 +38,7 @@ public class BenchmarkGomoku {
       while (!state.isTerminal()) {
         state.playInPlace(state.getRandomMove(random));
       }
-      status = state.status();
+      payoff = state.getPayoff();
     }
 
     return status;

@@ -1,16 +1,16 @@
 package gamer.chess;
 
 import gamer.def.GameException;
-import gamer.def.GameState;
-import gamer.def.GameStatus;
 import gamer.def.Move;
+import gamer.def.Position;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-public final class ChessState implements GameState<Chess>, State {
+public final class ChessState
+    implements Position<ChessState, ChessMove>, State {
   private final GameStatus status;
   private final byte[] boardBytes;
   private final byte castlings;
@@ -30,7 +30,7 @@ public final class ChessState implements GameState<Chess>, State {
     movesSinceCapture = builder.getMovesSinceCapture();
     movesCount = builder.getMovesCount();
     moves = builder.disownMoves();
-    player = builder.getPlayer();
+    player = builder.getPlayerBool();
   }
 
   public static ChessState fromFen(String fen) {
@@ -68,9 +68,13 @@ public final class ChessState implements GameState<Chess>, State {
     return movesCount;
   }
 
-  // @Override
-  public boolean getPlayer() {
+  public boolean getPlayerBool() {
     return player;
+  }
+
+  @Override
+  public int getPlayer() {
+    return player ? 0 : 1;
   }
 
   // GameState<> implementation
@@ -95,10 +99,8 @@ public final class ChessState implements GameState<Chess>, State {
     return moves.get(random.nextInt(moves.size()));
   }
 
-  // @Override
-  public ChessState play(Move<Chess> moveInt) {
-    ChessMove move = (ChessMove) moveInt;
-
+  @Override
+  public ChessState play(ChessMove move) {
     if (!moves.contains(move)) {
       throw new GameException("Illegal move");
     }
@@ -108,15 +110,18 @@ public final class ChessState implements GameState<Chess>, State {
     return new ChessState(builder);
   }
 
-  // @Override
   public ChessState play(String moveStr) {
-    ChessMove move = AlgebraicNotation.parse(this, moveStr);
-    return play(move);
+    return play(parseMove(moveStr));
+  }
+
+  @Override
+  public ChessMove parseMove(String moveStr) {
+    return AlgebraicNotation.parse(this, moveStr);
   }
 
   // @Override
-  public String moveToString(Move<Chess> move) {
-    return AlgebraicNotation.moveToString(this, (ChessMove) move);
+  public String moveToString(ChessMove move) {
+    return AlgebraicNotation.moveToString(this, move);
   }
 
   // @Override

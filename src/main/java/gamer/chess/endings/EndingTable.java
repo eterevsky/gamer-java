@@ -3,7 +3,6 @@ package gamer.chess.endings;
 import gamer.chess.ChessMove;
 import gamer.chess.ChessState;
 import gamer.chess.StateBuilder;
-import gamer.def.GameStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;

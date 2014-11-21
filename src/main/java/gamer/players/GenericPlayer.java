@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-public abstract class GenericPlayer<G extends Game> implements Player<G> {
+public abstract class GenericPlayer implements Player {
   private long samplesLimit = -1;
   protected int samplesBatch = 1;
   private long timeout = 1000;

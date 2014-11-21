@@ -19,5 +19,5 @@ interface State {
   int getMovesCount();
   GameStatus status();
   List<ChessMove> getMoves();
-  boolean getPlayer();
+  boolean getPlayerBool();
 }

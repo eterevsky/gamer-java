@@ -1,9 +1,9 @@
 package gamer.chess;
 
 import gamer.def.Game;
-import gamer.def.GameStateMut;
+import gamer.def.PositionMut;
 
-public final class Chess implements Game<Chess> {
+public final class Chess implements Game {
   private static final Chess INSTANCE = new Chess();
   private static final ChessState INITIAL = ChessState.fromFen(
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -18,7 +18,15 @@ public final class Chess implements Game<Chess> {
     return INITIAL;
   }
 
-  public GameStateMut<Chess> newGameMut() {
-    throw new RuntimeException("Not implemented.");
+  public PositionMut<?, ?> newGameMut() {
+    throw new UnsupportedOperationException("Not implemented.");
+  }
+
+  public boolean hasRandomPlayer() {
+    return false;
+  }
+
+  public int getPlayers() {
+    return 2;
   }
 }

@@ -12,12 +12,13 @@ import static gamer.chess.Pieces.KING;
 import static gamer.chess.Pieces.WHITE;
 import static gamer.chess.Pieces.BLACK;
 
-import gamer.def.GameStatus;
+import gamer.def.PositionMut;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StateBuilder implements State {
+public class StateBuilder
+    implements PositionMut<StateBuilder, ChessMove>, State {
   private Board board;
   private boolean player = true;
   private byte castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
@@ -74,23 +75,6 @@ public class StateBuilder implements State {
   }
 
   // @Override
-  public GameStatus status() {
-    if (movesSinceCapture > MOVES_WITHOUT_CAPTURE || drawByMaterial())
-      return GameStatus.DRAW;
-
-    if (moves == null)
-      generateMoves();
-
-    if (moves.size() > 0) {
-      return player ? GameStatus.FIRST_PLAYER : GameStatus.SECOND_PLAYER;
-    } else if (isCheck()) {
-      return player ? GameStatus.LOSS : GameStatus.WIN;
-    } else {
-      return GameStatus.DRAW;
-    }
-  }
-
-  // @Override
   public List<ChessMove> getMoves() {
     if (moves == null)
       generateMoves();
@@ -110,8 +94,13 @@ public class StateBuilder implements State {
     this.castlings = castlings;
   }
 
-  public boolean getPlayer() {
+  public boolean getPlayerBool() {
     return player;
+  }
+
+  @Override
+  public int getPlayer() {
+    return player ? 0 : 1;
   }
 
   public void setPlayer(boolean player) {
