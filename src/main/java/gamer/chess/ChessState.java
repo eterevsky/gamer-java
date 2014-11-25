@@ -3,6 +3,7 @@ package gamer.chess;
 import gamer.def.GameException;
 import gamer.def.Move;
 import gamer.def.Position;
+import gamer.util.GameStatusInt;
 
 import java.util.Iterator;
 import java.util.List;
@@ -11,10 +12,9 @@ import java.util.Random;
 
 public final class ChessState
     implements Position<ChessState, ChessMove>, State {
-  private final GameStatus status;
   private final byte[] boardBytes;
   private final byte castlings;
-  private final boolean player;
+  private final int status;
   private final int enPassant;  // -1 if no en passant pawn,
                                 // otherwise the passed empty square
   private final int movesSinceCapture;
@@ -23,14 +23,17 @@ public final class ChessState
   private final List<ChessMove> moves;
 
   public ChessState(StateBuilder builder) {
-    status = builder.status();
+    status = GameStatusInt.init();
+    status = GameStatusInt.setPlayer(status, builder.getPlayer());
+    if (builder.isTerminal()) {
+      status = GameStatusInt.setPayoff(status, builder.getPayoff(0));
+    }
     boardBytes = builder.getBoard().toBytes().clone();
     castlings = builder.getCastlings();
     enPassant = builder.getEnPassant();
     movesSinceCapture = builder.getMovesSinceCapture();
     movesCount = builder.getMovesCount();
     moves = builder.disownMoves();
-    player = builder.getPlayerBool();
   }
 
   public static ChessState fromFen(String fen) {
@@ -43,58 +46,58 @@ public final class ChessState
 
   // State implementation
 
-  // @Override
+  @Override
   public Board getBoard() {
     return new Board(boardBytes.clone());
   }
 
-  // @Override
+  @Override
   public byte getCastlings() {
     return castlings;
   }
 
-  // @Override
+  @Override
   public int getEnPassant() {
     return enPassant;
   }
 
-  // @Override
+  @Override
   public int getMovesSinceCapture() {
     return movesSinceCapture;
   }
 
-  // @Override
+  @Override
   public int getMovesCount() {
     return movesCount;
   }
 
   public boolean getPlayerBool() {
-    return player;
-  }
-
-  @Override
-  public int getPlayer() {
-    return player ? 0 : 1;
+    return GameStatusInt.getPlayer(status);
   }
 
   // GameState<> implementation
 
-  // @Override
+  @Override
+  public int getPlayer() {
+    return getPlayerBool() ? 0 : 1;
+  }
+
+  @Override
   public boolean isTerminal() {
-    return status.isTerminal();
+    return GameStatusInt.isTerminal(status);
   }
 
-  // @Override
-  public GameStatus status() {
-    return status;
+  @Override
+  public int getPayoff(int player) {
+    int payoff = GameStatusInt.getPayoff(status, player == 0);
   }
 
-  // @Override
+  @Override
   public final List<ChessMove> getMoves() {
     return moves;
   }
 
-  // @Override
+  @Override
   public ChessMove getRandomMove(Random random) {
     return moves.get(random.nextInt(moves.size()));
   }
@@ -106,7 +109,7 @@ public final class ChessState
     }
 
     StateBuilder builder = this.toBuilder();
-    builder.applyMove(move);
+    builder.apply(move);
     return new ChessState(builder);
   }
 
@@ -119,12 +122,12 @@ public final class ChessState
     return AlgebraicNotation.parse(this, moveStr);
   }
 
-  // @Override
+  @Override
   public String moveToString(ChessMove move) {
-    return AlgebraicNotation.moveToString(this, move);
+    return moveToStringWithNumber(move);
   }
 
-  // @Override
+  @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (int row = 8; row >= 1; row--) {

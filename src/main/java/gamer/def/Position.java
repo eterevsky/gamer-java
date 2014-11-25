@@ -7,6 +7,9 @@ public interface Position<P extends Position<P, M>, M extends Move> {
   // -1 means random player for games with randomness.
   int getPlayer();
 
+  // TODO: move to a separate interface for two-player games
+  boolean getPlayerBool();
+
   boolean isTerminal();
 
   // Only for terminal state. 0 means draw.

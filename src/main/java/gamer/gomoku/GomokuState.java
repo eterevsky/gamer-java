@@ -5,47 +5,41 @@ import static gamer.gomoku.Gomoku.SIZE;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-import gamer.def.GameException;
-import gamer.def.GameState;
-import gamer.def.GameStatus;
 import gamer.def.IllegalMoveException;
 import gamer.def.Move;
+import gamer.def.Position;
+import gamer.def.TerminalPositionException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
-public final class GomokuState implements GameState<Gomoku> {
+public final class GomokuState implements Position<GomokuState, GomokuMove> {
   private final BitSet marked;
   private final BitSet markedx;
-  private final GameStatus status;
+  private final int status;
 
-  public GameStatus status() {
-    return status;
-  }
-
-  public GomokuState play(Move<Gomoku> moveInt) {
-    GomokuMove move = (GomokuMove) moveInt;
-
-    if (status.isTerminal()) {
-      throw new IllegalMoveException(this, move, "state is terminal");
+  @Override
+  public GomokuState play(GomokuMove move) {
+    if (isTerminal()) {
+      throw new TerminalPositionException();
     }
 
     if (marked.get(move.point)) {
-      throw new IllegalMoveException(this, move, "cell is not empty");
+      throw new IllegalMoveException(this, move, "point is not empty");
     }
 
     return new GomokuState(this, move);
   }
 
+  @Override
   public boolean isTerminal() {
-    return status.isTerminal();
+    return GamerStatusInt.isTerminal(status);
   }
 
-  public List<Move<Gomoku>> getMoves() {
-    List<Move<Gomoku>> moves = new ArrayList<>();
+  public List<GomokuMove> getMoves() {
+    List<GomokuMove> moves = new ArrayList<>();
     for (int i = 0; i < POINTS; i++) {
       if (!marked.get(i)) {
         moves.add(GomokuMove.of(i));
@@ -152,7 +146,7 @@ public final class GomokuState implements GameState<Gomoku> {
     }
   }
 
-  private GameStatus updateStatus(boolean player, GomokuMove move) {
+  private int updateStatus(boolean player, GomokuMove move) {
     int cell = move.point;
     boolean won =
         checkLine(cell, limLeft[cell], limRight[cell], 1) ||
@@ -160,16 +154,19 @@ public final class GomokuState implements GameState<Gomoku> {
         checkLine(cell, limLT[cell], limRB[cell], SIZE + 1) ||
         checkLine(cell, limRT[cell], limLB[cell], SIZE - 1);
 
+    int status = GamerStatusInt.init();
+    if (!player)
+      status = GamerStatusInt.switchPlayer(status);
+
     if (won) {
-      return player ? GameStatus.WIN : GameStatus.LOSS;
+      status = GamerStatusInt.setPayoff(status, player ? 1 : -1);
     } else if (marked.nextClearBit(0) == POINTS) {
-      return GameStatus.DRAW;
-    } else {
-      return player ? GameStatus.SECOND_PLAYER : GameStatus.FIRST_PLAYER;
+      status = GamerStatusInt.setPayoff(status, 0);
     }
+    return status;
   }
 
-  public String moveToString(Move<Gomoku> move) {
+  public String moveToString(GomokuMove move) {
     return move.toString();
   }
 

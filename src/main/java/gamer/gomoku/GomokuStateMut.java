@@ -5,11 +5,11 @@ import static gamer.gomoku.Gomoku.SIZE;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-import gamer.def.GameException;
-import gamer.def.GameStateMut;
-import gamer.def.GameStatus;
 import gamer.def.IllegalMoveException;
 import gamer.def.Move;
+import gamer.def.PositionMut;
+import gamer.def.TerminalPositionException;
+import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,15 +17,16 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
-public final class GomokuStateMut implements GameStateMut<Gomoku> {
+public final class GomokuStateMut
+    implements PositionMut<GomokuStateMut, GomokuMove> {
   private BitSet marked;
   private BitSet markedx;
-  private GameStatus status;
+  private int status;
 
   GomokuStateMut() {
     marked = new BitSet(POINTS);
     markedx = new BitSet(POINTS);
-    status = GameStatus.FIRST_PLAYER;
+    status = GameStatusInt.init();
   }
 
   private GomokuStateMut(GomokuStateMut other) {
@@ -34,20 +35,20 @@ public final class GomokuStateMut implements GameStateMut<Gomoku> {
     status = other.status;
   }
 
-  public GameStatus status() {
-    return status;
+  public boolean isTerminal() {
+    return GameStatusInt.isTerminal(status);
   }
 
-  public GomokuStateMut play(Move<Gomoku> moveInt) {
+  @Override
+  public GomokuStateMut play(GomokuMove move) {
     GomokuStateMut next = new GomokuStateMut(this);
-    next.playInPlace(moveInt);
+    next.apply(move);
     return next;
   }
 
-  public void playInPlace(Move<Gomoku> moveInt) {
-    GomokuMove move = (GomokuMove) moveInt;
-
-    if (status.isTerminal()) {
+  @Override
+  public void apply(GomokuMove move) {
+    if (isTerminal()) {
       throw new IllegalMoveException(this, move, "state is terminal");
     }
 
@@ -69,12 +70,8 @@ public final class GomokuStateMut implements GameStateMut<Gomoku> {
     status = GameStatus.FIRST_PLAYER;
   }
 
-  public boolean isTerminal() {
-    return status.isTerminal();
-  }
-
-  public List<Move<Gomoku>> getMoves() {
-    List<Move<Gomoku>> moves = new ArrayList<>();
+  public List<GomokuMove> getMoves() {
+    List<GomokuMove> moves = new ArrayList<>();
     for (int i = 0; i < POINTS; i++) {
       if (!marked.get(i)) {
         moves.add(GomokuMove.of(i));
@@ -163,7 +160,7 @@ public final class GomokuStateMut implements GameStateMut<Gomoku> {
     }
   }
 
-  private GameStatus updateStatus(boolean player, GomokuMove move) {
+  private int updateStatus(boolean player, GomokuMove move) {
     int cell = move.point;
     boolean won =
         checkLine(cell, limLeft[cell], limRight[cell], 1) ||
@@ -171,16 +168,20 @@ public final class GomokuStateMut implements GameStateMut<Gomoku> {
         checkLine(cell, limLT[cell], limRB[cell], SIZE + 1) ||
         checkLine(cell, limRT[cell], limLB[cell], SIZE - 1);
 
+
+    int status = GameStatusInt.init();
+    if (!player)
+      status = GamerStatusInt.switchPlayer(status);
     if (won) {
-      return player ? GameStatus.WIN : GameStatus.LOSS;
+      status = GamerStatusInt.setPayoff(status, player ? 1 : -1);
     } else if (marked.nextClearBit(0) == POINTS) {
-      return GameStatus.DRAW;
-    } else {
-      return player ? GameStatus.SECOND_PLAYER : GameStatus.FIRST_PLAYER;
+      status = GamerStatusInt.setPayoff(status, 0);
     }
+
+    return status;
   }
 
-  public String moveToString(Move<Gomoku> move) {
+  public String moveToString(GomokuMove move) {
     return move.toString();
   }
 

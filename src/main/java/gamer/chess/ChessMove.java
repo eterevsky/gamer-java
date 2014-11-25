@@ -14,7 +14,7 @@ import gamer.def.Move;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ChessMove implements Move<Chess> {
+public final class ChessMove implements Move {
   private static int POSSIBLE_PROMOTIONS = 4;
 
   final int from;

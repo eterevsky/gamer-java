@@ -1,6 +1,6 @@
 package gamer.def;
 
-public interface Solver<P extends Position<?, ?>> {
+public interface Solver<P extends Position<P, ?>> {
   public static class Result {
     public int payoff;
     public int moves;

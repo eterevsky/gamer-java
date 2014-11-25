@@ -1,19 +1,18 @@
 package gamer.tournament;
 
 import gamer.def.Game;
-import gamer.def.GameState;
-import gamer.def.GameStatus;
-import gamer.def.Match;
+import gamer.def.Move;
+import gamer.def.Position;
 import gamer.def.Player;
 
 import java.util.Queue;
 
-public final class GameRunner<G extends Game<G>> implements Runnable {
-  private final Queue<Match<G>> games;
-  private final Queue<Match<G>> results;
+public final class GameRunner<P extends Position<P, ?>> implements Runnable {
+  private final Queue<Match<P>> games;
+  private final Queue<Match<P>> results;
   private final boolean verbose;
 
-  GameRunner(Queue<Match<G>> games, Queue<Match<G>> results, boolean verbose) {
+  GameRunner(Queue<Match<P>> games, Queue<Match<P>> results, boolean verbose) {
     this.games = games;
     this.results = results;
     this.verbose = verbose;
@@ -31,20 +30,21 @@ public final class GameRunner<G extends Game<G>> implements Runnable {
     }
   }
 
-  public static <G extends Game<G>> GameStatus playSingleGame(
-      Game<G> game, Player<G> p1, Player<G> p2, boolean verbose) {
-    GameState<G> state = game.newGame();
+  public static <P extends Position<P, M>, M extends Move>
+      int playSingleGame(
+          P startPosition, Player<P, M> p1, Player<P, M> p2, boolean verbose) {
+    P position = startPosition;
 
-    while (!state.isTerminal()) {
-      Player<G> player = state.status().getPlayer() ? p1 : p2;
-      state = state.play(player.selectMove(state));
+    while (!position.isTerminal()) {
+      Player<P, M> player = position.getPlayer() ? p1 : p2;
+      position = position.play(player.selectMove(state));
       if (verbose) {
         System.out.println(player.getReport());
-        System.out.println(state);
+        System.out.println(position);
         System.out.println();
       }
     }
 
-    return state.status();
+    return position.getPayoff(0);
   }
 }

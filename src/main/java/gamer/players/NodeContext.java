@@ -1,19 +1,19 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.Helper;
+import gamer.def.Position;
+import gamer.def.Solver;
 
-final class NodeContext<G extends Game> {
+final class NodeContext<P extends Position<?,?>> {
   final boolean propagateExact;
-  final Helper<G> helper;
+  final Solver<P> solver;
 
   NodeContext() {
     propagateExact = true;
     helper = null;
   }
 
-  NodeContext(boolean propagateExact, Helper<G> helper) {
+  NodeContext(boolean propagateExact, Solver<P> solver) {
     this.propagateExact = propagateExact;
-    this.helper = helper;
+    this.solver = solver;
   }
 }

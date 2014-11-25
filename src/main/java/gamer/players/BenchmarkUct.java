@@ -5,6 +5,8 @@ import gamer.chess.Chess;
 import gamer.chess.ChessMove;
 import gamer.def.Player;
 import gamer.gomoku.Gomoku;
+import gamer.gomoku.GomokuMove;
+import gamer.gomoku.GomokuState;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

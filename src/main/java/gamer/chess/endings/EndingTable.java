@@ -27,16 +27,18 @@ class EndingTable {
       assert other != ILLEGAL;
       switch (this) {
         case UNKNOWN:
-          return other == LOSS || other == DRAW;
+          return other == EndingStatus.LOSS || other == EndingStatus.DRAW;
 
         case WIN:
-          return other == UNKNOWN || other == LOSS || other == DRAW;
+          return other == EndingStatus.UNKNOWN ||
+                 other == EndingStatus.LOSS ||
+                 other == EndingStatus.DRAW;
 
         case LOSS:
           return false;
 
         case DRAW:
-          return other == LOSS;
+          return other == EndingStatus.LOSS;
       }
 
       throw new RuntimeException("Can't happen");
@@ -64,22 +66,22 @@ class EndingTable {
     }
 
     static public EndingValue fromState(ChessState state) {
-      switch (state.status()) {
-        case WIN:
-          if (state.getPlayer()) {
+      switch (state.getPayoff(0)) {
+        case 1:
+          if (state.getPlayerBool()) {
             return of(EndingStatus.ILLEGAL);
           } else {
             return of(EndingStatus.LOSS, 0);
           }
 
-        case LOSS:
-          if (!state.getPlayer()) {
+        case -1:
+          if (!state.getPlayerBool()) {
             return of(EndingStatus.ILLEGAL);
           } else {
             return of(EndingStatus.LOSS, 0);
           }
 
-        case DRAW:
+        case 0:
           return of(EndingStatus.DRAW);
 
         default:

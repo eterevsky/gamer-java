@@ -1,6 +1,6 @@
 package gamer.chess;
 
-import gamer.def.GameStatus;
+import gamer.def.Position;
 
 import java.util.List;
 
@@ -17,7 +17,5 @@ interface State {
   int getEnPassant();
   int getMovesSinceCapture();
   int getMovesCount();
-  GameStatus status();
   List<ChessMove> getMoves();
-  boolean getPlayerBool();
 }

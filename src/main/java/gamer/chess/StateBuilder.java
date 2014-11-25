@@ -16,6 +16,7 @@ import gamer.def.PositionMut;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class StateBuilder
     implements PositionMut<StateBuilder, ChessMove>, State {
@@ -49,12 +50,50 @@ public class StateBuilder
     movesCount = state.getMovesCount();
   }
 
-  // @Override
+  @Override
+  public void reset() {
+    board.reset();
+    player = true;
+    castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
+                BLACK_LONG_CASTLING | BLACK_SHORT_CASTLING;
+    enPassant = -1;
+    movesSinceCapture = 0;
+    movesCount = 0;
+    moves = null;  // TODO: clear
+    check = false;
+    kingCell = Board.a2i("e1");
+  }
+
+  @Override
+  public boolean isTerminal() {
+    if (movesSinceCapture > MOVES_WITHOUT_CAPTURE || drawByMaterial())
+      return true;
+
+    if (moves == null)
+      generateMoves();
+
+    return moves.size() == 0;
+  }
+
+  @Override
+  public int getPayoff(int p) {
+    if (!isTerminal()) {
+      throw new TerminalPositionException();
+    }
+
+    if (isCheck()) {
+      return (player == (p == 0)) ? -1 : 1;
+    } else {
+      return 0;
+    }
+  }
+
+  @Override
   public Board getBoard() {
     return board;
   }
 
-  // @Override
+  @Override
   public byte getCastlings() {
     return castlings;
   }
@@ -80,6 +119,16 @@ public class StateBuilder
       generateMoves();
 
     return moves;
+  }
+
+  @Override
+  public ChessMove parseMove(String moveStr) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public String moveToString(ChessMove move) {
+    throw new UnsupportedOperationException("Not implemented");
   }
 
   public void set(int cell, byte piece) {
@@ -128,7 +177,15 @@ public class StateBuilder
     return temp;
   }
 
-  void applyMove(ChessMove move) {
+  public StateBuilder play(ChessMove move) {
+    throw new UnsupportedOperationException("Not implemented.");
+  }
+
+  public ChessMove getRandomMove(Random rnd) {
+    throw new UnsupportedOperationException("Not implemented.");
+  }
+
+  public void apply(ChessMove move) {
     byte piece = board.getPiece(move.from);
 
     // We need board before the move, so this should be before applyToBoard().

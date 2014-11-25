@@ -1,27 +1,23 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.GameState;
-import gamer.def.Helper;
 import gamer.def.Move;
+import gamer.def.Position;
+import gamer.def.Solver;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-final class Node<G extends Game> {
-  private final NodeContext<G> context;
-  private final Node<G> parent;
-  private List<Node<G>> children = null;
-  private final GameState<G> state;
-  private final Move<G> move;
-  private final Selector<G> selector;
-  // 0 - LOSS
-  // 1 - DRAW
-  // 2 - WIN
-  // 3 - DON'T KNOW
-  private int exactValue = 3;
-  private double value = 0.5;
+final class Node<P extends Position<P, M>, M extends Move> {
+  private final NodeContext<P> context;
+  private final Node<P, M> parent;
+  private List<Node<P, M>> children = null;
+  private final P position;
+  private final M move;
+  private final Selector<P, M> selector;
+  private boolean exact = false;
+  // Exact if exact == true, mean otherwise.
+  private double payoff;
   private int totalSamples = 0;
   private int pendingSamples = 0;
 
@@ -29,34 +25,34 @@ final class Node<G extends Game> {
   @SuppressWarnings("unchecked")
   final static Node KNOW_EXACT_VALUE = new Node(null, null, null, null, null);
 
-  interface Selector<G extends Game> {
-    void setNode(Node<G> node);
+  interface Selector<P extends Position<P, M>, M extends Move> {
+    void setNode(Node<P, M> node);
 
-    Node<G> select(Collection<Node<G>> children, long totalSamples);
+    Node<P, M> select(Collection<Node<P, M>> children, long totalSamples);
 
     boolean shouldCreateChildren();
 
-    Selector<G> newChildSelector();
+    Selector<P, M> newChildSelector();
   }
 
-  Node(Node<G> parent,
-       GameState<G> state,
-       Move<G> move,
-       Selector<G> selector,
-       NodeContext<G> context) {
+  Node(Node<P, M> parent,
+       P position,
+       M move,
+       Selector<P, M> selector,
+       NodeContext<P> context) {
     this.context = context;
     this.parent = parent;
-    this.state = state;
+    this.position = position;
     this.move = move;
     this.selector = selector;
     if (selector != null) {
       selector.setNode(this);
     }
 
-    if (state != null) {
-      this.exactValue = state.status().valueInt();
+    if (position != null) {
+      this.exactValue = position.status().valueInt();
       if (this.exactValue == 3 && context.helper != null) {
-        Helper.Result result = context.helper.evaluate(state);
+        Helper.Result result = context.helper.evaluate(position);
         if (result != null)
           this.exactValue = result.status.valueInt();
       }
@@ -65,19 +61,19 @@ final class Node<G extends Game> {
 
   // Getters
 
-  Node<G> getParent() {
+  Node<P, M> getParent() {
     return parent;
   }
 
-  GameState<G> getState() {
-    return state;
+  P getPosition() {
+    return position;
   }
 
-  Move<G> getMove() {
+  M getMove() {
     return move;
   }
 
-  synchronized Collection<Node<G>> getChildren() {
+  synchronized Collection<Node<P, M>> getChildren() {
     if (children == null) {
       throw new RuntimeException(
           "Requested children from a node without children.");
@@ -112,9 +108,9 @@ final class Node<G extends Game> {
   //   samples.
   // - If there are no children, add nsamples to pending samples and return
   //   null.
-  Node<G> selectChildOrAddPending(int nsamples) {
+  Node<P, M> selectChildOrAddPending(int nsamples) {
     @SuppressWarnings("unchecked")
-    Node<G> returnValue = KNOW_EXACT_VALUE;
+    Node<P, M> returnValue = KNOW_EXACT_VALUE;
     boolean learnedExactValue = false;
 
     synchronized(this) {
@@ -159,13 +155,13 @@ final class Node<G extends Game> {
            Math.sqrt(parentSamplesLog / totalSamples);
   }
 
-  Node<G> getChildByStateForTest(GameState<G> state) {
+  Node<P, M> getChildByStateForTest(P position) {
     if (children == null) {
       throw new RuntimeException(
           "Requested children from a node without children.");
     }
-    for (Node<G> child : children) {
-      if (child.state.equals(state))
+    for (Node<P, M> child : children) {
+      if (child.position.equals(position))
         return child;
     }
     return null;
@@ -188,7 +184,7 @@ final class Node<G extends Game> {
     if (move != null) {
       builder.append(move.toString());
     } else {
-      builder.append(state.toString());
+      builder.append(position.toString());
     }
     builder.append(
         String.format(" %.1f/%d/%d", getValue(), totalSamples, pendingSamples));
@@ -196,7 +192,7 @@ final class Node<G extends Game> {
       builder.append(" exact");
     }
     if (children != null) {
-      for (Node<G> child : children) {
+      for (Node<P, M> child : children) {
         builder.append(child.toString(indent + 2));
       }
     }
@@ -205,14 +201,14 @@ final class Node<G extends Game> {
   }
 
   private void addSamplesAndUpdate(
-      int nsamples, double value, Node<G> child,
+      int nsamples, double value, Node<P, M> child,
       boolean childLearnedExactValue) {
     boolean learnedExactValue = false;
 
     synchronized(this) {
       pendingSamples -= nsamples;
       assert pendingSamples >= 0;
-      this.value += value * (double)nsamples / totalSamples;
+      this.payoff += value * (double)nsamples / totalSamples;
 
       if (context.propagateExact && childLearnedExactValue) {
         assert child != null;
@@ -226,12 +222,12 @@ final class Node<G extends Game> {
   }
 
   private boolean initChildren() {
-    List<? extends Move<G>> moves = state.getMoves();
+    List<M> moves = position.getMoves();
     children = new ArrayList<>(moves.size());
-    for (Move<G> move : moves) {
-      GameState<G> newState = state.play(move);
+    for (M move : moves) {
+      P newState = position.play(move);
       children.add(
-          new Node<G>(
+          new Node<P, M>(
               this, newState, move, selector.newChildSelector(), context));
     }
 
@@ -242,46 +238,51 @@ final class Node<G extends Game> {
     int hi = 0;
     boolean hasNonExact = false;
 
-    for (Node<G> child : children) {
-      int v = child.exactValue;
-      if (v == 3)
+    for (Node<P, M> child : children) {
+      if (!child.exact) {
         hasNonExact = true;
+        continue;
+      }
+      int v = child.payoff;
       if (v < lo)
         lo = v;
       if (v > hi)
         hi = v;
     }
 
-    boolean player = state.status().getPlayer();
+    boolean player = position.status().getPlayer();
 
+    exact = true;
     if (hasNonExact) {
-      if (player && hi == 2) {
-        exactValue = 2;
-      } else if (!player && lo == 0) {
-        exactValue = 0;
+      if (player && hi == 1) {
+        payoff = 1;
+      } else if (!player && lo == -1) {
+        payoff = -1;
       } else {
-        exactValue = 3;
+        exact = false;
       }
     } else {
-      exactValue = player ? hi : lo;
+      payoff = player ? hi : lo;
     }
 
-    return exactValue != 3;
+    return exact;
   }
 
-  private boolean maybeSetExactValue(Node<G> updatedChild) {
-    boolean player = state.status().getPlayer();
+  private boolean maybeSetExactValue(Node<P, M> updatedChild) {
+    boolean player = position.getPlayerBool();
 
-    if (player && updatedChild.exactValue == 2 ||
-        !player && updatedChild.exactValue == 0) {
-      exactValue = updatedChild.exactValue;
+    if (updatedChild.exact &&
+        (player && updatedChild.payoff == 1 ||
+         !player && updatedChild.payoff == -1)) {
+      exact = true;
+      payoff = updatedChild.payoff;
       return true;
     }
 
     int lo = 2;
     int hi = 0;
 
-    for (Node<G> child : children) {
+    for (Node<P, M> child : children) {
       int v = child.exactValue;
       if (v == 3)
         return false;
@@ -291,7 +292,8 @@ final class Node<G extends Game> {
         hi = v;
     }
 
-    exactValue = player ? hi : lo;
+    payoff = player ? hi : lo;
+    exact = true;
     return true;
   }
 }

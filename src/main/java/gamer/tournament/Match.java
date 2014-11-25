@@ -1,13 +1,16 @@
-package gamer.def;
+package gamer.tournament;
 
-public final class Match {
-  public final Game game;
-  public final Player player1;
-  public final Player player2;
+import gamer.def.Player;
+import gamer.def.Position;
+
+public final class Match<P extends Position<P, ?>> {
+  public final P startPosition;
+  public final Player<P, ?> player1;
+  public final Player<P, ?> player2;
   public Integer payoff = null;
 
-  public Match(Game game, Player player1, Player player2) {
-    this.game = game;
+  public Match(P position, Player<P, ?> player1, Player<P, ?> player2) {
+    this.startPosition = position;
     this.player1 = player1;
     this.player2 = player2;
   }
@@ -18,7 +21,7 @@ public final class Match {
 
   public String toString() {
     if (payoff == null) {
-      return String.format("%s: %s  v  %s", game.toString(),
+      return String.format("%s: %s  v  %s",
                            player1.getName(),
                            player2.getName());
     }
@@ -32,8 +35,7 @@ public final class Match {
         throw new RuntimeException("shouldn't happen");
     }
 
-    return String.format("%s: %s (%c)  v  %s (%c)",
-                         game.toString(),
+    return String.format("%s (%c)  v  %s (%c)",
                          player1.getName(), result1,
                          player2.getName(), result2);
   }

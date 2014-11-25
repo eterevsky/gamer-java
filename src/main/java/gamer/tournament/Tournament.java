@@ -1,10 +1,9 @@
 package gamer.tournament;
 
 import gamer.def.Game;
-import gamer.def.GameState;
-import gamer.def.Match;
 import gamer.def.Move;
 import gamer.def.Player;
+import gamer.def.Position;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,36 +11,34 @@ import java.util.List;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
 
-public final class Tournament<G extends Game<G>> {
-  private final Game<G> game;
-  private final List<Player<G>> players = new ArrayList<>();
+public final class Tournament<P extends Position<P, M>, M extends Move> {
+  private final P startPosition;
+  private final List<Player<P, ?>> players = new ArrayList<>();
   private Integer timeout = null;
   private ExecutorService executor = null;
   private int threadsPerPlayer = 1;
   private int gameThreads = 1;
-  private Map<Player<G>, Map<Player<G>, Double>> results = null;
-  private Queue<Match<G>> gamesQueue;
-  private BlockingQueue<Match<G>> resultsQueue;
+  private Map<Player<P, ?>, Map<Player<P, ?>, Double>> results = null;
+  private Queue<Match<P>> gamesQueue;
+  private ConcurrentLinkedQueue<Match<P>> resultsQueue;
   private final boolean verbose;
   private int rounds = 1;
 
-  public Tournament(G game) {
-    this(game, false);
+  public Tournament(P startPosition) {
+    this(startPosition, false);
   }
 
-  public Tournament(G game, boolean verbose) {
-    this.game = game;
+  public Tournament(P startPosition, boolean verbose) {
+    this.startPosition = startPosition;
     this.verbose = verbose;
     this.gamesQueue = new ConcurrentLinkedQueue<>();
     this.resultsQueue = new LinkedBlockingQueue<>();
   }
 
-  public void addPlayer(Player<G> player) {
+  public void addPlayer(Player<P, ?> player) {
     players.add(player);
   }
 
@@ -65,17 +62,16 @@ public final class Tournament<G extends Game<G>> {
     this.rounds = rounds;
   }
 
-  private static class PlayerResult<G extends Game>
-      implements Comparable<PlayerResult<G>> {
-    final Player<G> player;
+  private static class PlayerResult implements Comparable<PlayerResult> {
+    final Player<?, ?> player;
     final Double result;
 
     @Override
-    public int compareTo(PlayerResult<G> o) {
+    public int compareTo(PlayerResult o) {
       return o.result.compareTo(result);
     }
 
-    PlayerResult(Player<G> p, double r) {
+    PlayerResult(Player<?, ?> p, double r) {
       player = p;
       result = r;
     }
@@ -152,13 +148,11 @@ public final class Tournament<G extends Game<G>> {
     }
   }
 
-  private void initPlayer(Player<G> player) {
+  private void initPlayer(Player<P, ?> player) {
     if (timeout != null) {
       player.setTimeout(timeout);
     }
-    if (executor != null && threadsPerPlayer > 1) {
-      player.setExecutor(executor, threadsPerPlayer);
-    }
+    player.setMaxWorkers(threadsPerPlayer);
   }
 
   private void initResults() {

@@ -1,13 +1,15 @@
 package gamer.players;
 
-import gamer.def.Game;
+import gamer.def.Move;
+import gamer.def.Position;
 
 import java.util.Collection;
 
-final class LeafSelector<G extends Game> implements Node.Selector<G> {
-  public void setNode(Node<G> node) {}
+final class LeafSelector<P extends Position<P, M>, M extends Move>
+    implements Node.Selector<P, M> {
+  public void setNode(Node<P, M> node) {}
 
-  public Node<G> select(Collection<Node<G>> children, long totalSamples)  {
+  public Node<P, M> select(Collection<Node<P, M>> children, long totalSamples) {
     throw new RuntimeException();
   }
 
@@ -15,11 +17,11 @@ final class LeafSelector<G extends Game> implements Node.Selector<G> {
     return false;
   }
 
-  public Node.Selector<G> newChildSelector() {
+  public Node.Selector<P, M> newChildSelector() {
     throw new RuntimeException();
   }
 
-  public void childUpdated(Node<G> child, long totalSamples) {
+  public void childUpdated(Node<P, M> child, long totalSamples) {
     throw new RuntimeException();
   }
 }
