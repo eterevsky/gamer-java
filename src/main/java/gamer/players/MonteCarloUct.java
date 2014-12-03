@@ -2,33 +2,35 @@ package gamer.players;
 
 import gamer.chess.Chess;
 import gamer.def.Game;
-import gamer.def.GameState;
 import gamer.def.Move;
+import gamer.def.Position;
 import gamer.gomoku.Gomoku;
 
-public class MonteCarloUct<G extends Game> extends GenericPlayer<G> {
+public class MonteCarloUct<P extends Position<P, M>, M>
+    extends GenericPlayer<P, M> {
   private int childrenThreshold = -1;
 
-  private class Selector<G extends Game> extends BanditSelector<G> {
+  private class Selector extends BanditSelector {
     public boolean shouldCreateChildren() {
       return node.getSamples() > childrenThreshold;
     }
 
-    public Selector<G> newChildSelector() {
-      return new Selector<G>();
+    public Selector newChildSelector() {
+      return new Selector();
     }
   }
 
   @Override
-  protected Node<G> getRoot(GameState<G> state) {
-    return new Node<G>(null, state, null, new Selector<G>(), nodeContext);
+  protected Node<P, M> getRoot(P position) {
+    return new Node<P, M>(null, position, null, new Selector<G>(), nodeContext);
   }
 
-  public MonteCarloUct<G> setChildrenThreshold(int threshold) {
+  public void setChildrenThreshold(int threshold) {
     childrenThreshold = threshold;
     return this;
   }
 
+  @Override
   public String getName() {
     if (name != null)
       return name;
@@ -38,9 +40,9 @@ public class MonteCarloUct<G extends Game> extends GenericPlayer<G> {
   }
 
   @Override
-  public Move<G> selectMove(GameState<G> state) {
+  public M selectMove(P position) {
     if (childrenThreshold == -1)
       childrenThreshold = samplesBatch;
-    return super.selectMove(state);
+    return super.selectMove(position);
   }
 }

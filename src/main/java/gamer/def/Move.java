@@ -1,7 +1,7 @@
 package gamer.def;
 
 // Immutable
-public interface Move<G extends Game> {
+public interface Move {
   @Override
   int hashCode();
 }

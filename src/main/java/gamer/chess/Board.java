@@ -1,5 +1,7 @@
 package gamer.chess;
 
+import java.util.Arrays;
+
 final class Board {
   static int a2i(String a) {
     assert a.length() == 2;
@@ -32,6 +34,10 @@ final class Board {
 
   Board(byte[] board) {
     this.board = board;
+  }
+
+  void reset() {
+    Arrays.fill(board, (byte)0);
   }
 
   byte[] toBytes() {

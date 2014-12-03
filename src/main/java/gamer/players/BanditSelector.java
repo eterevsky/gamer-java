@@ -1,24 +1,25 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.GameState;
+import gamer.def.Move;
+import gamer.def.Position;
 
 import java.util.Collection;
 
-abstract class BanditSelector<G extends Game> implements Node.Selector<G> {
-  protected Node<G> node = null;
+abstract class BanditSelector<P extends Position<P, M>, M extends Move>
+    implements Node.Selector<P, M> {
+  protected Node<P, M> node = null;
 
-  public void setNode(Node<G> node) {
+  public void setNode(Node<P, M> node) {
     this.node = node;
   }
 
-  public Node<G> select(Collection<Node<G>> children, long totalSamples) {
+  public Node<P, M> select(Collection<Node<P, M>> children, long totalSamples) {
     double totalSamplesLog = 2 * Math.log(totalSamples);
     assert totalSamplesLog >= 0;
 
-    Node<G> bestChild = null;
+    Node<P, M> bestChild = null;
     double bestChildPrio = 0;
-    for (Node<G> child : children) {
+    for (Node<P, M> child : children) {
       if (child.getTotalSamples() == 0) {
         return child;
       }
@@ -36,7 +37,7 @@ abstract class BanditSelector<G extends Game> implements Node.Selector<G> {
 
   public abstract boolean shouldCreateChildren();
 
-  public abstract Node.Selector<G> newChildSelector();
+  public abstract Node.Selector<P, M> newChildSelector();
 
-  public void childUpdated(Node<G> child, long totalSamples) {}
+  public void childUpdated(Node<P, M> child, long totalSamples) {}
 }

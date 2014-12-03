@@ -1,78 +1,73 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.GameState;
-import gamer.def.GameStatus;
-import gamer.def.Helper;
 import gamer.def.Move;
-import gamer.def.Player;
+import gamer.def.ComputerPlayer;
+import gamer.def.Position;
+import gamer.def.Solver;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-public abstract class GenericPlayer<G extends Game> implements Player<G> {
+abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
+    implements ComputerPlayer<P, M> {
   private long samplesLimit = -1;
-  protected int samplesBatch = 1;
   private long timeout = 1000;
   private ExecutorService executor = null;
   private int workers = 1;
-  protected NodeContext<G> nodeContext = new NodeContext<G>();
   private Random random = null;
-  private final Logger LOG = Logger.getLogger("gamer.players.GenericPlayer");
+  private Solver<P> solver = null;
+  private String report;
+
+  protected int samplesBatch = 1;
   protected String name = null;
-  private Helper<G> helper = null;
+  protected NodeContext<P> nodeContext = new NodeContext<P>();
 
   @Override
-  public final GenericPlayer<G> setTimeout(long timeout) {
+  public boolean isHuman() {
+    return false;
+  }
+
+  @Override
+  public final void setTimeout(long timeout) {
     this.timeout = timeout;
-    return this;
   }
 
-  @Override
-  public final GenericPlayer<G> setSamplesLimit(long samplesLimit) {
+  public final void setSamplesLimit(long samplesLimit) {
     this.samplesLimit = samplesLimit;
-    return this;
   }
 
-  public final GenericPlayer<G> setSamplesBatch(int samplesBatch) {
+  public final void setSamplesBatch(int samplesBatch) {
     this.samplesBatch = samplesBatch;
-    return this;
   }
 
   @Override
-  public final GenericPlayer<G> setExecutor(ExecutorService executor,
-                                             int workers) {
-    this.executor = executor;
+  public final void setMaxWorkers(int workers) {
     this.workers = workers;
-    return this;
+    if (workers > 1) {
+      executor = Executors.newFixedThreadPool(workers);
+    } else {
+      executor = null;
+    }
   }
 
   @Override
-  public GenericPlayer<G> setRandom(Random random) {
+  public void setRandom(Random random) {
     this.random = random;
-    return this;
   }
 
-  @Override
-  public GenericPlayer<G> setName(String name) {
-    this.name = name;
-    return this;
+  public void setFindExact(boolean exact) {
+    this.nodeContext = new NodeContext<P>(exact, solver);
   }
 
-  public GenericPlayer<G> setFindExact(boolean exact) {
-    this.nodeContext = new NodeContext<G>(exact, helper);
-    return this;
-  }
-
-  public GenericPlayer<G> setHelper(Helper<G> helper) {
-    this.helper = helper;
+  public void addSolver(Solver<P> solver) {
+    this.solver = solver;
     this.nodeContext =
-        new NodeContext<G>(this.nodeContext.propagateExact, helper);
-    return this;
+        new NodeContext<P>(this.nodeContext.propagateExact, solver);
   }
 
   @Override
@@ -87,21 +82,26 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
     if (this.nodeContext.propagateExact)
       s += " +exact";
 
-    if (this.helper != null)
-      s += " " + this.helper.getClass().getSimpleName();
+    if (this.solver != null)
+      s += " " + this.solver.getClass().getSimpleName();
 
     return s;
   }
 
-  abstract protected Node<G> getRoot(GameState<G> state);
+  @Override
+  public String getReport() {
+    return report;
+  }
 
-  protected Sampler<G> newSampler(
-      Node<G> root, long finishTime, long samplesLimit, int samplesBatch,
+  abstract protected Node<P, M> getRoot(P state);
+
+  protected Sampler<P, M> newSampler(
+      Node<P, M> root, long finishTime, long samplesLimit, int samplesBatch,
       Random random) {
-    Sampler<G> sampler = new Sampler<G>(
+    Sampler<P, M> sampler = new Sampler<>(
         root, finishTime, samplesLimit, samplesBatch, random);
-    if (helper != null)
-      sampler.setHelper(helper);
+    if (solver != null)
+      sampler.setSolver(solver);
     return sampler;
   }
 
@@ -109,23 +109,15 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
     return System.currentTimeMillis();
   }
 
-  String report;
-
-  @Override
-  public String getReport() {
-    return report;
-  }
-
-  private Move<G> selectMoveUsingHelper(
-      GameState<G> state, Helper.Result result) {
+  private M selectMoveUsingSolver(P state, Solver.Result result) {
     GameStatus status = result.status;
-    double value = result.status.value(state.status().getPlayer());
-    boolean winning = value > 0.5;
-    boolean loosing = value < 0.5;
+    double value = result.value(position.getPlayer());
+    boolean winning = value > 0;
+    boolean loosing = value < 0;
 
-    for (Move<G> move : state.getMoves()) {
-      GameState<G> next = state.play(move);
-      Helper.Result nextResult = helper.evaluate(next);
+    for (M move : state.getMoves()) {
+      P next = state.play(move);
+      Solver.Result nextResult = solver.evaluate(next);
       if (nextResult == null || nextResult.status != status) {
         assert winning;
         continue;
@@ -142,18 +134,18 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
   }
 
   @Override
-  public Move<G> selectMove(GameState<G> state) {
-    if (helper != null) {
-      Helper.Result result = helper.evaluate(state);
+  public M selectMove(P state) {
+    if (solver != null) {
+      Solver.Result result = solver.evaluate(state);
       if (result != null)
-        return selectMoveUsingHelper(state, result);
+        return selectMoveUsingSolver(state, result);
     }
 
-    Node<G> root = getRoot(state);
+    Node<P, M> root = getRoot(state);
 
     long finishTime = timeout > 0 ? getCurrentTime() + timeout : -1;
 
-    if (executor != null) {
+    if (workers > 0) {
       List<Future<?>> tasks = new ArrayList<>();
       for (int i = 0; i < workers; i++) {
         tasks.add(executor.submit(
@@ -172,9 +164,9 @@ public abstract class GenericPlayer<G extends Game> implements Player<G> {
     }
 
     boolean player = state.status().getPlayer();
-    Node<G> bestNode = null;
+    Node<P, M> bestNode = null;
     double bestValue = player ? -1 : 2;
-    for (Node<G> node : root.getChildren()) {
+    for (Node<P, M> node : root.getChildren()) {
       if (player ? (node.getValue() > bestValue)
                  : (node.getValue() < bestValue)) {
         bestNode = node;

@@ -1,23 +1,24 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.GameState;
+import gamer.def.Move;
+import gamer.def.Position;
 import gamer.util.UpdatablePriorityQueue;
 
 import java.util.Collection;
 
-abstract class BanditSelectorCached<G extends Game>
-    implements Node.Selector<G> {
-  protected Node<G> node = null;
-  private UpdatablePriorityQueue<Node<G>> queue = null;
+abstract class BanditSelectorCached<P extends Position<P, M>, M extends Move>
+    implements Node.Selector<P, M> {
+  protected Node<P, M> node = null;
+  private UpdatablePriorityQueue<Node<P, M>> queue = null;
   long nextFullUpdate;
 
-  public void setNode(Node<G> node) {
+  public void setNode(Node<P, M> node) {
     this.node = node;
   }
 
-  public Node<G> select(Collection<Node<G>> children, long totalSamples) {
-    throw new RuntimeException("Shouldn't be used, since childUpdate is switched off.");
+  public Node<P, M> select(Collection<Node<P, M>> children, long totalSamples) {
+    throw new RuntimeException(
+        "Shouldn't be used, since childUpdate is switched off.");
 
     // if (queue == null || totalSamples > nextFullUpdate)
     //   initQueue(children, totalSamples);
@@ -25,12 +26,12 @@ abstract class BanditSelectorCached<G extends Game>
     // return queue.head();
   }
 
-  private void initQueue(Collection<Node<G>> children, long totalSamples) {
+  private void initQueue(Collection<Node<P, M>> children, long totalSamples) {
     queue = new UpdatablePriorityQueue<>(children.size());
     double totalSamplesLog = 2 * Math.log(totalSamples);
-    boolean player = node.getState().status().getPlayer();
+    boolean player = node.getPosition().getPlayerBool();
 
-    for (Node<G> child : children) {
+    for (Node<P, M> child : children) {
       queue.add(child, child.getUcbPriority(totalSamplesLog, player));
     }
 
@@ -39,10 +40,10 @@ abstract class BanditSelectorCached<G extends Game>
 
   public abstract boolean shouldCreateChildren();
 
-  public abstract Node.Selector<G> newChildSelector();
+  public abstract Node.Selector<P, M> newChildSelector();
 
-  public void childUpdated(Node<G> child, long totalSamples) {
-    boolean player = node.getState().status().getPlayer();
+  public void childUpdated(Node<P, M> child, long totalSamples) {
+    boolean player = node.getPosition().getPlayerBool();
     queue.update(
         child, child.getUcbPriority(2 * Math.log(totalSamples), player));
   }

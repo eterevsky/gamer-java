@@ -1,15 +1,16 @@
 package gamer.def;
 
 public class IllegalMoveException extends GameException {
-  public IllegalMoveException(
-      GameState<?> state, Move<?> move, String message) {
-    super("Illegal move " + move.toString() +
-          " in state " + state.toString() +
+  public <P extends Position<P, M>, M extends Move> IllegalMoveException(
+      P position, M move, String message) {
+    super("Illegal move " + position.moveToString(move) +
+          " in position " + position.toString() +
           ": " + message);
   }
 
-  public IllegalMoveException(GameState<?> state, Move<?> move) {
-    super("Illegal move " + move.toString() +
-          " in state " + state.toString());
+  public <P extends Position<P, M>, M extends Move> IllegalMoveException(
+      P position, M move) {
+    super("Illegal move " + position.moveToString(move) +
+          " in position " + position.toString());
   }
 }

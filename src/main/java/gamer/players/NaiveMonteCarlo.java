@@ -1,19 +1,20 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.GameState;
+import gamer.def.Move;
+import gamer.def.Position;
 
 import java.util.Collection;
 import java.util.Iterator;
 
-public class NaiveMonteCarlo<G extends Game> extends GenericPlayer<G> {
-  static class Selector<G extends Game> implements Node.Selector<G> {
-    Iterator<Node<G>> childrenIt = null;
+public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
+    extends GenericPlayer<P, M> {
+  static class Selector<P, M> implements Node.Selector<P, M> {
+    Iterator<Node<P, M>> childrenIt = null;
 
-    public void setNode(Node<G> node) {}
+    public void setNode(Node<P, M> node) {}
 
-    public synchronized Node<G> select(
-        Collection<Node<G>> children, long totalSamples) {
+    public synchronized Node<P, M> select(
+        Collection<Node<P, M>> children, long totalSamples) {
       if (childrenIt == null || !childrenIt.hasNext())
         childrenIt = children.iterator();
 
@@ -24,15 +25,15 @@ public class NaiveMonteCarlo<G extends Game> extends GenericPlayer<G> {
       return true;
     }
 
-    public synchronized LeafSelector<G> newChildSelector() {
-      return new LeafSelector<G>();
+    public synchronized LeafSelector<P, M> newChildSelector() {
+      return new LeafSelector<P, M>();
     }
 
-    public void childUpdated(Node<G> child, long totalSamples) {}
+    public void childUpdated(Node<P, M> child, long totalSamples) {}
   }
 
   @Override
-  protected Node<G> getRoot(GameState<G> state) {
-    return new Node<G>(null, state, null, new Selector<G>(), nodeContext);
+  protected Node<P, M> getRoot(P state) {
+    return new Node<P, M>(null, state, null, new Selector<G>(), nodeContext);
   }
 }

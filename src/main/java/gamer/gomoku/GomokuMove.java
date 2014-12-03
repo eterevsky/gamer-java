@@ -5,7 +5,7 @@ import gamer.def.Move;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class GomokuMove implements Move<Gomoku> {
+public final class GomokuMove implements Move {
   final int point;
 
   static GomokuMove of(int point) {

@@ -2,7 +2,7 @@ package gamer.gomoku;
 
 import gamer.def.Game;
 
-public final class Gomoku implements Game<Gomoku> {
+public final class Gomoku implements Game {
   static final int SIZE = 19;
   static final int POINTS = SIZE * SIZE;
   private static final Gomoku INSTANCE = new Gomoku();
@@ -16,5 +16,9 @@ public final class Gomoku implements Game<Gomoku> {
 
   public GomokuState newGame() {
     return INITIAL_STATE;
+  }
+
+  public GomokuStateMut newGameMut() {
+    return new GomokuStateMut();
   }
 }

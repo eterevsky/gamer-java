@@ -88,7 +88,7 @@ class Fen {
       String totalMoves = getComponent();
       if (!totalMoves.equals(""))
         builder.setMovesCount(Integer.parseInt(totalMoves) * 2 +
-                              (builder.getPlayer() ? 0 : 1));
+                              (builder.getPlayerBool() ? 0 : 1));
 
       return builder;
     }
@@ -159,7 +159,7 @@ class Fen {
         builder.append('/');
     }
 
-    builder.append(state.getPlayer() ? " w " : " b ");
+    builder.append(state.getPlayerBool() ? " w " : " b ");
     int castlings = state.getCastlings();
 
     if (castlings == 0) {

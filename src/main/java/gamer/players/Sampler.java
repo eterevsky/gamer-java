@@ -1,23 +1,25 @@
 package gamer.players;
 
-import gamer.def.Game;
-import gamer.def.GameState;
-import gamer.def.Helper;
+import gamer.def.Move;
+import gamer.def.Position;
+import gamer.def.Solver;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-class Sampler<G extends Game> implements Runnable {
-  private final Node<G> root;
+class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
+  private final Node<P, M> root;
   private final long finishTime;
   private final long maxSamples;
   private final int samplesBatch;
   private final Random random;
-  private Helper<G> helper = null;
+  private Solver<P> solver = null;
 
-  Sampler(
-      Node<G> root, long finishTime, long maxSamples, int samplesBatch,
-      Random random) {
+  Sampler(Node<P, M> root,
+          long finishTime,
+          long maxSamples,
+          int samplesBatch,
+          Random random) {
     this.root = root;
     this.finishTime = finishTime;
     this.maxSamples = maxSamples;
@@ -25,8 +27,8 @@ class Sampler<G extends Game> implements Runnable {
     this.random = random;
   }
 
-  void setHelper(Helper<G> helper) {
-    this.helper = helper;
+  void setSolver(Solver<P> solver) {
+    this.solver = solver;
   }
 
   public void run() {
@@ -35,8 +37,8 @@ class Sampler<G extends Game> implements Runnable {
     while (!root.knowExactValue() &&
            (maxSamples <= 0 || root.getSamples() < maxSamples) &&
            (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
-      Node<G> node = null;
-      Node<G> child = root;
+      Node<P, M> node = null;
+      Node<P, M> child = root;
       do {
         node = child;
         child = node.selectChildOrAddPending(samplesBatch);
@@ -47,17 +49,17 @@ class Sampler<G extends Game> implements Runnable {
 
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
-        GameState<G> state = node.getState();
-        Helper.Result hResult;
+        P position = node.getState();
+        Solver.Result sResult;
         do {
-          state = state.play(state.getRandomMove(rnd));
-          hResult = helper != null ? helper.evaluate(state) : null;
-        } while (!state.status().isTerminal() && hResult == null);
+          position = position.play(position.getRandomMove(rnd));
+          sResult = solver != null ? solver.evaluate(state) : null;
+        } while (!position.isTerminal() && sResult == null);
 
-        if (state.status().isTerminal()) {
-          value += state.status().value();
+        if (position.isTerminal()) {
+          value += state.getPayoff();
         } else {
-          value += hResult.value();
+          value += sResult.value();
         }
       }
       node.addSamples(samplesBatch, value / samplesBatch);

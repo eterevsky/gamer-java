@@ -7,35 +7,67 @@ import static java.lang.Math.min;
 
 import gamer.def.IllegalMoveException;
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.PositionMut;
 import gamer.def.TerminalPositionException;
+import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
-public final class GomokuState implements Position<GomokuState, GomokuMove> {
-  private final BitSet marked;
-  private final BitSet markedx;
-  private final int status;
+public final class GomokuStateMut
+    implements PositionMut<GomokuStateMut, GomokuMove> {
+  private BitSet marked;
+  private BitSet markedx;
+  private int status;
+
+  GomokuStateMut() {
+    marked = new BitSet(POINTS);
+    markedx = new BitSet(POINTS);
+    status = GameStatusInt.init();
+  }
+
+  private GomokuStateMut(GomokuStateMut other) {
+    marked = (BitSet) other.marked.clone();
+    markedx = (BitSet) other.markedx.clone();
+    status = other.status;
+  }
+
+  public boolean isTerminal() {
+    return GameStatusInt.isTerminal(status);
+  }
 
   @Override
-  public GomokuState play(GomokuMove move) {
+  public GomokuStateMut play(GomokuMove move) {
+    GomokuStateMut next = new GomokuStateMut(this);
+    next.apply(move);
+    return next;
+  }
+
+  @Override
+  public void apply(GomokuMove move) {
     if (isTerminal()) {
-      throw new TerminalPositionException();
+      throw new IllegalMoveException(this, move, "state is terminal");
     }
 
     if (marked.get(move.point)) {
       throw new IllegalMoveException(this, move, "point is not empty");
     }
 
-    return new GomokuState(this, move);
+    marked.set(move.point);
+    if (status.getPlayer()) {
+      markedx.set(move.point);
+    }
+
+    status = updateStatus(status.getPlayer(), move);
   }
 
-  @Override
-  public boolean isTerminal() {
-    return GamerStatusInt.isTerminal(status);
+  public void reset() {
+    marked.clear();
+    markedx.clear();
+    status = GameStatus.FIRST_PLAYER;
   }
 
   public List<GomokuMove> getMoves() {
@@ -59,24 +91,6 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     } while (marked.get(i));
 
     return GomokuMove.of(i);
-  }
-
-  GomokuState() {
-    marked = new BitSet(POINTS);
-    markedx = new BitSet(POINTS);
-    status = GameStatus.FIRST_PLAYER;
-  }
-
-  private GomokuState(GomokuState other, GomokuMove move) {
-    marked = (BitSet) other.marked.clone();
-    marked.set(move.point);
-    if (other.status().getPlayer()) {
-      markedx = (BitSet) other.markedx.clone();
-      markedx.set(move.point);
-    } else {
-      markedx = other.markedx;
-    }
-    status = updateStatus(other.status().getPlayer(), move);
   }
 
   public String toString() {
@@ -154,15 +168,16 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
         checkLine(cell, limLT[cell], limRB[cell], SIZE + 1) ||
         checkLine(cell, limRT[cell], limLB[cell], SIZE - 1);
 
-    int status = GamerStatusInt.init();
+
+    int status = GameStatusInt.init();
     if (!player)
       status = GamerStatusInt.switchPlayer(status);
-
     if (won) {
       status = GamerStatusInt.setPayoff(status, player ? 1 : -1);
     } else if (marked.nextClearBit(0) == POINTS) {
       status = GamerStatusInt.setPayoff(status, 0);
     }
+
     return status;
   }
 
