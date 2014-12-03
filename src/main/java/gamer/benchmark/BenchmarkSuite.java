@@ -26,6 +26,10 @@ public final class BenchmarkSuite {
     double mean;
     double variance;
     double interval;
+
+    double error() {
+      return interval / mean;
+    }
   }
 
   static final double STUDENT_95 = 12.71;
@@ -70,7 +74,7 @@ public final class BenchmarkSuite {
 
       while (times.size() < 6 ||
              (System.nanoTime() - startTime < 3E11 &&
-              genStats(times).interval / genStats(times).mean > 0.05)) {
+              genStats(times).error() > 0.05)) {
         double t = singleRun(benchmark, reps);
         times.add(t / reps);
       }
