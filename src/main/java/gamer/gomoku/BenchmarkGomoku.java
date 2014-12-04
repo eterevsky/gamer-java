@@ -14,7 +14,7 @@ import java.util.Random;
 public class BenchmarkGomoku {
   @Benchmark
   public static int timeRandomGame(int reps) {
-    int payoff;
+    int payoff = 0;
 
     for (int i = 0; i < reps; i++) {
       Random random = new Random();
@@ -22,26 +22,26 @@ public class BenchmarkGomoku {
       while (!state.isTerminal()) {
         state = state.play(state.getRandomMove(random));
       }
-      payoff = state.getPayoff();
+      payoff += state.getPayoff(0);
     }
 
-    return status;
+    return payoff;
   }
 
   @Benchmark
   public static int timeRandomGameMut(int reps) {
-    int payoff;
+    int payoff = 0;
 
     for (int i = 0; i < reps; i++) {
       Random random = new Random();
       GomokuStateMut state = Gomoku.getInstance().newGameMut();
       while (!state.isTerminal()) {
-        state.playInPlace(state.getRandomMove(random));
+        state.apply(state.getRandomMove(random));
       }
-      payoff = state.getPayoff();
+      payoff += state.getPayoff(0);
     }
 
-    return status;
+    return payoff;
   }
 
   @Benchmark
@@ -55,7 +55,7 @@ public class BenchmarkGomoku {
         while (!state.isTerminal()) {
           state = state.play(state.getRandomMove(random));
         }
-        sum += state.status().value();
+        sum += state.getPayoff(0);
       }
     }
 
@@ -72,9 +72,9 @@ public class BenchmarkGomoku {
       for (int isamples = 0; isamples < 200000; isamples++) {
         state.reset();
         while (!state.isTerminal()) {
-          state.playInPlace(state.getRandomMove(random));
+          state.apply(state.getRandomMove(random));
         }
-        sum += state.status().value();
+        sum += state.getPayoff(0);
       }
     }
 
@@ -102,7 +102,7 @@ public class BenchmarkGomoku {
               while (!state.isTerminal()) {
                 state = state.play(state.getRandomMove(random));
               }
-              s += state.status().value();
+              s += state.getPayoff(0);
             }
 
             return s;
@@ -150,7 +150,7 @@ public class BenchmarkGomoku {
               while (!state.isTerminal()) {
                 state = state.play(state.getRandomMove(random));
               }
-              s += state.status().value();
+              s += state.getPayoff(0);
             }
 
             return s;

@@ -11,6 +11,10 @@ public final class GameStatusInt {
     return (status & TERMINAL_MASK) != 0;
   }
 
+  public static int getPayoff(int status, int player) {
+    return getPayoff(status, player == 0);
+  }
+
   public static int getPayoff(int status, boolean player) {
     if (!isTerminal(status)) {
       throw new TerminalPositionException(

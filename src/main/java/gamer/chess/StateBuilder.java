@@ -13,13 +13,14 @@ import static gamer.chess.Pieces.WHITE;
 import static gamer.chess.Pieces.BLACK;
 
 import gamer.def.PositionMut;
+import gamer.def.TerminalPositionException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class StateBuilder
-    implements PositionMut<StateBuilder, ChessMove>, State {
+    implements PositionMut<StateBuilder, ChessMove>, State<StateBuilder> {
   private Board board;
   private boolean player = true;
   private byte castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
@@ -43,7 +44,7 @@ public class StateBuilder
 
   StateBuilder(State state) {
     board = state.getBoard();
-    player = state.status().getPlayer();
+    player = state.getPlayerBool();
     castlings = state.getCastlings();
     enPassant = state.getEnPassant();
     movesSinceCapture = state.getMovesSinceCapture();

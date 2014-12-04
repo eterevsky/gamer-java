@@ -57,17 +57,17 @@ public final class GomokuStateMut
     }
 
     marked.set(move.point);
-    if (status.getPlayer()) {
+    if (getPlayerBool()) {
       markedx.set(move.point);
     }
 
-    status = updateStatus(status.getPlayer(), move);
+    status = updateStatus(getPlayerBool(), move);
   }
 
   public void reset() {
     marked.clear();
     markedx.clear();
-    status = GameStatus.FIRST_PLAYER;
+    status = GameStatusInt.init();
   }
 
   public List<GomokuMove> getMoves() {
@@ -83,7 +83,7 @@ public final class GomokuStateMut
 
   public GomokuMove getRandomMove(Random random) {
     if (isTerminal())
-      throw new GameException();
+      throw new TerminalPositionException();
 
     int i;
     do {
@@ -171,11 +171,11 @@ public final class GomokuStateMut
 
     int status = GameStatusInt.init();
     if (!player)
-      status = GamerStatusInt.switchPlayer(status);
+      status = GameStatusInt.switchPlayer(status);
     if (won) {
-      status = GamerStatusInt.setPayoff(status, player ? 1 : -1);
+      status = GameStatusInt.setPayoff(status, player ? 1 : -1);
     } else if (marked.nextClearBit(0) == POINTS) {
-      status = GamerStatusInt.setPayoff(status, 0);
+      status = GameStatusInt.setPayoff(status, 0);
     }
 
     return status;
@@ -183,6 +183,26 @@ public final class GomokuStateMut
 
   public String moveToString(GomokuMove move) {
     return move.toString();
+  }
+
+  @Override
+  public int getPlayer() {
+    return getPlayerBool() ? 0 : 1;
+  }
+
+  @Override
+  public boolean getPlayerBool() {
+    return GameStatusInt.getPlayerBool(status);
+  }
+
+  @Override
+  public int getPayoff(int player) {
+    return GameStatusInt.getPayoff(status, player);
+  }
+
+  @Override
+  public GomokuMove parseMove(String moveStr) {
+    return GomokuMove.of(moveStr);
   }
 
 }

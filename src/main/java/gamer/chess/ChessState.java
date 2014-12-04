@@ -24,7 +24,7 @@ public final class ChessState
 
   public ChessState(StateBuilder builder) {
     status = GameStatusInt.init();
-    status = GameStatusInt.setPlayer(status, builder.getPlayer());
+    status = GameStatusInt.setPlayer(status, builder.getPlayerBool());
     if (builder.isTerminal()) {
       status = GameStatusInt.setPayoff(status, builder.getPayoff(0));
     }
@@ -89,7 +89,7 @@ public final class ChessState
 
   @Override
   public int getPayoff(int player) {
-    int payoff = GameStatusInt.getPayoff(status, player == 0);
+    int payoff = GameStatusInt.getPayoff(status, player);
   }
 
   @Override
