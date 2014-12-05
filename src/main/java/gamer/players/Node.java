@@ -2,7 +2,6 @@ package gamer.players;
 
 import gamer.def.Move;
 import gamer.def.Position;
-import gamer.def.Solver;
 
 import java.util.ArrayList;
 import java.util.Collection;

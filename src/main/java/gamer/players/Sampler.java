@@ -31,6 +31,7 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
     this.solver = solver;
   }
 
+  @Override
   public void run() {
     Random rnd = random == null ? ThreadLocalRandom.current() : random;
 
@@ -49,17 +50,17 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
 
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
-        P position = node.getState();
+        P position = node.getPosition();
         Solver.Result sResult;
         do {
           position = position.play(position.getRandomMove(rnd));
-          sResult = solver != null ? solver.evaluate(state) : null;
+          sResult = (solver != null) ? solver.solve(position) : null;
         } while (!position.isTerminal() && sResult == null);
 
         if (position.isTerminal()) {
-          value += state.getPayoff();
+          value += position.getPayoff(0);
         } else {
-          value += sResult.value();
+          value += sResult.payoff;
         }
       }
       node.addSamples(samplesBatch, value / samplesBatch);

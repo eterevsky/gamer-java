@@ -1,37 +1,35 @@
 package gamer.players;
 
-import gamer.def.Position;
+import gamer.def.ComputerPlayer;
 import gamer.def.Move;
-import gamer.def.Player;
+import gamer.def.Position;
+import gamer.def.Solver;
 
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class RandomPlayer<P extends Position<M>, M extends Move>
-    implements Player<P, M> {
+public final class RandomPlayer<P extends Position<P, M>, M extends Move>
+    implements ComputerPlayer<P, M> {
   private Random random = null;
 
   @Override
-  public <M extends Move, P extends Position<P, M>> M selectMove(P position) {
-    return position.getRandomMove(
-        random == null ? ThreadLocalRandom.current() : random);
+  public void addSolver(Solver<P> solver) {}
+
+  @Override
+  public void setMaxSamples(long maxSamples) {}
+
+  @Override
+  public void setMaxWorkers(int maxWorkers) {}
+
+  @Override
+  public void setRandom(Random random) {
+    this.random = random;
   }
 
   @Override
-  public void setTimeout(long timeout) {
-    return this;
-  }
+  public void setTimeout(long timeout) {}
 
   @Override
-  public void setSamplesLimit(long samplesLimit) {
-    return this;
-  }
-
-  public void setName(String name) {
-    return this;
-  }
-
   public String getName() {
     return "RandomPlayer";
   }
@@ -41,8 +39,14 @@ public final class RandomPlayer<P extends Position<M>, M extends Move>
     return "";
   }
 
-  public void setRandom(Random random) {
-    this.random = random;
-    return this;
+  @Override
+  public boolean isHuman() {
+    return false;
+  }
+
+  @Override
+  public M selectMove(P position) {
+    return position.getRandomMove(
+        random == null ? ThreadLocalRandom.current() : random);
   }
 }
