@@ -42,7 +42,7 @@ public class StateBuilder
     this.board = new Board();
   }
 
-  StateBuilder(State state) {
+  StateBuilder(State<?> state) {
     board = state.getBoard();
     player = state.getPlayerBool();
     castlings = state.getCastlings();
@@ -99,22 +99,22 @@ public class StateBuilder
     return castlings;
   }
 
-  // @Override
+  @Override
   public int getEnPassant() {
     return enPassant;
   }
 
-  // @Override
+  @Override
   public int getMovesSinceCapture() {
     return movesSinceCapture;
   }
 
-  // @Override
+  @Override
   public int getMovesCount() {
     return movesCount;
   }
 
-  // @Override
+  @Override
   public List<ChessMove> getMoves() {
     if (moves == null)
       generateMoves();
@@ -144,6 +144,7 @@ public class StateBuilder
     this.castlings = castlings;
   }
 
+  @Override
   public boolean getPlayerBool() {
     return player;
   }
@@ -178,14 +179,17 @@ public class StateBuilder
     return temp;
   }
 
+  @Override
   public StateBuilder play(ChessMove move) {
     throw new UnsupportedOperationException("Not implemented.");
   }
 
+  @Override
   public ChessMove getRandomMove(Random rnd) {
     throw new UnsupportedOperationException("Not implemented.");
   }
 
+  @Override
   public void apply(ChessMove move) {
     byte piece = board.getPiece(move.from);
 

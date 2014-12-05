@@ -14,18 +14,22 @@ public final class Chess implements Game {
     return INSTANCE;
   }
 
+  @Override
   public ChessState newGame() {
     return INITIAL;
   }
 
+  @Override
   public PositionMut<?, ?> newGameMut() {
     throw new UnsupportedOperationException("Not implemented.");
   }
 
+  @Override
   public boolean hasRandomPlayer() {
     return false;
   }
 
+  @Override
   public int getPlayers() {
     return 2;
   }

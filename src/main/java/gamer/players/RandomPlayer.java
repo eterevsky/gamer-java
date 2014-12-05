@@ -8,7 +8,8 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class RandomPlayer implements Player {
+public final class RandomPlayer<P extends Position<M>, M extends Move>
+    implements Player<P, M> {
   private Random random = null;
 
   @Override

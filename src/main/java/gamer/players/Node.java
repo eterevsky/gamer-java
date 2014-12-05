@@ -23,7 +23,8 @@ final class Node<P extends Position<P, M>, M extends Move> {
 
   // Used as a result of selectChildOrAddPending().
   @SuppressWarnings("unchecked")
-  final static Node KNOW_EXACT_VALUE = new Node(null, null, null, null, null);
+  final static Node<?, ?> KNOW_EXACT_VALUE =
+      new Node<>(null, null, null, null, null);
 
   interface Selector<P extends Position<P, M>, M extends Move> {
     void setNode(Node<P, M> node);

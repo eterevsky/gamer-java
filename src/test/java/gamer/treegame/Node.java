@@ -1,17 +1,16 @@
 package gamer.treegame;
 
-import gamer.def.GameException;
-import gamer.def.GameStatus;
+import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
 import java.util.List;
 
 final class Node {
   final int id;
-  final GameStatus status;
+  final int status;
   List<Node> children = new ArrayList<>();
 
-  Node(int id, GameStatus status) {
+  Node(int id, int status) {
     this.id = id;
     this.status = status;
   }
@@ -20,12 +19,12 @@ final class Node {
     children.add(child);
   }
 
-  boolean getPlayer() {
-    return status.getPlayer();
+  boolean getPlayerBool() {
+    return GameStatusInt.getPlayerBool(status);
   }
 
   boolean isTerminal() {
-    return status.isTerminal();
+    return GameStatusInt.isTerminal(status);
   }
 
   Node getDescendantById(int id) {

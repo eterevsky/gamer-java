@@ -6,6 +6,9 @@ public final class GameStatusInt {
   private static int PAYOFF_MASK = 3;
   private static int TERMINAL_MASK = 4;
   private static int PLAYER_MASK = 8;
+  
+  public static int WIN = 2 | TERMINAL_MASK;
+  public static int LOSS = 0 | TERMINAL_MASK | PLAYER_MASK;
 
   public static boolean isTerminal(int status) {
     return (status & TERMINAL_MASK) != 0;
@@ -40,5 +43,9 @@ public final class GameStatusInt {
 
   public static int switchPlayer(int status) {
     return status ^ PLAYER_MASK;
+  }
+  
+  public static int setPlayerBool(int status, boolean player) {
+    return player ? status | PLAYER_MASK : status & (~PLAYER_MASK);
   }
 }

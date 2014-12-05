@@ -4,7 +4,9 @@ import gamer.chess.ChessState;
 import gamer.def.Solver;
 
 public class ChessEndingSolver implements Solver<ChessState> {
-  public Solver.Result evaluate(ChessState position) {
+  @Override
+  public Solver.Result solve(ChessState position) {
+    // TODO(olege): Auto-generated method stub
     return null;
   }
 }

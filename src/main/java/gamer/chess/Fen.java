@@ -118,7 +118,7 @@ class Fen {
     return parser.parse();
   }
 
-  static String toFen(State state) {
+  static String toFen(State<?> state) {
     StringBuilder builder = new StringBuilder();
     Board board = state.getBoard();
 

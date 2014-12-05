@@ -79,6 +79,7 @@ public final class ChessMove implements Move {
                           (i2col(from) - 1) * 8 + i2col(to) - 1);
   }
 
+  @Override
   public String toString() {
     return i2a(from) + "-" + i2a(to) +
            ((promote != EMPTY) ? piece2a(promote) : "");

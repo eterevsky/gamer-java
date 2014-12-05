@@ -37,9 +37,9 @@ class App {
     addUctPlayer(tournament, 16, 16);
     addUctPlayer(tournament, 32, 16);
 
-    tournament.addPlayer(new MonteCarloUcb<Gomoku>());
-    tournament.addPlayer(new NaiveMonteCarlo<Gomoku>());
-    tournament.addPlayer(new RandomPlayer<Gomoku>());
+    tournament.addPlayer(new MonteCarloUcb<P, M>());
+    tournament.addPlayer(new NaiveMonteCarlo<P, M>());
+    tournament.addPlayer(new RandomPlayer<P, M>());
   }
 
   static Gomoku gomoku = Gomoku.getInstance();
@@ -49,7 +49,7 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
 
-    Tournament<Gomoku> tournament = new Tournament<>(gomoku, true);
+    Tournament<> tournament = new Tournament<>(gomoku, true);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
     tournament.setTimeout(10000);

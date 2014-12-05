@@ -1,7 +1,7 @@
 package gamer.treegame;
 
-import static gamer.def.GameStatus.WIN;
-import static gamer.def.GameStatus.LOSS;
+import static gamer.util.GameStatusInt.LOSS;
+import static gamer.util.GameStatusInt.WIN;
 
 public final class TreeGameInstances {
   // See game0.svg

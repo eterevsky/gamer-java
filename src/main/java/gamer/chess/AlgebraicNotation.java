@@ -144,7 +144,7 @@ class AlgebraicNotation {
     }
   }
 
-  static ChessMove parse(State state, String moveStr) {
+  static ChessMove parse(State<?> state, String moveStr) {
     MoveComponents components = new MoveComponents(moveStr);
     ChessMove move = null;
     Board board = state.getBoard();
@@ -173,7 +173,7 @@ class AlgebraicNotation {
     return move;
   }
 
-  static String moveToString(State state, ChessMove move) {
+  static String moveToString(State<?> state, ChessMove move) {
     Board board = state.getBoard();
     byte piece = board.getPiece(move.from);
     if (piece == Pieces.KING) {

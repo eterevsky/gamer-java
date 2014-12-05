@@ -1,17 +1,17 @@
 package gamer.treegame;
 
 import gamer.def.GameException;
-import gamer.def.GameState;
-import gamer.def.GameStatus;
-import gamer.def.Move;
+import gamer.def.Position;
+import gamer.def.TerminalPositionException;
+import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 
-public final class TreeGameState implements GameState<TreeGame> {
+public final class TreeGameState
+    implements Position<TreeGameState, TreeGameMove> {
   private final Node node;
 
   TreeGameState(Node node) {
@@ -22,16 +22,14 @@ public final class TreeGameState implements GameState<TreeGame> {
     return node.id;
   }
 
+  @Override
   public boolean isTerminal() {
-    return node.status.isTerminal();
+    return GameStatusInt.isTerminal(node.status);
   }
 
-  public GameStatus status() {
-    return node.status;
-  }
-
-  public List<Move<TreeGame>> getMoves() {
-    ArrayList<Move<TreeGame>> moves = new ArrayList<>();
+  @Override
+  public List<TreeGameMove> getMoves() {
+    ArrayList<TreeGameMove> moves = new ArrayList<>();
     for (Node child : node.children) {
       moves.add(new TreeGameMove(child));
     }
@@ -48,22 +46,25 @@ public final class TreeGameState implements GameState<TreeGame> {
     return null;
   }
 
-  public Move<TreeGame> getRandomMove(Random random) {
-    if (node.status.isTerminal()) {
-      throw new GameException("terminal state: " + this.toString());
+  @Override
+  public TreeGameMove getRandomMove(Random random) {
+    if (GameStatusInt.isTerminal(node.status)) {
+      throw new TerminalPositionException("terminal state: " + this.toString());
     }
     int i = random.nextInt(node.children.size());
     return new TreeGameMove(node.children.get(i));
   }
 
-  public TreeGameState play(Move<TreeGame> move) {
-    Node newNode = ((TreeGameMove) move).node;
+  @Override
+  public TreeGameState play(TreeGameMove move) {
+    Node newNode = move.node;
     if (!node.children.contains(newNode)) {
       throw new GameException();
     }
     return new TreeGameState(newNode);
   }
 
+  @Override
   public String toString() {
     return "TreeState(" + node.id + ")";
   }
@@ -77,7 +78,27 @@ public final class TreeGameState implements GameState<TreeGame> {
   }
 
   @Override
-  public String moveToString(Move<TreeGame> move) {
+  public String moveToString(TreeGameMove move) {
     return move.toString();
+  }
+
+  @Override
+  public int getPlayer() {
+    return getPlayerBool() ? 0 : 1;
+  }
+
+  @Override
+  public boolean getPlayerBool() {
+    return GameStatusInt.getPlayerBool(node.status);
+  }
+
+  @Override
+  public int getPayoff(int player) {
+    return GameStatusInt.getPayoff(node.status, player);
+  }
+
+  @Override
+  public TreeGameMove parseMove(String moveStr) {
+    throw new UnsupportedOperationException();
   }
 }

@@ -1,15 +1,12 @@
 package gamer.players;
 
-import static gamer.def.GameStatus.WIN;
-import static gamer.def.GameStatus.LOSS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import gamer.def.GameState;
-import gamer.def.GameStatus;
-import gamer.def.Helper;
+import gamer.def.Position;
+import gamer.def.Solver;
 import gamer.treegame.TreeGame;
 import gamer.treegame.TreeGameInstances;
 import gamer.treegame.TreeGameMove;
@@ -22,7 +19,7 @@ import org.junit.Test;
 
 public final class TestGenericPlayer {
 
-  private class MockSampler extends Sampler<TreeGame> {
+  private class MockSampler extends Sampler<TreeGame, TreeGameMove> {
     boolean wasCalled = false;
     private Node<TreeGame> root;
 

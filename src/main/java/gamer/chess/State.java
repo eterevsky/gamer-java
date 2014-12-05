@@ -2,8 +2,6 @@ package gamer.chess;
 
 import gamer.def.Position;
 
-import java.util.List;
-
 interface State<S extends State<S>> extends Position<S, ChessMove> {
   static final byte WHITE_SHORT_CASTLING = 1;
   static final byte WHITE_LONG_CASTLING = 2;
@@ -12,11 +10,9 @@ interface State<S extends State<S>> extends Position<S, ChessMove> {
 
   static final int MOVES_WITHOUT_CAPTURE = 100;
 
-  boolean getPlayerBool();
   Board getBoard();
   byte getCastlings();
   int getEnPassant();
   int getMovesSinceCapture();
   int getMovesCount();
-  List<ChessMove> getMoves();
 }

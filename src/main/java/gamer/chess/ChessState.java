@@ -1,7 +1,6 @@
 package gamer.chess;
 
 import gamer.def.GameException;
-import gamer.def.Move;
 import gamer.def.Position;
 import gamer.util.GameStatusInt;
 
@@ -11,7 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 public final class ChessState
-    implements Position<ChessState, ChessMove>, State {
+    implements Position<ChessState, ChessMove>, State<ChessState> {
   private final byte[] boardBytes;
   private final byte castlings;
   private final int status;
@@ -23,11 +22,13 @@ public final class ChessState
   private final List<ChessMove> moves;
 
   public ChessState(StateBuilder builder) {
-    status = GameStatusInt.init();
-    status = GameStatusInt.setPlayer(status, builder.getPlayerBool());
+    int statusTemp = GameStatusInt.init();
+    statusTemp = GameStatusInt.setPlayerBool(
+        statusTemp, builder.getPlayerBool());
     if (builder.isTerminal()) {
-      status = GameStatusInt.setPayoff(status, builder.getPayoff(0));
+      statusTemp = GameStatusInt.setPayoff(statusTemp, builder.getPayoff(0));
     }
+    status = statusTemp;
     boardBytes = builder.getBoard().toBytes().clone();
     castlings = builder.getCastlings();
     enPassant = builder.getEnPassant();
@@ -71,11 +72,12 @@ public final class ChessState
     return movesCount;
   }
 
+  @Override
   public boolean getPlayerBool() {
-    return GameStatusInt.getPlayer(status);
+    return GameStatusInt.getPlayerBool(status);
   }
 
-  // GameState<> implementation
+  // Position<> implementation
 
   @Override
   public int getPlayer() {
@@ -89,7 +91,7 @@ public final class ChessState
 
   @Override
   public int getPayoff(int player) {
-    int payoff = GameStatusInt.getPayoff(status, player);
+    return GameStatusInt.getPayoff(status, player);
   }
 
   @Override
@@ -155,7 +157,7 @@ public final class ChessState
     builder.append(moves);
     builder.append(". ");
 
-    if (status == GameStatus.SECOND_PLAYER)
+    if (!GameStatusInt.getPlayerBool(status))
       builder.append("... ");
 
     builder.append(moveToString(move));
@@ -166,6 +168,7 @@ public final class ChessState
     return new Iterable<Integer>() {
       private final byte pieceWithColor = Pieces.withColor(piece, player);
 
+      @Override
       public Iterator<Integer> iterator() {
         return new Iterator<Integer>() {
           private int idx = 0;
@@ -176,17 +179,20 @@ public final class ChessState
             }
           }
 
+          @Override
           public boolean hasNext() {
             findNext();
             return idx < 64;
           }
 
+          @Override
           public Integer next() {
             if (!hasNext())
               throw new NoSuchElementException();
             return idx++;
           }
 
+          @Override
           public void remove() {
             throw new UnsupportedOperationException();
           }

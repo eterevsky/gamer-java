@@ -26,6 +26,7 @@ final class PieceSquare implements Comparable<PieceSquare> {
     return instances.get(piece * 64 + square);
   }
 
+  @Override
   public int compareTo(PieceSquare o) {
     int d = this.piece - o.piece;
     return d == 0 ? this.square - o.square : d;

@@ -2,7 +2,7 @@ package gamer.treegame;
 
 import gamer.def.Move;
 
-public final class TreeGameMove implements Move<TreeGame> {
+public final class TreeGameMove implements Move {
   final Node node;
 
   TreeGameMove(Node node) {
@@ -13,6 +13,7 @@ public final class TreeGameMove implements Move<TreeGame> {
     return node.id;
   }
 
+  @Override
   public String toString() {
     return "-> " + node.id;
   }

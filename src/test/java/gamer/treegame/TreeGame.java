@@ -2,22 +2,21 @@ package gamer.treegame;
 
 import gamer.def.Game;
 import gamer.def.GameException;
-import gamer.def.GameStatus;
+import gamer.def.PositionMut;
+import gamer.util.GameStatusInt;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 // Used mainly for unit tests which require games with very simple game trees.
-public final class TreeGame implements Game<TreeGame> {
+public final class TreeGame implements Game {
   private final Node root;
 
   public static class Builder {
     Map<Integer, Node> nodes = new HashMap<>();
     int rootId = -1;
 
-    Builder() {
-    }
+    Builder() {}
 
     public TreeGame toGame() {
       TreeGame game = new TreeGame(nodes.get(rootId));
@@ -25,22 +24,22 @@ public final class TreeGame implements Game<TreeGame> {
       return game;
     }
 
-    public Builder addNode(int id, GameStatus status) {
+    public Builder addNode(int id, int status) {
       nodes.put(id, new Node(id, status));
       return this;
     }
 
     public Builder addMove(int from, int to) {
       if (!nodes.containsKey(to)) {
-        this.addNode(to, nodes.get(from).status.otherPlayer());
+        this.addNode(to, GameStatusInt.switchPlayer(nodes.get(from).status));
       }
       nodes.get(from).addChild(nodes.get(to));
       return this;
     }
 
-    public Builder addLastMove(int from, int to, GameStatus status)
+    public Builder addLastMove(int from, int to, int status)
         throws GameException {
-      assert status.isTerminal();
+      assert GameStatusInt.isTerminal(status);
       if (nodes.containsKey(to)) {
         if (nodes.get(to).status != status) {
           throw new GameException();
@@ -53,7 +52,7 @@ public final class TreeGame implements Game<TreeGame> {
 
     public Builder setRoot(int id) {
       rootId = id;
-      this.addNode(id, GameStatus.FIRST_PLAYER);
+      this.addNode(id, GameStatusInt.init());
       return this;
     }
   }
@@ -66,11 +65,27 @@ public final class TreeGame implements Game<TreeGame> {
     this.root = root;
   }
 
+  @Override
   public TreeGameState newGame() {
     return new TreeGameState(root);
   }
 
   Node getNode(int id) {
     return root.getDescendantById(id);
+  }
+
+  @Override
+  public PositionMut<?, ?> newGameMut() {
+    throw new UnsupportedOperationException("Not implemented.");
+  }
+
+  @Override
+  public int getPlayers() {
+    return 2;
+  }
+
+  @Override
+  public boolean hasRandomPlayer() {
+    return false;
   }
 }
