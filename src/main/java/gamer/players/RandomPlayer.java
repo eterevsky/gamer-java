@@ -13,7 +13,7 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
   private Random random = null;
 
   @Override
-  public void addSolver(Solver<P> solver) {}
+  public void addSolver(Solver<P, M> solver) {}
 
   @Override
   public void setMaxSamples(long maxSamples) {}

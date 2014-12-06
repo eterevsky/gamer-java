@@ -1,10 +1,13 @@
 package gamer.players;
 
 import gamer.def.Game;
+import gamer.def.Move;
 import gamer.def.Position;
 
-public class MonteCarloUcb<P, M> extends GenericPlayer<P, M> {
-  private static class Selector<P, M> extends BanditSelector<P, M> {
+public class MonteCarloUcb<P extends Position<P, M>, M extends Move>
+    extends GenericPlayer<P, M> {
+  private static class Selector<P extends Position<P, M>, M extends Move>
+      extends BanditSelector<P, M> {
     public boolean shouldCreateChildren() {
       return true;
     }

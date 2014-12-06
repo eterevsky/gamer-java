@@ -10,7 +10,7 @@ public interface ComputerPlayer<P extends Position<P, M>, M extends Move>
   void setMaxSamples(long maxSamples);
   void setTimeout(long timout);
 
-  void addSolver(Solver<P> solver);
+  void addSolver(Solver<P, M> solver);
 
   String getReport();
 }

@@ -20,12 +20,12 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   private ExecutorService executor = null;
   private int workers = 1;
   private Random random = null;
-  private Solver<P> solver = null;
+  private Solver<P, M> solver = null;
   private String report;
 
   protected int samplesBatch = 1;
   protected String name = null;
-  protected NodeContext<P> nodeContext = new NodeContext<P>();
+  protected NodeContext<P, M> nodeContext = new NodeContext<>();
 
   @Override
   public boolean isHuman() {
@@ -42,7 +42,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
    */
   @Override
   public void setMaxSamples(long maxSamples) {
-    this.samplesLimit = samplesLimit;    
+    this.samplesLimit = samplesLimit;
   }
 
   public final void setSamplesBatch(int samplesBatch) {
@@ -65,13 +65,13 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   }
 
   public void setFindExact(boolean exact) {
-    this.nodeContext = new NodeContext<P>(exact, solver);
+    this.nodeContext = new NodeContext<>(exact, solver);
   }
 
-  public void addSolver(Solver<P> solver) {
+  public void addSolver(Solver<P, M> solver) {
     this.solver = solver;
     this.nodeContext =
-        new NodeContext<P>(this.nodeContext.propagateExact, solver);
+        new NodeContext<>(this.nodeContext.propagateExact, solver);
   }
 
   @Override
@@ -113,36 +113,12 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     return System.currentTimeMillis();
   }
 
-  private M selectMoveUsingSolver(P state, Solver.Result result) {
-    GameStatus status = result.status;
-    double value = result.value(position.getPlayer());
-    boolean winning = value > 0;
-    boolean loosing = value < 0;
-
-    for (M move : state.getMoves()) {
-      P next = state.play(move);
-      Solver.Result nextResult = solver.evaluate(next);
-      if (nextResult == null || nextResult.status != status) {
-        assert winning;
-        continue;
-      }
-
-      if (winning && nextResult.moves < result.moves ||
-          loosing && nextResult.moves >= result.moves - 1 ||
-          !winning && !loosing) {
-        return move;
-      }
-    }
-
-    throw new RuntimeException("Internal error");
-  }
-
   @Override
   public M selectMove(P state) {
     if (solver != null) {
-      Solver.Result result = solver.evaluate(state);
+      Solver.Result<M> result = solver.solve(state);
       if (result != null)
-        return selectMoveUsingSolver(state, result);
+        return result.move;
     }
 
     Node<P, M> root = getRoot(state);
@@ -167,9 +143,9 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
       newSampler(root, finishTime, samplesLimit, samplesBatch, random).run();
     }
 
-    boolean player = state.status().getPlayer();
+    boolean player = state.getPlayerBool();
     Node<P, M> bestNode = null;
-    double bestValue = player ? -1 : 2;
+    double bestValue = player ? -2 : 2;
     for (Node<P, M> node : root.getChildren()) {
       if (player ? (node.getValue() > bestValue)
                  : (node.getValue() < bestValue)) {

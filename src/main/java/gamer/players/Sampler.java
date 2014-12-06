@@ -13,7 +13,7 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
   private final long maxSamples;
   private final int samplesBatch;
   private final Random random;
-  private Solver<P> solver = null;
+  private Solver<P, M> solver = null;
 
   Sampler(Node<P, M> root,
           long finishTime,
@@ -27,7 +27,7 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
     this.random = random;
   }
 
-  void setSolver(Solver<P> solver) {
+  void setSolver(Solver<P, M> solver) {
     this.solver = solver;
   }
 

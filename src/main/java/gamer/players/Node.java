@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 final class Node<P extends Position<P, M>, M extends Move> {
-  private final NodeContext<P> context;
+  private final NodeContext<P, M> context;
   private final Node<P, M> parent;
   private List<Node<P, M>> children = null;
   private final P position;
@@ -22,8 +22,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
 
   // Used as a result of selectChildOrAddPending().
   @SuppressWarnings("unchecked")
-  final static Node<?, ?> KNOW_EXACT_VALUE =
-      new Node<>(null, null, null, null, null);
+  final static Node KNOW_EXACT_VALUE = new Node(null, null, null, null, null);
 
   interface Selector<P extends Position<P, M>, M extends Move> {
     void setNode(Node<P, M> node);
@@ -39,7 +38,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
        P position,
        M move,
        Selector<P, M> selector,
-       NodeContext<P> context) {
+       NodeContext<P, M> context) {
     this.context = context;
     this.parent = parent;
     this.position = position;
@@ -50,16 +49,18 @@ final class Node<P extends Position<P, M>, M extends Move> {
     }
 
     if (position != null) {
-      this.exactValue = position.status().valueInt();
-      if (this.exactValue == 3 && context.helper != null) {
-        Helper.Result result = context.helper.evaluate(position);
-        if (result != null)
-          this.exactValue = result.status.valueInt();
+      if (position.isTerminal()) {
+        this.payoff = position.getPayoff(0);
+        this.exact = true;
+      } else if (context.solver != null) {
+        Solver.Result result = context.helper.evaluate(position);
+        if (result != null) {
+          this.payoff = result.payoff;
+          this.exact = true;
+        }
       }
     }
   }
-
-  // Getters
 
   Node<P, M> getParent() {
     return parent;
@@ -82,15 +83,11 @@ final class Node<P extends Position<P, M>, M extends Move> {
   }
 
   double getValue() {
-    if (exactValue == 3) {
-      return value;
-    } else {
-      return exactValue / 2.0;
-    }
+    return payoff;
   }
 
   boolean knowExactValue() {
-    return exactValue != 3;
+    return exact;
   }
 
   synchronized int getSamples() {
@@ -115,9 +112,8 @@ final class Node<P extends Position<P, M>, M extends Move> {
 
     synchronized(this) {
       totalSamples += nsamples;
-      if (!knowExactValue()) {
+      if (!exact) {
         pendingSamples += nsamples;
-        value *= ((double)totalSamples - nsamples) / totalSamples;
 
         if (children == null && selector.shouldCreateChildren()) {
           learnedExactValue = initChildren();
@@ -206,9 +202,11 @@ final class Node<P extends Position<P, M>, M extends Move> {
     boolean learnedExactValue = false;
 
     synchronized(this) {
+      payoff = (payoff * getSamples() + value * nsamples) /
+               (getSamples() + nsamples);
+
       pendingSamples -= nsamples;
       assert pendingSamples >= 0;
-      this.payoff += value * (double)nsamples / totalSamples;
 
       if (context.propagateExact && childLearnedExactValue) {
         assert child != null;

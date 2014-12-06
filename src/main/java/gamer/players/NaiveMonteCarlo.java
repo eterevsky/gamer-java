@@ -8,7 +8,8 @@ import java.util.Iterator;
 
 public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
     extends GenericPlayer<P, M> {
-  static class Selector<P, M> implements Node.Selector<P, M> {
+  static class Selector<P extends Position<P, M>, M extends Move>
+      implements Node.Selector<P, M> {
     Iterator<Node<P, M>> childrenIt = null;
 
     public void setNode(Node<P, M> node) {}
@@ -34,6 +35,6 @@ public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
 
   @Override
   protected Node<P, M> getRoot(P state) {
-    return new Node<P, M>(null, state, null, new Selector<G>(), nodeContext);
+    return new Node<P, M>(null, state, null, new Selector<P, M>(), nodeContext);
   }
 }
