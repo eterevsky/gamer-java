@@ -51,7 +51,7 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
         P position = node.getPosition();
-        Solver.Result sResult;
+        Solver.Result<M> sResult = null;
         do {
           position = position.play(position.getRandomMove(rnd));
           sResult = (solver != null) ? solver.solve(position) : null;

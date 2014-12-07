@@ -1,6 +1,5 @@
 package gamer.players;
 
-import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 

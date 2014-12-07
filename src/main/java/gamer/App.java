@@ -45,11 +45,12 @@ class App {
   static Gomoku gomoku = Gomoku.getInstance();
   static Chess chess = Chess.getInstance();
 
-  static <P extends Position<P, M>, M extends Move> void runTournament() {
+  static <P extends Position<P, M>, M extends Move> void runTournament(
+      P startPosition) {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
 
-    Tournament<P, M> tournament = new Tournament<P, M>(gomoku, true);
+    Tournament<P, M> tournament = new Tournament<>(startPosition, true);
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
     tournament.setTimeout(10000);

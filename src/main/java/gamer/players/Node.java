@@ -2,6 +2,7 @@ package gamer.players;
 
 import gamer.def.Move;
 import gamer.def.Position;
+import gamer.def.Solver;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +22,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
   private int pendingSamples = 0;
 
   // Used as a result of selectChildOrAddPending().
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   final static Node KNOW_EXACT_VALUE = new Node(null, null, null, null, null);
 
   interface Selector<P extends Position<P, M>, M extends Move> {
@@ -53,7 +54,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
         this.payoff = position.getPayoff(0);
         this.exact = true;
       } else if (context.solver != null) {
-        Solver.Result result = context.helper.evaluate(position);
+        Solver.Result<M> result = context.solver.solve(position);
         if (result != null) {
           this.payoff = result.payoff;
           this.exact = true;
@@ -131,7 +132,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
 
     if (parent != null && returnValue == KNOW_EXACT_VALUE) {
       parent.addSamplesAndUpdate(
-          nsamples, exactValue / 2.0, this, learnedExactValue);
+          nsamples, payoff, this, learnedExactValue);
     }
 
     return returnValue;
@@ -232,8 +233,8 @@ final class Node<P extends Position<P, M>, M extends Move> {
     if (!context.propagateExact)
       return false;
 
-    int lo = 2;
-    int hi = 0;
+    double lo = 2;
+    double hi = -2;
     boolean hasNonExact = false;
 
     for (Node<P, M> child : children) {
@@ -241,14 +242,14 @@ final class Node<P extends Position<P, M>, M extends Move> {
         hasNonExact = true;
         continue;
       }
-      int v = child.payoff;
+      double v = child.payoff;
       if (v < lo)
         lo = v;
       if (v > hi)
         hi = v;
     }
 
-    boolean player = position.status().getPlayer();
+    boolean player = position.getPlayerBool();
 
     exact = true;
     if (hasNonExact) {
@@ -277,13 +278,13 @@ final class Node<P extends Position<P, M>, M extends Move> {
       return true;
     }
 
-    int lo = 2;
-    int hi = 0;
+    double lo = 2;
+    double hi = -2;
 
     for (Node<P, M> child : children) {
-      int v = child.exactValue;
-      if (v == 3)
+      if (!child.exact)
         return false;
+      double v = child.payoff;
       if (v < lo)
         lo = v;
       if (v > hi)

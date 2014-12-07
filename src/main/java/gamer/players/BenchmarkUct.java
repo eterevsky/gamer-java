@@ -3,6 +3,7 @@ package gamer.players;
 import gamer.benchmark.Benchmark;
 import gamer.chess.Chess;
 import gamer.chess.ChessMove;
+import gamer.chess.ChessState;
 import gamer.def.Player;
 import gamer.gomoku.Gomoku;
 import gamer.gomoku.GomokuMove;
@@ -17,12 +18,12 @@ public class BenchmarkUct {
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
 
-    Player player = new MonteCarloUct()
-        .setSamplesLimit(20000)
-        .setTimeout(-1)
-        .setSamplesBatch(1)
-        .setFindExact(true)
-        .setExecutor(executor, cores);
+    MonteCarloUct<ChessState, ChessMove> player = new MonteCarloUct<>();
+    player.setMaxSamples(20000);
+    player.setTimeout(-1);
+    player.setSamplesBatch(1);
+    player.setFindExact(true);
+    player.setMaxWorkers(cores);
 
     ChessMove move = null;
     for (int i = 0; i < reps; i++) {
@@ -36,11 +37,11 @@ public class BenchmarkUct {
 
   // @Benchmark
   public static ChessMove uctChess20kSamplesSingle(int reps) {
-    Player<Chess> player = new MonteCarloUct()
-        .setSamplesLimit(20000)
-        .setTimeout(-1)
-        .setSamplesBatch(1)
-        .setFindExact(true);
+    MonteCarloUct<ChessState, ChessMove> player = new MonteCarloUct<>();
+    player.setMaxSamples(20000);
+    player.setTimeout(-1);
+    player.setSamplesBatch(1);
+    player.setFindExact(true);
 
     ChessMove move = null;
     for (int i = 0; i < reps; i++) {

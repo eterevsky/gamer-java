@@ -14,5 +14,5 @@ public interface Solver<P extends Position<P, M>, M extends Move> {
   }
 
   // null in case result is unknown.
-  Result solve(P position);
+  Result<M> solve(P position);
 }

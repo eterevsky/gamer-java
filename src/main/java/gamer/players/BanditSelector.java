@@ -24,7 +24,7 @@ abstract class BanditSelector<P extends Position<P, M>, M extends Move>
         return child;
       }
       double priority = child.getUcbPriority(
-          totalSamplesLog, node.getState().status().getPlayer());
+          totalSamplesLog, node.getPosition().getPlayerBool());
 
       if (bestChild == null || priority > bestChildPrio) {
         bestChild = child;

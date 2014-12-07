@@ -1,7 +1,6 @@
 package gamer.def;
 
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 
 public interface ComputerPlayer<P extends Position<P, M>, M extends Move>
     extends Player<P, M> {
