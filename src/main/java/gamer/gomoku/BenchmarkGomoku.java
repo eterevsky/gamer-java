@@ -45,12 +45,12 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku200k(int reps) {
+  public static double gomoku100k(int reps) {
     double sum = 0;
     Random random = new Random();
 
     for (int i = 0; i < reps; i++) {
-      for (int isamples = 0; isamples < 200000; isamples++) {
+      for (int isamples = 0; isamples < 100000; isamples++) {
         GomokuState state = Gomoku.getInstance().newGame();
         while (!state.isTerminal()) {
           state = state.play(state.getRandomMove(random));
@@ -63,13 +63,13 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku200kMut(int reps) {
+  public static double gomoku100kMut(int reps) {
     double sum = 0;
     Random random = new Random();
 
     for (int i = 0; i < reps; i++) {
       GomokuStateMut state = Gomoku.getInstance().newGameMut();
-      for (int isamples = 0; isamples < 200000; isamples++) {
+      for (int isamples = 0; isamples < 100000; isamples++) {
         state.reset();
         while (!state.isTerminal()) {
           state.apply(state.getRandomMove(random));
@@ -82,11 +82,11 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku200kBatches(int reps) {
+  public static double gomoku100kBatches(int reps) {
     double sum = 0;
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
-    final int samplesByThread = 200000 / cores + 1;
+    final int samplesByThread = 100000 / cores + 1;
 
     for (int i = 0; i < reps; i++) {
       List<Future<Double>> futures = new ArrayList<>();
@@ -130,7 +130,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku200kCounter(int reps) {
+  public static double gomoku100kCounter(int reps) {
     double sum = 0;
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
@@ -146,7 +146,7 @@ public class BenchmarkGomoku {
             double s = 0;
             Random random = ThreadLocalRandom.current();
 
-            while (counter.value < 200000) {
+            while (counter.value < 100000) {
               counter.value += 1;
               GomokuState state = Gomoku.getInstance().newGame();
               while (!state.isTerminal()) {
@@ -174,7 +174,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku200kMutCounter(int reps) {
+  public static double gomoku100kMutCounter(int reps) {
     double sum = 0;
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
@@ -190,7 +190,7 @@ public class BenchmarkGomoku {
             double s = 0;
             Random random = ThreadLocalRandom.current();
 
-            while (counter.value < 200000) {
+            while (counter.value < 100000) {
               counter.value += 1;
               GomokuStateMut state = Gomoku.getInstance().newGameMut();
               while (!state.isTerminal()) {

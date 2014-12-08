@@ -47,11 +47,11 @@ public class BenchmarkUct {
   }
 
   @Benchmark
-  public static GomokuMove uctGomoku200kSamplesMulti(int reps) {
+  public static GomokuMove uctGomoku100kSamplesMulti(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
 
     MonteCarloUct<GomokuState, GomokuMove> player = new MonteCarloUct<>();
-    player.setMaxSamples(200000);
+    player.setMaxSamples(100000);
     player.setTimeout(-1);
     player.setSamplesBatch(1);
     player.setFindExact(true);
@@ -67,9 +67,9 @@ public class BenchmarkUct {
   }
 
   @Benchmark
-  public static GomokuMove uctGomoku200kSamplesSingle(int reps) {
+  public static GomokuMove uctGomoku100kSamplesSingle(int reps) {
     MonteCarloUct<GomokuState, GomokuMove> player = new MonteCarloUct<>();
-    player.setMaxSamples(200000);
+    player.setMaxSamples(100000);
     player.setTimeout(-1);
     player.setSamplesBatch(1);
     player.setFindExact(true);
