@@ -16,7 +16,6 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     implements ComputerPlayer<P, M> {
   private long samplesLimit = -1;
   private long timeout = 1000;
-  private ExecutorService executor = null;
   private int workers = 0;
   private Random random = null;
   private Solver<P, M> solver = null;
@@ -51,11 +50,6 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   @Override
   public final void setMaxWorkers(int workers) {
     this.workers = workers;
-    if (workers > 1) {
-      executor = Executors.newFixedThreadPool(workers);
-    } else {
-      executor = null;
-    }
   }
 
   @Override
@@ -78,8 +72,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   public String getName() {
     if (name != null)
       return name;
-    String threads =
-        this.executor == null ? "t0" : String.format("t%d", this.workers);
+    String threads = String.format("t%d", this.workers);
     String s = String.format(
         "%s b%d %s %.1fs", getClass().getSimpleName(), this.samplesBatch, threads,
         timeout/1000.0);
@@ -126,6 +119,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     long finishTime = timeout > 0 ? getCurrentTime() + timeout : -1;
 
     if (workers > 0) {
+      ExecutorService executor = Executors.newFixedThreadPool(workers);
       List<Future<?>> tasks = new ArrayList<>();
       for (int i = 0; i < workers; i++) {
         tasks.add(executor.submit(
@@ -139,6 +133,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
           throw new RuntimeException(ex);
         }
       }
+      executor.shutdown();
     } else {
       newSampler(root, finishTime, samplesLimit, samplesBatch, random).run();
     }
