@@ -93,6 +93,7 @@ public class BenchmarkGomoku {
 
       for (int ithread = 0; ithread < cores; ithread++) {
         futures.add(executor.submit(new Callable<Double>() {
+          @Override
           public Double call() {
             double s = 0;
             Random random = ThreadLocalRandom.current();
@@ -140,6 +141,7 @@ public class BenchmarkGomoku {
 
       for (int ithread = 0; ithread < cores; ithread++) {
         futures.add(executor.submit(new Callable<Double>() {
+          @Override
           public Double call() {
             double s = 0;
             Random random = ThreadLocalRandom.current();

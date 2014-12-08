@@ -17,7 +17,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   private long samplesLimit = -1;
   private long timeout = 1000;
   private ExecutorService executor = null;
-  private int workers = 1;
+  private int workers = 0;
   private Random random = null;
   private Solver<P, M> solver = null;
   private String report;
@@ -67,6 +67,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     this.nodeContext = new NodeContext<>(exact, solver);
   }
 
+  @Override
   public void addSolver(Solver<P, M> solver) {
     this.solver = solver;
     this.nodeContext =
@@ -146,8 +147,9 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     Node<P, M> bestNode = null;
     double bestValue = player ? -2 : 2;
     for (Node<P, M> node : root.getChildren()) {
-      if (player ? (node.getValue() > bestValue)
-                 : (node.getValue() < bestValue)) {
+      if (bestNode == null ||
+          (player ? (node.getValue() > bestValue)
+                  : (node.getValue() < bestValue))) {
         bestNode = node;
         bestValue = node.getValue();
       }

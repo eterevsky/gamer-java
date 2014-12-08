@@ -1,8 +1,6 @@
 package gamer;
 
 import gamer.chess.Chess;
-import gamer.chess.endings.ChessEndingSolver;
-import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 import gamer.gomoku.Gomoku;
@@ -51,10 +49,8 @@ class App {
     System.out.format("Found %d cores.\n", cores);
 
     Tournament<P, M> tournament = new Tournament<>(startPosition, true);
-    ExecutorService executor = Executors.newFixedThreadPool(cores);
 
     tournament.setTimeout(10000);
-    tournament.setExecutor(executor);
     tournament.setGameThreads(1);
     tournament.setThreadsPerPlayer(cores);
     tournament.setRounds(1);
@@ -62,33 +58,29 @@ class App {
     addPlayers(tournament);
 
     tournament.play();
-    executor.shutdown();
   }
 
-  static <P extends Position<P, ?>> void runGameFromPosition(P startPosition) {
+  static <P extends Position<P, M>, M extends Move> void runGameFromPosition(
+      P startPosition) {
     int cores = Runtime.getRuntime().availableProcessors();
 
-    MonteCarloUct<P, ?> player1 = new MonteCarloUct<>();
+    MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
     player1.setTimeout(300000L);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(1);
     player1.setChildrenThreshold(2);
-    MonteCarloUct<P, ?> player2 = new MonteCarloUct<>();
+    MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
     player2.setTimeout(300000L);
     player2.setMaxWorkers(cores);
     player2.setSamplesBatch(4);
-    Match<P> match = new Match<>(game, player1, player2);
+    Match<P, M> match = new Match<>(startPosition, player1, player2);
 
     System.out.println(match);
-    GameRunner.playSingleGame(game, player1, player2, true);
+    GameRunner.playSingleGame(match, true);
     System.out.println(match);
-  }
-
-  static <G extends Game> void runGame(G game) {
-    runGameFromPosition(game.newGame());
   }
 
   public static void main(String[] args) throws Exception {
-    runGame(chess);
+    runGameFromPosition(chess.newGame());
   }
 }

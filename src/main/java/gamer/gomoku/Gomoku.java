@@ -14,14 +14,17 @@ public final class Gomoku implements Game {
     return INSTANCE;
   }
 
+  @Override
   public GomokuState newGame() {
     return INITIAL_STATE;
   }
 
+  @Override
   public GomokuStateMut newGameMut() {
     return new GomokuStateMut();
   }
-  
+
+  @Override
   public int getPlayers() {
 	return 2;
   }

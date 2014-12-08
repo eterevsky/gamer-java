@@ -6,9 +6,6 @@ import gamer.chess.BenchmarkPerft;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.players.BenchmarkUct;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public final class Benchmarks {
   @Benchmark
   public static long testBenchmark(int reps) {

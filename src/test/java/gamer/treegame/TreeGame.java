@@ -39,7 +39,10 @@ public final class TreeGame implements Game {
 
     public Builder addLastMove(int from, int to, int status)
         throws GameException {
-      assert GameStatusInt.isTerminal(status);
+      if (!GameStatusInt.isTerminal(status)) {
+        throw new RuntimeException();
+      }
+
       if (nodes.containsKey(to)) {
         if (nodes.get(to).status != status) {
           throw new GameException();

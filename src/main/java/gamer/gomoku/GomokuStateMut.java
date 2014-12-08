@@ -2,17 +2,14 @@ package gamer.gomoku;
 
 import static gamer.gomoku.Gomoku.POINTS;
 import static gamer.gomoku.Gomoku.SIZE;
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import gamer.def.IllegalMoveException;
-import gamer.def.Move;
 import gamer.def.PositionMut;
 import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
@@ -35,6 +32,7 @@ public final class GomokuStateMut
     status = other.status;
   }
 
+  @Override
   public boolean isTerminal() {
     return GameStatusInt.isTerminal(status);
   }
@@ -64,12 +62,14 @@ public final class GomokuStateMut
     status = updateStatus(getPlayerBool(), move);
   }
 
+  @Override
   public void reset() {
     marked.clear();
     markedx.clear();
     status = GameStatusInt.init();
   }
 
+  @Override
   public List<GomokuMove> getMoves() {
     List<GomokuMove> moves = new ArrayList<>();
     for (int i = 0; i < POINTS; i++) {
@@ -81,6 +81,7 @@ public final class GomokuStateMut
     return moves;
   }
 
+  @Override
   public GomokuMove getRandomMove(Random random) {
     if (isTerminal())
       throw new TerminalPositionException();
@@ -93,6 +94,7 @@ public final class GomokuStateMut
     return GomokuMove.of(i);
   }
 
+  @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < POINTS; i++) {
@@ -181,6 +183,7 @@ public final class GomokuStateMut
     return status;
   }
 
+  @Override
   public String moveToString(GomokuMove move) {
     return move.toString();
   }

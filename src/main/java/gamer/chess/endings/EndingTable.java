@@ -39,6 +39,9 @@ class EndingTable {
 
         case DRAW:
           return other == EndingStatus.LOSS;
+
+        case ILLEGAL:
+          throw new RuntimeException();
       }
 
       throw new RuntimeException("Can't happen");
@@ -246,6 +249,10 @@ class EndingTable {
             table[i] = EndingValue.of(EndingStatus.DRAW).asByte();
             draw++;
             break;
+
+          case UNKNOWN:
+          case ILLEGAL:
+            throw new RuntimeException();
         }
       }
 

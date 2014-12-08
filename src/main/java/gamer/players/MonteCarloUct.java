@@ -8,10 +8,12 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
   private int childrenThreshold = -1;
 
   private class Selector extends BanditSelector<P, M> {
+    @Override
     public boolean shouldCreateChildren() {
       return node.getSamples() > childrenThreshold;
     }
 
+    @Override
     public Selector newChildSelector() {
       return new Selector();
     }

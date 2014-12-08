@@ -1,11 +1,9 @@
 package gamer.chess;
 
 import static gamer.chess.Board.a2i;
-import static gamer.chess.Pieces.ROOK;
 import static gamer.chess.Pieces.KNIGHT;
-
+import static gamer.chess.Pieces.ROOK;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 

@@ -1,15 +1,14 @@
 package gamer.players;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import gamer.def.GameStatus;
-import gamer.treegame.TreeGame;
-import gamer.treegame.TreeGameState;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
+
+import gamer.util.GameStatusInt;
+
+import gamer.treegame.TreeGame;
+import gamer.treegame.TreeGameMove;
+import gamer.treegame.TreeGameState;
 
 public final class TestRandomPlayer {
 
@@ -19,16 +18,16 @@ public final class TestRandomPlayer {
     TreeGame game = TreeGame.newBuilder().setRoot(0)
         .addMove(0, 1).addMove(0, 2)
         .addMove(1, 3).addMove(2, 3)
-        .addLastMove(3, 4, GameStatus.WIN)
+        .addLastMove(3, 4, GameStatusInt.WIN)
         .toGame();
 
     TreeGameState state = game.newGame();
-    RandomPlayer<TreeGame> player = new RandomPlayer<TreeGame>();
+    RandomPlayer<TreeGameState, TreeGameMove> player = new RandomPlayer<>();
 
     while (!state.isTerminal()) {
       state = state.play(player.selectMove(state));
     }
 
-    assertEquals(GameStatus.WIN, state.status());
+    assertEquals(1, state.getPayoff(0));
   }
 }

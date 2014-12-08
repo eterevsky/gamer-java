@@ -3,22 +3,12 @@ package gamer.chess;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import gamer.def.GameStatus;
-
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
 public class TestChessState {
-
-  private void showMoves(ChessState state) {
-    System.out.format("Moves:");
-    for (ChessMove move : state.getMoves()) {
-      System.out.format(" %s", state.moveToString(move));
-    }
-    System.out.println();
-  }
 
   @Test
   public void foolsMate() {
@@ -28,7 +18,7 @@ public class TestChessState {
     ChessState state3 = state2.play(ChessMove.of("g2", "g4"));
     ChessState state4 = state3.play(ChessMove.of("d8", "h4"));
     assertTrue(state4.isTerminal());
-    assertEquals(GameStatus.LOSS, state4.status());
+    assertEquals(-1, state4.getPayoff(0));
   }
 
   @Test
@@ -42,7 +32,7 @@ public class TestChessState {
       state = state.play(move);
     }
     assertTrue(state.isTerminal());
-    assertEquals(GameStatus.WIN, state.status());
+    assertEquals(1, state.getPayoff(0));
   }
 
 }

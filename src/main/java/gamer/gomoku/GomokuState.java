@@ -2,11 +2,9 @@ package gamer.gomoku;
 
 import static gamer.gomoku.Gomoku.POINTS;
 import static gamer.gomoku.Gomoku.SIZE;
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import gamer.def.IllegalMoveException;
-import gamer.def.Move;
 import gamer.def.Position;
 import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
@@ -39,6 +37,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     return GameStatusInt.isTerminal(status);
   }
 
+  @Override
   public List<GomokuMove> getMoves() {
     List<GomokuMove> moves = new ArrayList<>();
     for (int i = 0; i < POINTS; i++) {
@@ -50,6 +49,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     return moves;
   }
 
+  @Override
   public GomokuMove getRandomMove(Random random) {
     if (isTerminal())
       throw new TerminalPositionException();
@@ -77,9 +77,10 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     } else {
       markedx = other.markedx;
     }
-    status = updateStatus(other.getPlayerBool(), move);
+    status = updateStatus(!other.getPlayerBool(), move);
   }
 
+  @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < POINTS; i++) {
@@ -160,13 +161,14 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
       status = GameStatusInt.switchPlayer(status);
 
     if (won) {
-      status = GameStatusInt.setPayoff(status, player ? 1 : -1);
+      status = GameStatusInt.setPayoff(status, player ? -1 : 1);
     } else if (marked.nextClearBit(0) == POINTS) {
       status = GameStatusInt.setPayoff(status, 0);
     }
     return status;
   }
 
+  @Override
   public String moveToString(GomokuMove move) {
     return move.toString();
   }

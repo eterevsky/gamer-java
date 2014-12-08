@@ -6,7 +6,7 @@ import gamer.def.Solver;
 
 public class ChessEndingSolver implements Solver<ChessState, ChessMove> {
   @Override
-  public Solver.Result solve(ChessState position) {
+  public Solver.Result<ChessMove> solve(ChessState position) {
     return null;
   }
 }

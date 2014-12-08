@@ -50,9 +50,9 @@ public final class GomokuMove implements Move {
 
   @Override
   public String toString() {
-    int col = point % Gomoku.SIZE;
-    int row = point % Gomoku.SIZE + 1;
-    return String.format("%c%d", COL_LETTER.charAt(col), row);
+    int col = point / Gomoku.SIZE;
+    int row = point % Gomoku.SIZE;
+    return String.format("%c%d", COL_LETTER.charAt(col), row + 1);
   }
 
   @Override

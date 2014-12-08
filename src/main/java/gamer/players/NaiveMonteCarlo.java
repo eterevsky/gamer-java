@@ -12,8 +12,10 @@ public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
       implements Node.Selector<P, M> {
     Iterator<Node<P, M>> childrenIt = null;
 
+    @Override
     public void setNode(Node<P, M> node) {}
 
+    @Override
     public synchronized Node<P, M> select(
         Collection<Node<P, M>> children, long totalSamples) {
       if (childrenIt == null || !childrenIt.hasNext())
@@ -22,15 +24,15 @@ public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
       return childrenIt.next();
     }
 
+    @Override
     public boolean shouldCreateChildren() {
       return true;
     }
 
+    @Override
     public synchronized LeafSelector<P, M> newChildSelector() {
       return new LeafSelector<P, M>();
     }
-
-    public void childUpdated(Node<P, M> child, long totalSamples) {}
   }
 
   @Override

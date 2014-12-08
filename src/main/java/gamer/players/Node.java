@@ -164,6 +164,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
     return null;
   }
 
+  @Override
   public String toString() {
     return toString(0);
   }
