@@ -3,3 +3,7 @@
 .sconsign.dblite
 java.hprof.txt
 target
+
+.settings
+.classpath
+.project
