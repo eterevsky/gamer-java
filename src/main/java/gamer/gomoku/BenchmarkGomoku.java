@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class BenchmarkGomoku {
   @Benchmark
-  public static int timeRandomGame(int reps) {
+  public static int gomoku1(int reps) {
     int payoff = 0;
 
     for (int i = 0; i < reps; i++) {
@@ -29,7 +29,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static int timeRandomGameMut(int reps) {
+  public static int gomoku1mut(int reps) {
     int payoff = 0;
 
     for (int i = 0; i < reps; i++) {
@@ -45,7 +45,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double averageOver200k(int reps) {
+  public static double gomoku200k(int reps) {
     double sum = 0;
     Random random = new Random();
 
@@ -63,7 +63,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double averageOver200kMut(int reps) {
+  public static double gomoku200kMut(int reps) {
     double sum = 0;
     Random random = new Random();
 
@@ -82,7 +82,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double averageOver200kMulti(int reps) {
+  public static double gomoku200kBatches(int reps) {
     double sum = 0;
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
@@ -130,7 +130,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double averageOver200kCommonCounter(int reps) {
+  public static double gomoku200kCounter(int reps) {
     double sum = 0;
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
@@ -151,6 +151,50 @@ public class BenchmarkGomoku {
               GomokuState state = Gomoku.getInstance().newGame();
               while (!state.isTerminal()) {
                 state = state.play(state.getRandomMove(random));
+              }
+              s += state.getPayoff(0);
+            }
+
+            return s;
+          }
+        }));
+      }
+
+      for (Future<Double> f : futures) {
+        try {
+          sum += f.get();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+
+    executor.shutdown();
+    return sum;
+  }
+
+  @Benchmark
+  public static double gomoku200kMutCounter(int reps) {
+    double sum = 0;
+    int cores = Runtime.getRuntime().availableProcessors();
+    ExecutorService executor = Executors.newFixedThreadPool(cores);
+    final WrappedInt counter = new WrappedInt();
+
+    for (int i = 0; i < reps; i++) {
+      List<Future<Double>> futures = new ArrayList<>();
+
+      for (int ithread = 0; ithread < cores; ithread++) {
+        futures.add(executor.submit(new Callable<Double>() {
+          @Override
+          public Double call() {
+            double s = 0;
+            Random random = ThreadLocalRandom.current();
+
+            while (counter.value < 200000) {
+              counter.value += 1;
+              GomokuStateMut state = Gomoku.getInstance().newGameMut();
+              while (!state.isTerminal()) {
+                state.apply(state.getRandomMove(random));
               }
               s += state.getPayoff(0);
             }

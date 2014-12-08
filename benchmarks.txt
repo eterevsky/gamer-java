@@ -1,0 +1,29 @@
+Z620
+
+commit f1b7d5a78e02926d029dfe4324d85ae275857524
+Date:   Thu Nov 13 20:56:09 2014 +0300
+
+Benchmarks.testBenchmark                           3.1±0.2 µs (5.0%)
+BenchmarkGomoku.averageOver200k                    4.2±0.3 s (7.6%)
+BenchmarkGomoku.averageOver200kMulti               351.5±17.5 ms (5.0%)
+BenchmarkGomoku.averageOver200kCommonCounter       312.7±13.6 ms (4.4%)
+BenchmarkGomoku.timeRandomGame                     19.9±1.0 µs (5.0%)
+BenchmarkPerft.timePerftInitial2                   604.1±30.1 µs (5.0%)
+BenchmarkUct.uctGomoku200kSamplesSingle            5.4±0.3 s (5.0%)
+BenchmarkUct.uctGomoku200kSamplesMulti             4.0±0.2 s (4.9%)
+
+
+commit 091619549fa9b268656a037ee83131bee2b1c9ac
+Date:   Mon Dec 8 20:08:28 2014 +0300
+
+Benchmarks.testBenchmark                           3.0±0.1 µs (5.0%)
+BenchmarkGomoku.timeRandomGameMut                  6.7±0.3 µs (5.0%)
+BenchmarkGomoku.averageOver200k                    4.1±0.6 s (13.7%)
+BenchmarkGomoku.averageOver200kMut                 1334.8±66.6 ms (5.0%)
+BenchmarkGomoku.averageOver200kMulti               360.4±18.0 ms (5.0%)
+BenchmarkGomoku.averageOver200kCommonCounter       307.6±14.9 ms (4.9%)
+BenchmarkGomoku.timeRandomGame                     18.7±0.6 µs (3.1%)
+BenchmarkPerft.timePerftInitial2                   597.4±26.2 µs (4.4%)
+BenchmarkUct.uctGomoku200kSamplesMulti             5.2±0.5 s (9.5%)
+BenchmarkUct.uctGomoku200kSamplesSingle            8.1±1.4 s (17.3%)
+
