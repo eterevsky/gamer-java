@@ -71,20 +71,6 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku100k(int reps) {
-    double sum = 0;
-    Random random = new Random();
-
-    for (int i = 0; i < reps; i++) {
-      for (int isamples = 0; isamples < 100000; isamples++) {
-        sum += oneSample(random);
-      }
-    }
-
-    return sum;
-  }
-
-  @Benchmark
   public static double gomoku100kMut(int reps) {
     double sum = 0;
     Random random = new Random();
