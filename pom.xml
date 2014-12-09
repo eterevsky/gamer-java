@@ -61,6 +61,7 @@
           </execution>
         </executions>
         <configuration>
+          <killAfter>-1</killAfter>
           <mainClass>gamer.Benchmarks</mainClass>
         </configuration>
       </plugin>

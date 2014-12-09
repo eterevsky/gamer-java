@@ -35,9 +35,6 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     this.timeout = timeout;
   }
 
-  /*
-   * @see gamer.def.ComputerPlayer#setMaxSamples(long)
-   */
   @Override
   public void setMaxSamples(long maxSamples) {
     this.samplesLimit = maxSamples;
