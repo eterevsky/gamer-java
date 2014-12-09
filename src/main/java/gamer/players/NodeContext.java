@@ -5,13 +5,11 @@ import gamer.def.Position;
 import gamer.def.Solver;
 
 final class NodeContext<P extends Position<P, M>, M extends Move> {
-  final boolean propagateExact;
-  final Solver<P, M> solver;
+  boolean propagateExact = true;
+  Solver<P, M> solver = null;
+  int childrenThreshold = 0;
 
-  NodeContext() {
-    propagateExact = true;
-    solver = null;
-  }
+  NodeContext() {}
 
   NodeContext(boolean propagateExact, Solver<P, M> solver) {
     this.propagateExact = propagateExact;

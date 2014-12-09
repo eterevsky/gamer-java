@@ -35,17 +35,19 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
   public void run() {
     Random rnd = random == null ? ThreadLocalRandom.current() : random;
 
-    while (!root.knowExactValue() &&
+    while (!root.knowExact() &&
            (maxSamples <= 0 || root.getSamples() < maxSamples) &&
            (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
-      Node<P, M> node = null;
-      Node<P, M> child = root;
-      do {
-        node = child;
-        child = node.selectChildOrAddPending(samplesBatch);
-      } while (child != null && child != Node.KNOW_EXACT_VALUE);
+      Node<P, M> node = root;
+      Node.SelectChildResult<P, M> scResult = null;
+      while (true) {
+        scResult = node.selectChildOrAddPending(samplesBatch);
+        if (scResult.noChildren || scResult.knowExact)
+          break;
+        node = scResult.child;
+      }
 
-      if (child == Node.KNOW_EXACT_VALUE)
+      if (scResult.knowExact)
         continue;
 
       double value = 0;

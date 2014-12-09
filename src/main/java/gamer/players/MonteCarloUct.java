@@ -1,46 +1,58 @@
 package gamer.players;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gamer.def.Move;
 import gamer.def.Position;
 
 public class MonteCarloUct<P extends Position<P, M>, M extends Move>
     extends GenericPlayer<P, M> {
-  private int childrenThreshold = -1;
 
-  private class Selector extends BanditSelector<P, M> {
-    @Override
-    public boolean shouldCreateChildren() {
-      return node.getSamples() > childrenThreshold;
+  private static class UctNode<P extends Position<P, M>, M extends Move>
+      extends BanditNode<P, M> {
+
+    UctNode(Node<P, M> parent, P position, M move, NodeContext<P, M> context) {
+      super(parent, position, move, context);
     }
 
     @Override
-    public Selector newChildSelector() {
-      return new Selector();
+    public boolean maybeInitChildren() {
+      if (getTotalSamples() < context.childrenThreshold)
+        return false;
+
+      List<M> moves = getPosition().getMoves();
+      children = new ArrayList<>(moves.size());
+      for (M move : moves) {
+        P newPosition = getPosition().play(move);
+        children.add(new UctNode<>(this, newPosition, move, context));
+      }
+      return true;
     }
   }
 
   @Override
   protected Node<P, M> getRoot(P position) {
-    return new Node<P, M>(null, position, null, new Selector(), nodeContext);
+    return new UctNode<P, M>(null, position, null, nodeContext);
+  }
+
+  @Override
+  public void setSamplesBatch(int samplesBatch) {
+    this.samplesBatch = samplesBatch;
+    if (samplesBatch > nodeContext.childrenThreshold) {
+      nodeContext.childrenThreshold = samplesBatch;
+    }
   }
 
   public void setChildrenThreshold(int threshold) {
-    childrenThreshold = threshold;
+    nodeContext.childrenThreshold = threshold;
   }
 
   @Override
   public String getName() {
     if (name != null)
       return name;
-    if (childrenThreshold == -1)
-      childrenThreshold = samplesBatch;
-    return super.getName() + String.format(" ct%d", childrenThreshold);
-  }
-
-  @Override
-  public M selectMove(P position) {
-    if (childrenThreshold == -1)
-      childrenThreshold = samplesBatch;
-    return super.selectMove(position);
+    return super.getName() +
+           String.format(" ct%d", nodeContext.childrenThreshold);
   }
 }

@@ -4,78 +4,86 @@ import gamer.def.Move;
 import gamer.def.Position;
 import gamer.def.Solver;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-final class Node<P extends Position<P, M>, M extends Move> {
-  private final NodeContext<P, M> context;
-  private final Node<P, M> parent;
-  private List<Node<P, M>> children = null;
+abstract class Node<P extends Position<P, M>, M extends Move> {
   private final P position;
   private final M move;
-  private final Selector<P, M> selector;
-  private boolean exact = false;
-  // Exact if exact == true, mean otherwise.
-  private double payoff;
+  private final Node<P, M> parent;
+  protected final NodeContext<P, M> context;
+  protected List<Node<P, M>> children = null;
+  private boolean knowExact = false;
+  private double payoff;  // Payoff for player 0
   private int totalSamples = 0;
   private int pendingSamples = 0;
 
-  // Used as a result of selectChildOrAddPending().
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  final static Node KNOW_EXACT_VALUE = new Node(null, null, null, null, null);
+  public static final class SelectChildResult<
+      P extends Position<P, M>, M extends Move> {
+    public Node<P, M> child;
+    public final boolean knowExact;
+    public final boolean noChildren;
 
-  interface Selector<P extends Position<P, M>, M extends Move> {
-    void setNode(Node<P, M> node);
+    private SelectChildResult(boolean knowExact, boolean noChildren) {
+      this.child = null;
+      this.knowExact = knowExact;
+      this.noChildren = noChildren;
+    }
 
-    Node<P, M> select(Collection<Node<P, M>> children, long totalSamples);
-
-    boolean shouldCreateChildren();
-
-    Selector<P, M> newChildSelector();
+    private SelectChildResult(Node<P, M> child) {
+      this.child = child;
+      this.knowExact = false;
+      this.noChildren = false;
+    }
   }
+
+  @SuppressWarnings("rawtypes")
+  public static final SelectChildResult KNOW_EXACT =
+      new SelectChildResult(true, false);
+
+  @SuppressWarnings("rawtypes")
+  public static final SelectChildResult NO_CHILDREN =
+      new SelectChildResult(false, true);
 
   Node(Node<P, M> parent,
        P position,
        M move,
-       Selector<P, M> selector,
        NodeContext<P, M> context) {
     this.context = context;
     this.parent = parent;
     this.position = position;
     this.move = move;
-    this.selector = selector;
-    if (selector != null) {
-      selector.setNode(this);
-    }
 
     if (position != null) {
       if (position.isTerminal()) {
         this.payoff = position.getPayoff(0);
-        this.exact = true;
+        this.knowExact = true;
       } else if (context.solver != null) {
         Solver.Result<M> result = context.solver.solve(position);
         if (result != null) {
           this.payoff = result.payoff;
-          this.exact = true;
+          this.knowExact = true;
         }
       }
     }
   }
 
-  Node<P, M> getParent() {
+  abstract protected Node<P, M> selectChild();
+  abstract protected boolean maybeInitChildren();
+
+  final Node<P, M> getParent() {
     return parent;
   }
 
-  P getPosition() {
+  final P getPosition() {
     return position;
   }
 
-  M getMove() {
+  final M getMove() {
     return move;
   }
 
-  synchronized Collection<Node<P, M>> getChildren() {
+  final synchronized Collection<Node<P, M>> getChildren() {
     if (children == null) {
       throw new RuntimeException(
           "Requested children from a node without children.");
@@ -83,76 +91,64 @@ final class Node<P extends Position<P, M>, M extends Move> {
     return children;
   }
 
-  double getValue() {
+  final synchronized double getPayoff() {
     return payoff;
   }
 
-  boolean knowExactValue() {
-    return exact;
+  final boolean knowExact() {
+    return knowExact;
   }
 
-  synchronized int getSamples() {
+  final synchronized int getSamples() {
     return totalSamples - pendingSamples;
   }
 
   // Samples, including pending.
-  int getTotalSamples() {
+  final int getTotalSamples() {
     return totalSamples;
   }
 
-  // - If the exact value is known, add nsamples to samples (and parent samples)
-  //   and return KNOW_EXACT_VALUE.
-  // - If there are children, select one using Selector, add nsamples to pending
-  //   samples.
-  // - If there are no children, add nsamples to pending samples and return
-  //   null.
-  Node<P, M> selectChildOrAddPending(int nsamples) {
-    @SuppressWarnings("unchecked")
-    Node<P, M> returnValue = KNOW_EXACT_VALUE;
-    boolean learnedExactValue = false;
+  final SelectChildResult<P, M> selectChildOrAddPending(int nsamples) {
+    boolean learnedExact = false;
 
     synchronized(this) {
       totalSamples += nsamples;
-      if (!exact) {
+
+      if (!knowExact) {
         pendingSamples += nsamples;
+        learnedExact = children == null &&
+                       maybeInitChildren() &&
+                       context.propagateExact &&
+                       checkChildrenForExact();
 
-        if (children == null && selector.shouldCreateChildren()) {
-          learnedExactValue = initChildren();
-        }
-
-        if (!learnedExactValue) {
-          if (children == null) {
-            returnValue = null;
-          } else {
-            returnValue = selector.select(children, totalSamples);
-          }
+        if (!learnedExact) {
+          return children == null ? new SelectChildResult<P, M>(false, true)
+                                  : new SelectChildResult<P, M>(selectChild());
         }
       }
     }
 
-    if (parent != null && returnValue == KNOW_EXACT_VALUE) {
-      parent.addSamplesAndUpdate(
-          nsamples, payoff, this, learnedExactValue);
+    if (parent != null) {
+      parent.addSamplesAndUpdate(nsamples, payoff, this, learnedExact);
     }
 
-    return returnValue;
+    return new SelectChildResult<P, M>(true, false);
   }
 
-  void addSamples(int nsamples, double value) {
+  final void addSamples(int nsamples, double value) {
     addSamplesAndUpdate(nsamples, value, null, false);
   }
 
-  double getUcbPriority(double parentSamplesLog, boolean player) {
+  final double getUcbPriority(double parentSamplesLog, boolean player) {
     if (totalSamples == 0) {
       return 2 * (1 + Math.sqrt(parentSamplesLog));
     }
 
-    double value = getValue();
-    return (player ? value : 1 - value) +
-           Math.sqrt(parentSamplesLog / totalSamples);
+    double payoff = player ? getPayoff() : -getPayoff();
+    return payoff + Math.sqrt(parentSamplesLog / totalSamples);
   }
 
-  Node<P, M> getChildByStateForTest(P position) {
+  final Node<P, M> getChildByPositionForTest(P position) {
     if (children == null) {
       throw new RuntimeException(
           "Requested children from a node without children.");
@@ -165,28 +161,24 @@ final class Node<P extends Position<P, M>, M extends Move> {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return toString(0);
   }
 
-  private String toString(int indent) {
+  private final String toString(int indent) {
     StringBuilder builder = new StringBuilder();
     builder.append('\n');
     for (int i = 0; i < indent; i++) {
       builder.append(' ');
-    }
-    if (this == KNOW_EXACT_VALUE) {
-      builder.append("KNOW_EXACT_VALUE");
-      return builder.toString();
     }
     if (move != null) {
       builder.append(move.toString());
     } else {
       builder.append(position.toString());
     }
-    builder.append(
-        String.format(" %.1f/%d/%d", getValue(), totalSamples, pendingSamples));
-    if (knowExactValue()) {
+    builder.append(String.format(
+        " %.1f/%d/%d", getPayoff(), totalSamples, pendingSamples));
+    if (knowExact()) {
       builder.append(" exact");
     }
     if (children != null) {
@@ -198,7 +190,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
     return builder.toString();
   }
 
-  private void addSamplesAndUpdate(
+  private final void addSamplesAndUpdate(
       int nsamples, double value, Node<P, M> child,
       boolean childLearnedExactValue) {
     boolean learnedExactValue = false;
@@ -212,7 +204,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
 
       if (context.propagateExact && childLearnedExactValue) {
         assert child != null;
-        assert child.knowExactValue();
+        assert child.knowExact();
         learnedExactValue = maybeSetExactValue(child);
       }
     }
@@ -221,25 +213,13 @@ final class Node<P extends Position<P, M>, M extends Move> {
       parent.addSamplesAndUpdate(nsamples, value, this, learnedExactValue);
   }
 
-  private boolean initChildren() {
-    List<M> moves = position.getMoves();
-    children = new ArrayList<>(moves.size());
-    for (M move : moves) {
-      P newState = position.play(move);
-      children.add(
-          new Node<P, M>(
-              this, newState, move, selector.newChildSelector(), context));
-    }
-
-    if (!context.propagateExact)
-      return false;
-
+  private final boolean checkChildrenForExact() {
     double lo = 2;
     double hi = -2;
     boolean hasNonExact = false;
 
     for (Node<P, M> child : children) {
-      if (!child.exact) {
+      if (!child.knowExact) {
         hasNonExact = true;
         continue;
       }
@@ -252,29 +232,29 @@ final class Node<P extends Position<P, M>, M extends Move> {
 
     boolean player = position.getPlayerBool();
 
-    exact = true;
     if (hasNonExact) {
-      if (player && hi == 1) {
+      if (player && hi > 0) {
         payoff = 1;
-      } else if (!player && lo == -1) {
+      } else if (!player && lo < 0) {
         payoff = -1;
       } else {
-        exact = false;
+        return false;
       }
     } else {
       payoff = player ? hi : lo;
     }
 
-    return exact;
+    knowExact = true;
+    return true;
   }
 
-  private boolean maybeSetExactValue(Node<P, M> updatedChild) {
+  private final boolean maybeSetExactValue(Node<P, M> updatedChild) {
     boolean player = position.getPlayerBool();
 
-    if (updatedChild.exact &&
-        (player && updatedChild.payoff == 1 ||
-         !player && updatedChild.payoff == -1)) {
-      exact = true;
+    if (updatedChild.knowExact &&
+        (player && updatedChild.payoff > 0 ||
+         !player && updatedChild.payoff < 0)) {
+      knowExact = true;
       payoff = updatedChild.payoff;
       return true;
     }
@@ -283,7 +263,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
     double hi = -2;
 
     for (Node<P, M> child : children) {
-      if (!child.exact)
+      if (!child.knowExact)
         return false;
       double v = child.payoff;
       if (v < lo)
@@ -293,7 +273,7 @@ final class Node<P extends Position<P, M>, M extends Move> {
     }
 
     payoff = player ? hi : lo;
-    exact = true;
+    knowExact = true;
     return true;
   }
 }

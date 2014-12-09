@@ -3,21 +3,24 @@ package gamer.players;
 import gamer.def.Move;
 import gamer.def.Position;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
     extends GenericPlayer<P, M> {
-  static class Selector<P extends Position<P, M>, M extends Move>
-      implements Node.Selector<P, M> {
+
+  private static class NaiveNode<P extends Position<P, M>, M extends Move>
+      extends Node<P, M> {
+
     Iterator<Node<P, M>> childrenIt = null;
 
-    @Override
-    public void setNode(Node<P, M> node) {}
+    NaiveNode(P position, NodeContext<P, M> context) {
+      super(null, position, null, context);
+    }
 
     @Override
-    public synchronized Node<P, M> select(
-        Collection<Node<P, M>> children, long totalSamples) {
+    public synchronized Node<P, M> selectChild() {
       if (childrenIt == null || !childrenIt.hasNext())
         childrenIt = children.iterator();
 
@@ -25,18 +28,20 @@ public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
     }
 
     @Override
-    public boolean shouldCreateChildren() {
-      return true;
-    }
+    public boolean maybeInitChildren() {
+      List<M> moves = getPosition().getMoves();
+      children = new ArrayList<>(moves.size());
+      for (M move : moves) {
+        P newState = getPosition().play(move);
+        children.add(new LeafNode<>(this, newState, move, context));
+      }
 
-    @Override
-    public synchronized LeafSelector<P, M> newChildSelector() {
-      return new LeafSelector<P, M>();
+      return true;
     }
   }
 
   @Override
-  protected Node<P, M> getRoot(P state) {
-    return new Node<P, M>(null, state, null, new Selector<P, M>(), nodeContext);
+  protected Node<P, M> getRoot(P position) {
+    return new NaiveNode<P, M>(position, nodeContext);
   }
 }

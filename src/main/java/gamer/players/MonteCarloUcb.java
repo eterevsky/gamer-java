@@ -1,26 +1,36 @@
 package gamer.players;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gamer.def.Move;
 import gamer.def.Position;
 
 public class MonteCarloUcb<P extends Position<P, M>, M extends Move>
     extends GenericPlayer<P, M> {
-  private static class Selector<P extends Position<P, M>, M extends Move>
-      extends BanditSelector<P, M> {
-    @Override
-    public boolean shouldCreateChildren() {
-      return true;
+
+  private static class UcbNode<P extends Position<P, M>, M extends Move>
+      extends BanditNode<P, M> {
+
+    UcbNode(P position, NodeContext<P, M> context) {
+      super(null, position, null, context);
     }
 
     @Override
-    public LeafSelector<P, M> newChildSelector() {
-      return new LeafSelector<P, M>();
+    public boolean maybeInitChildren() {
+      List<M> moves = getPosition().getMoves();
+      children = new ArrayList<>(moves.size());
+      for (M move : moves) {
+        P newState = getPosition().play(move);
+        children.add(new LeafNode<>(this, newState, move, context));
+      }
+
+      return true;
     }
   }
 
   @Override
   protected Node<P, M> getRoot(P position) {
-    return new Node<P, M>(
-        null, position, null, new Selector<P, M>(), nodeContext);
+    return new UcbNode<P, M>(position, nodeContext);
   }
 }

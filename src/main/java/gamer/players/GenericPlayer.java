@@ -23,7 +23,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
 
   protected int samplesBatch = 1;
   protected String name = null;
-  protected NodeContext<P, M> nodeContext = new NodeContext<>();
+  protected NodeContext<P, M> nodeContext = new NodeContext<P, M>();
 
   @Override
   public boolean isHuman() {
@@ -40,7 +40,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     this.samplesLimit = maxSamples;
   }
 
-  public final void setSamplesBatch(int samplesBatch) {
+  public void setSamplesBatch(int samplesBatch) {
     this.samplesBatch = samplesBatch;
   }
 
@@ -55,14 +55,13 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   }
 
   public void setFindExact(boolean exact) {
-    this.nodeContext = new NodeContext<>(exact, solver);
+    this.nodeContext.propagateExact = exact;
   }
 
   @Override
   public void addSolver(Solver<P, M> solver) {
     this.solver = solver;
-    this.nodeContext =
-        new NodeContext<>(this.nodeContext.propagateExact, solver);
+    this.nodeContext.solver = solver;
   }
 
   @Override
@@ -140,17 +139,17 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     double bestValue = player ? -2 : 2;
     for (Node<P, M> node : root.getChildren()) {
       if (bestNode == null ||
-          (player ? (node.getValue() > bestValue)
-                  : (node.getValue() < bestValue))) {
+          (player ? (node.getPayoff() > bestValue)
+                  : (node.getPayoff() < bestValue))) {
         bestNode = node;
-        bestValue = node.getValue();
+        bestValue = node.getPayoff();
       }
     }
 
     report = String.format(
         "%s : %f over %d (%d)",
         state.moveToString(bestNode.getMove()),
-        bestNode.getValue(), bestNode.getSamples(), root.getSamples());
+        bestNode.getPayoff(), bestNode.getSamples(), root.getSamples());
 
     return bestNode.getMove();
   }
