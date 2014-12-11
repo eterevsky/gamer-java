@@ -45,10 +45,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   public static final SelectChildResult NO_CHILDREN =
       new SelectChildResult(false, true);
 
-  Node(Node<P, M> parent,
-       P position,
-       M move,
-       NodeContext<P, M> context) {
+  Node(Node<P, M> parent, P position, M move, NodeContext<P, M> context) {
     this.context = context;
     this.parent = parent;
     this.position = position;
