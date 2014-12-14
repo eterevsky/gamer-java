@@ -17,12 +17,13 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
 
     Node<P, M> bestChild = null;
     double bestChildPrio = 0;
+    boolean player = getPosition().getPlayerBool();
+
     for (Node<P, M> child : children) {
       if (child.getTotalSamples() == 0) {
         return child;
       }
-      double priority = child.getUcbPriority(
-          totalSamplesLog, getPosition().getPlayerBool());
+      double priority = child.getUcbPriority(totalSamplesLog, player);
 
       if (bestChild == null || priority > bestChildPrio) {
         bestChild = child;

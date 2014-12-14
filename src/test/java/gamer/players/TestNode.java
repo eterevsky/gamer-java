@@ -106,39 +106,66 @@ public final class TestNode {
     assertEquals(1, root.getSamples());
     assertEquals(1.0, root.getPayoff(), 1E-8);
 
-    // Test sampling node 2.
-
     root.willInitChildren = true;
     Node<TreeGameState, TreeGameMove> nodeX =
         root.selectChildOrAddPending(2).child;
     assertNotNull(nodeX);
-    assertEquals(1, root.getSamples());
     assertEquals(3, root.getTotalSamples());
     assertEquals(1.0, root.getPayoff(), 1E-8);
+    assertEquals(0, nodeX.getTotalSamples());
+    Node.SelectChildResult nodeXResult = nodeX.selectChildOrAddPending(2);
+    assertEquals(2, nodeX.getTotalSamples());
 
     Node<TreeGameState, TreeGameMove> nodeY =
         root.selectChildOrAddPending(2).child;
     assertNotNull(nodeY);
-    assertEquals(1, root.getSamples());
     assertEquals(5, root.getTotalSamples());
     assertEquals(1.0, root.getPayoff(), 1E-8);
+    assertEquals(0, nodeY.getTotalSamples());
+    Node.SelectChildResult nodeYResult = nodeY.selectChildOrAddPending(2);
+    assertEquals(2, nodeY.getTotalSamples());
 
     TestingNode node1, node2;
+    Node.SelectChildResult node1Result, node2Result;
     if (nodeX.getPosition().equals(pos1)) {
       node1 = (TestingNode) nodeX;
       node2 = (TestingNode) nodeY;
+      node1Result = nodeXResult;
+      node2Result = nodeYResult;
     } else {
       node1 = (TestingNode) nodeY;
       node2 = (TestingNode) nodeX;
+      node1Result = nodeYResult;
+      node2Result = nodeXResult;
     }
 
     assertEquals(pos1, node1.getPosition());
     assertEquals(pos2, node2.getPosition());
 
-    assertEquals(0, node1.getSamples());
+    assertEquals(3, root.getSamples());
+    assertEquals(2, node1.getSamples());
     assertEquals(2, node1.getTotalSamples());
     assertEquals(0, node2.getSamples());
     assertEquals(2, node2.getTotalSamples());
 
+    node2.addSamples(2, -1.0);
+    assertEquals(2, node2.getSamples());
+    assertEquals(5, root.getSamples());
+    assertEquals(-1.0, node2.getPayoff(), 1E-8);
+    assertEquals(0.2, root.getPayoff(), 1E-8);
+
+    Node.SelectChildResult anotherResult = root.selectChildOrAddPending(1);
+    assertEquals(node1, anotherResult.child);
+  }
+
+  @Test
+  public void testExact() {
+    TreeGameState pos0 = TreeGameInstances.GAME0.newGame();
+    TreeGameState pos1 = pos0.play(pos0.getMoveToNode(1));
+    TreeGameState pos2 = pos0.play(pos0.getMoveToNode(2));
+
+    TestingNode root = new TestingNode(
+        null, pos0, null,
+        new NodeContext<TreeGameState, TreeGameMove>(true, null));
   }
 }
