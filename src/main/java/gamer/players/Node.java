@@ -60,7 +60,8 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       } else if (context.solver != null) {
         Solver.Result<M> result = context.solver.solve(position);
         if (result != null) {
-          this.payoff = result.payoff;
+          this.payoff =
+              result.payoff * Math.pow(PAYOFF_SCALE_FACTOR, result.moves);
           this.knowExact = true;
         }
       }
@@ -207,7 +208,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       if (context.propagateExact && childLearnedExactValue) {
         assert child != null;
         assert child.knowExact();
-        learnedExactValue = maybeSetExactValue(child);
+        learnedExactValue = checkChildrenForExact();
       }
     }
 
@@ -219,52 +220,6 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   private final boolean checkChildrenForExact() {
     double lo = 1E10;
     double hi = -1E10;
-    boolean hasNonExact = false;
-
-    for (Node<P, M> child : children) {
-      if (!child.knowExact) {
-        hasNonExact = true;
-        continue;
-      }
-      double v = child.payoff;
-      if (v < lo)
-        lo = v;
-      if (v > hi)
-        hi = v;
-    }
-
-    boolean player = position.getPlayerBool();
-
-    if (hasNonExact) {
-      if (player && hi > 0) {
-        payoff = 1;
-      } else if (!player && lo < 0) {
-        payoff = -1;
-      } else {
-        return false;
-      }
-    } else {
-      payoff = player ? hi : lo;
-    }
-
-    payoff *= PAYOFF_SCALE_FACTOR;
-    knowExact = true;
-    return true;
-  }
-
-  private final boolean maybeSetExactValue(Node<P, M> updatedChild) {
-    boolean player = position.getPlayerBool();
-
-    if (updatedChild.knowExact &&
-        (player && updatedChild.payoff > 0 ||
-         !player && updatedChild.payoff < 0)) {
-      knowExact = true;
-      payoff = PAYOFF_SCALE_FACTOR * updatedChild.payoff;
-      return true;
-    }
-
-    double lo = 2;
-    double hi = -2;
 
     for (Node<P, M> child : children) {
       if (!child.knowExact)
@@ -276,7 +231,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
         hi = v;
     }
 
-    payoff = PAYOFF_SCALE_FACTOR * (player ? hi : lo);
+    payoff = PAYOFF_SCALE_FACTOR * (position.getPlayerBool() ? hi : lo);
     knowExact = true;
     return true;
   }

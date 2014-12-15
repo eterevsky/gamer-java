@@ -158,17 +158,23 @@ public final class TestNode {
   @Test(timeout=100)
   public void testExact0() {
     TreeGameState pos0 = TreeGameInstances.GAME0.newGame();
-    TreeGameState pos1 = pos0.play(pos0.getMoveToNode(1));
+    TreeGameState pos2 = pos0.play(pos0.getMoveToNode(2));
 
     TestingNode root = new TestingNode(
         null, pos0, null,
         new NodeContext<TreeGameState, TreeGameMove>(true, null));
 
     root.willInitChildren = true;
-    root.nextSelectResult = pos1;
+    root.nextSelectResult = pos2;
+
+    TestingNode node2 = (TestingNode) root.selectChildOrAddPending(1).child;
+    node2.willInitChildren = true;
+    assertTrue(node2.selectChildOrAddPending(1).knowExact);
+    assertTrue(node2.knowExact());
+    assertEquals(-0.999, node2.getPayoff(), 1E-8);
 
     assertTrue(root.selectChildOrAddPending(1).knowExact);
-    assertEquals(0.999, root.getPayoff(), 1E-8);
     assertTrue(root.knowExact());
+    assertEquals(0.999, root.getPayoff(), 1E-8);
   }
 }

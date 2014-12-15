@@ -65,12 +65,12 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
 
     MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
-    player1.setTimeout(2000L);
+    player1.setTimeout(15000L);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(1);
     player1.setChildrenThreshold(2);
     MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
-    player2.setTimeout(2000L);
+    player2.setTimeout(15000L);
     player2.setMaxWorkers(cores);
     player2.setSamplesBatch(4);
     Match<P, M> match = new Match<>(startPosition, player1, player2);

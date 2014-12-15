@@ -115,6 +115,7 @@ public class BenchmarkGomoku {
       this.counter = counter;
     }
 
+    @Override
     public Double call() {
       double s = 0;
       Random random = ThreadLocalRandom.current();
@@ -167,6 +168,7 @@ public class BenchmarkGomoku {
       this.counter = counter;
     }
 
+    @Override
     public Double call() {
       double s = 0;
       Random random = ThreadLocalRandom.current();
