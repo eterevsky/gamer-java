@@ -46,18 +46,16 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
            (maxSamples <= 0 || root.getSamples() < maxSamples) &&
            (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
       Node<P, M> node = root;
-      Node.SelectChildResult<P, M> scResult = null;
-      while (true) {
-        scResult = node.selectChildOrAddPending(samplesBatch);
-        if (scResult.noChildren || scResult.knowExact)
-          break;
-        node = scResult.child;
+      Node<P, M> next = node.selectChildOrAddPending(samplesBatch);
+      while (next != Node.NO_CHILDREN && next != Node.KNOW_EXACT) {
+        node = next;
+        next = node.selectChildOrAddPending(samplesBatch);
       }
 
       if (verbose)
         System.out.format("%s", node);
 
-      if (scResult.knowExact) {
+      if (next == Node.KNOW_EXACT) {
         if (verbose)
           System.out.println(root);
         continue;

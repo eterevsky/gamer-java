@@ -1,7 +1,6 @@
 package gamer.players;
 
 import static gamer.players.Sampler.PAYOFF_SCALE_FACTOR;
-
 import gamer.def.Move;
 import gamer.def.Position;
 import gamer.def.Solver;
@@ -20,32 +19,31 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   private int totalSamples = 0;
   private int pendingSamples = 0;
 
-  public static final class SelectChildResult<
-      P extends Position<P, M>, M extends Move> {
-    public Node<P, M> child;
-    public final boolean knowExact;
-    public final boolean noChildren;
-
-    private SelectChildResult(boolean knowExact, boolean noChildren) {
-      this.child = null;
-      this.knowExact = knowExact;
-      this.noChildren = noChildren;
+  @SuppressWarnings("rawtypes")
+  private final static class DummyNode extends Node {
+    @Override
+    protected DummyNode selectChild() {
+      throw new RuntimeException("shouldn't be called");
     }
 
-    private SelectChildResult(Node<P, M> child) {
-      this.child = child;
-      this.knowExact = false;
-      this.noChildren = false;
+    @Override
+    protected boolean maybeInitChildren() {
+      throw new RuntimeException("shouldn't be called");
     }
   }
 
   @SuppressWarnings("rawtypes")
-  public static final SelectChildResult KNOW_EXACT =
-      new SelectChildResult(true, false);
+  static final DummyNode KNOW_EXACT = new DummyNode();
 
   @SuppressWarnings("rawtypes")
-  public static final SelectChildResult NO_CHILDREN =
-      new SelectChildResult(false, true);
+  static final DummyNode NO_CHILDREN = new DummyNode();
+
+  private Node() {
+    position = null;
+    move = null;
+    parent = null;
+    context = null;
+  }
 
   Node(Node<P, M> parent, P position, M move, NodeContext<P, M> context) {
     this.context = context;
@@ -91,7 +89,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return children;
   }
 
-  final synchronized double getPayoff() {
+  final double getPayoff() {
     return payoff;
   }
 
@@ -108,27 +106,32 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return totalSamples;
   }
 
-  final SelectChildResult<P, M> selectChildOrAddPending(int nsamples) {
+  final Node<P, M> selectChildOrAddPending(int nsamples) {
+    boolean knowExactLocal;
     boolean learnedExact = false;
 
     synchronized(this) {
-      if (!knowExact) {
+      knowExactLocal = knowExact;
+      if (!knowExactLocal) {
         pendingSamples += nsamples;
         learnedExact = children == null &&
                        maybeInitChildren() &&
                        context.propagateExact &&
                        checkChildrenForExact();
+      }
 
-        // totalSamples should be incremented _after_ maybeInitChildren() is
-        // called since it may take into account the old totalSamples value.
-        totalSamples += nsamples;
+      // totalSamples should be incremented _after_ maybeInitChildren() is
+      // called since it may take into account the old totalSamples value.
+      totalSamples += nsamples;
+    }
 
-        if (!learnedExact) {
-          return children == null ? new SelectChildResult<P, M>(false, true)
-                                  : new SelectChildResult<P, M>(selectChild());
-        }
+    if (!knowExactLocal && !learnedExact) {
+      if (children == null) {
+        @SuppressWarnings("unchecked")
+        Node<P, M> no_children_result = NO_CHILDREN;
+        return no_children_result;
       } else {
-        totalSamples += nsamples;
+        return selectChild();
       }
     }
 
@@ -136,7 +139,9 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       parent.addSamplesAndUpdate(nsamples, payoff, this, learnedExact);
     }
 
-    return new SelectChildResult<P, M>(true, false);
+    @SuppressWarnings("unchecked")
+    Node<P, M> know_exact_result = KNOW_EXACT;
+    return know_exact_result;
   }
 
   final void addSamples(int nsamples, double value) {
