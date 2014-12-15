@@ -24,7 +24,7 @@ public final class Match<P extends Position<P, M>, M extends Move> {
   @Override
   public String toString() {
     if (result == null) {
-      return String.format("%s: %s  v  %s",
+      return String.format("%s  v  %s",
                            player1.getName(),
                            player2.getName());
     }

@@ -39,12 +39,15 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
   @Override
   public void setSamplesBatch(int samplesBatch) {
     this.samplesBatch = samplesBatch;
-    if (samplesBatch > nodeContext.childrenThreshold) {
+    if (nodeContext.childrenThreshold < samplesBatch) {
       nodeContext.childrenThreshold = samplesBatch;
     }
   }
 
   public void setChildrenThreshold(int threshold) {
+    if (threshold < 1) {
+      throw new RuntimeException("Children threshold should be at least 1");
+    }
     nodeContext.childrenThreshold = threshold;
   }
 

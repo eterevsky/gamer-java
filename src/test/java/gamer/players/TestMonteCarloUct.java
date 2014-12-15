@@ -59,6 +59,19 @@ public final class TestMonteCarloUct {
   }
 
   @Test(timeout=100)
+  public void play2player2() {
+    TreeGameState state = TreeGameInstances.GAME2.newGame();
+    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    player.setTimeout(-1);
+    player.setMaxSamples(50L);
+    player.setSamplesBatch(1);
+
+    state = state.play(state.getMoveToNode(2));
+    TreeGameMove move = player.selectMove(state);
+    assertEquals(5, move.getNodeId());
+  }
+
+  @Test(timeout=100)
   public void play3() {
     TreeGameState state = TreeGameInstances.GAME3.newGame();
     MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
@@ -72,5 +85,22 @@ public final class TestMonteCarloUct {
 
     move = player.selectMove(state);
     assertEquals(5, move.getNodeId());
+  }
+
+  @Test(timeout=500)
+  public void play4() {
+    TreeGameState state = TreeGameInstances.GAME4.newGame();
+    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    player.setTimeout(-1);
+    player.setMaxSamples(50L);
+    player.setSamplesBatch(1);
+
+    TreeGameMove move = player.selectMove(state);
+    assertEquals(2, move.getNodeId());
+    state = state.play(move);
+    state = state.play(state.getMoveToNode(4));
+
+    move = player.selectMove(state);
+    assertEquals(7, move.getNodeId());
   }
 }

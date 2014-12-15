@@ -2,7 +2,6 @@ package gamer.players;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -14,7 +13,6 @@ import gamer.treegame.TreeGameMove;
 import gamer.treegame.TreeGameState;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public final class TestNode {
@@ -62,6 +60,7 @@ public final class TestNode {
       extends BanditNode<TreeGameState, TreeGameMove> {
 
     private boolean willInitChildren = false;
+    private TreeGameState nextSelectResult = null;
 
     TestingNode(Node<TreeGameState, TreeGameMove> parent,
                 TreeGameState position,
@@ -85,6 +84,22 @@ public final class TestNode {
 
       return true;
     }
+
+    @Override
+    public TestingNode selectChild() {
+      if (nextSelectResult != null) {
+        for (Node<TreeGameState, TreeGameMove> child : children) {
+          if (child.getPosition().equals(nextSelectResult)) {
+            TestingNode result = (TestingNode) child;
+            nextSelectResult = null;
+            return result;
+          }
+        }
+        throw new RuntimeException();
+      }
+
+      return (TestingNode) super.selectChild();
+    }
   }
 
   @Test(timeout=50)
@@ -107,65 +122,53 @@ public final class TestNode {
     assertEquals(1.0, root.getPayoff(), 1E-8);
 
     root.willInitChildren = true;
-    Node<TreeGameState, TreeGameMove> nodeX =
-        root.selectChildOrAddPending(2).child;
-    assertNotNull(nodeX);
+    root.nextSelectResult = pos1;
+    TestingNode node1 = (TestingNode) root.selectChildOrAddPending(2).child;
+    assertNotNull(node1);
+    assertEquals(pos1, node1.getPosition());
     assertEquals(3, root.getTotalSamples());
     assertEquals(1.0, root.getPayoff(), 1E-8);
-    assertEquals(0, nodeX.getTotalSamples());
-    Node.SelectChildResult nodeXResult = nodeX.selectChildOrAddPending(2);
-    assertEquals(2, nodeX.getTotalSamples());
-
-    Node<TreeGameState, TreeGameMove> nodeY =
-        root.selectChildOrAddPending(2).child;
-    assertNotNull(nodeY);
-    assertEquals(5, root.getTotalSamples());
-    assertEquals(1.0, root.getPayoff(), 1E-8);
-    assertEquals(0, nodeY.getTotalSamples());
-    Node.SelectChildResult nodeYResult = nodeY.selectChildOrAddPending(2);
-    assertEquals(2, nodeY.getTotalSamples());
-
-    TestingNode node1, node2;
-    Node.SelectChildResult node1Result, node2Result;
-    if (nodeX.getPosition().equals(pos1)) {
-      node1 = (TestingNode) nodeX;
-      node2 = (TestingNode) nodeY;
-      node1Result = nodeXResult;
-      node2Result = nodeYResult;
-    } else {
-      node1 = (TestingNode) nodeY;
-      node2 = (TestingNode) nodeX;
-      node1Result = nodeYResult;
-      node2Result = nodeXResult;
-    }
-
-    assertEquals(pos1, node1.getPosition());
-    assertEquals(pos2, node2.getPosition());
-
-    assertEquals(3, root.getSamples());
-    assertEquals(2, node1.getSamples());
+    assertEquals(0, node1.getTotalSamples());
+    node1.selectChildOrAddPending(2);
     assertEquals(2, node1.getTotalSamples());
-    assertEquals(0, node2.getSamples());
+    assertEquals(2, node1.getSamples());
+    assertEquals(3, root.getSamples());
+
+    // Bandit selectChild is used.
+    TestingNode node2 = (TestingNode) root.selectChildOrAddPending(2).child;
+    assertNotNull(node2);
+    assertEquals(pos2, node2.getPosition());
+    assertEquals(5, root.getTotalSamples());
+    assertEquals(0, node2.getTotalSamples());
+    node2.selectChildOrAddPending(2);
     assertEquals(2, node2.getTotalSamples());
+    assertEquals(0, node2.getSamples());
 
     node2.addSamples(2, -1.0);
     assertEquals(2, node2.getSamples());
     assertEquals(5, root.getSamples());
     assertEquals(-1.0, node2.getPayoff(), 1E-8);
-    assertEquals(0.2, root.getPayoff(), 1E-8);
+    assertEquals(0.2, root.getPayoff(), 1E-2);
 
-    Node.SelectChildResult anotherResult = root.selectChildOrAddPending(1);
+    Node.SelectChildResult<TreeGameState, TreeGameMove> anotherResult =
+        root.selectChildOrAddPending(1);
     assertEquals(node1, anotherResult.child);
   }
 
-  @Test
-  public void testExact() {
+  @Test(timeout=100)
+  public void testExact0() {
     TreeGameState pos0 = TreeGameInstances.GAME0.newGame();
     TreeGameState pos1 = pos0.play(pos0.getMoveToNode(1));
-    TreeGameState pos2 = pos0.play(pos0.getMoveToNode(2));
 
     TestingNode root = new TestingNode(
         null, pos0, null,
         new NodeContext<TreeGameState, TreeGameMove>(true, null));
+
+    root.willInitChildren = true;
+    root.nextSelectResult = pos1;
+
+    assertTrue(root.selectChildOrAddPending(1).knowExact);
+    assertEquals(0.999, root.getPayoff(), 1E-8);
+    assertTrue(root.knowExact());
   }
 }

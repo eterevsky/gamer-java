@@ -7,7 +7,7 @@ import gamer.def.Solver;
 final class NodeContext<P extends Position<P, M>, M extends Move> {
   boolean propagateExact = true;
   Solver<P, M> solver = null;
-  int childrenThreshold = 0;
+  int childrenThreshold = 1;
 
   NodeContext() {}
 

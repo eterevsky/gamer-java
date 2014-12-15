@@ -8,11 +8,14 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
+  static final double PAYOFF_SCALE_FACTOR = 0.999;
+
   private final Node<P, M> root;
   private final long finishTime;
   private final long maxSamples;
   private final int samplesBatch;
   private final Random random;
+  private boolean verbose = false;
   private Solver<P, M> solver = null;
 
   Sampler(Node<P, M> root,
@@ -31,6 +34,10 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
     this.solver = solver;
   }
 
+  void setVerbose(boolean verbose) {
+    this.verbose = verbose;
+  }
+
   @Override
   public void run() {
     Random rnd = random == null ? ThreadLocalRandom.current() : random;
@@ -47,25 +54,38 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
         node = scResult.child;
       }
 
-      if (scResult.knowExact)
+      if (verbose)
+        System.out.format("%s", node);
+
+      if (scResult.knowExact) {
+        if (verbose)
+          System.out.println(root);
         continue;
+      }
 
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
         P position = node.getPosition();
         Solver.Result<M> sResult = null;
+        int moves = 0;
         do {
           position = position.play(position.getRandomMove(rnd));
           sResult = (solver != null) ? solver.solve(position) : null;
+          moves += 1;
         } while (!position.isTerminal() && sResult == null);
 
         if (position.isTerminal()) {
-          value += position.getPayoff(0);
+          value += Math.pow(PAYOFF_SCALE_FACTOR, moves) * position.getPayoff(0);
         } else {
-          value += sResult.payoff;
+          value += Math.pow(PAYOFF_SCALE_FACTOR, moves) * sResult.payoff;
         }
       }
       node.addSamples(samplesBatch, value / samplesBatch);
+
+      if (verbose) {
+        System.out.format("%s", node);
+        System.out.println(root);
+      }
     }
   }
 }

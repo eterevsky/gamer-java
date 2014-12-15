@@ -1,5 +1,7 @@
 package gamer.players;
 
+import static gamer.players.Sampler.PAYOFF_SCALE_FACTOR;
+
 import gamer.def.Move;
 import gamer.def.Position;
 import gamer.def.Solver;
@@ -109,8 +111,6 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     boolean learnedExact = false;
 
     synchronized(this) {
-      totalSamples += nsamples;
-
       if (!knowExact) {
         pendingSamples += nsamples;
         learnedExact = children == null &&
@@ -118,10 +118,16 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
                        context.propagateExact &&
                        checkChildrenForExact();
 
+        // totalSamples should be incremented _after_ maybeInitChildren() is
+        // called since it may take into account the old totalSamples value.
+        totalSamples += nsamples;
+
         if (!learnedExact) {
           return children == null ? new SelectChildResult<P, M>(false, true)
                                   : new SelectChildResult<P, M>(selectChild());
         }
+      } else {
+        totalSamples += nsamples;
       }
     }
 
@@ -171,13 +177,12 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     if (move != null) {
       builder.append(move.toString());
     } else {
-      builder.append(position.toString());
+      builder.append("root");
     }
     builder.append(String.format(
-        " %.1f/%d/%d", getPayoff(), totalSamples, pendingSamples));
-    if (knowExact()) {
-      builder.append(" exact");
-    }
+        " %s%.3f %d+%d samples",
+        knowExact() ? "=" : "", getPayoff(),
+        totalSamples - pendingSamples, pendingSamples));
     if (children != null) {
       for (Node<P, M> child : children) {
         builder.append(child.toString(indent + 2));
@@ -207,12 +212,13 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     }
 
     if (parent != null)
-      parent.addSamplesAndUpdate(nsamples, value, this, learnedExactValue);
+      parent.addSamplesAndUpdate(
+          nsamples, PAYOFF_SCALE_FACTOR * value, this, learnedExactValue);
   }
 
   private final boolean checkChildrenForExact() {
-    double lo = 2;
-    double hi = -2;
+    double lo = 1E10;
+    double hi = -1E10;
     boolean hasNonExact = false;
 
     for (Node<P, M> child : children) {
@@ -241,6 +247,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       payoff = player ? hi : lo;
     }
 
+    payoff *= PAYOFF_SCALE_FACTOR;
     knowExact = true;
     return true;
   }
@@ -252,7 +259,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
         (player && updatedChild.payoff > 0 ||
          !player && updatedChild.payoff < 0)) {
       knowExact = true;
-      payoff = updatedChild.payoff;
+      payoff = PAYOFF_SCALE_FACTOR * updatedChild.payoff;
       return true;
     }
 
@@ -269,7 +276,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
         hi = v;
     }
 
-    payoff = player ? hi : lo;
+    payoff = PAYOFF_SCALE_FACTOR * (player ? hi : lo);
     knowExact = true;
     return true;
   }

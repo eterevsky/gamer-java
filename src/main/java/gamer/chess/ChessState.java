@@ -126,7 +126,7 @@ public final class ChessState
 
   @Override
   public String moveToString(ChessMove move) {
-    return moveToStringWithNumber(move);
+    return AlgebraicNotation.moveToString(this, move);
   }
 
   @Override
