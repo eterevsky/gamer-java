@@ -41,6 +41,20 @@ BenchmarkPerft.timePerftInitial2                   581.5±28.9 µs (5.0%)
 BenchmarkUct.uctGomoku100kSamplesMulti             1972.2±315.1 ms (16.0%)
 BenchmarkUct.uctGomoku100kSamplesSingle            2.7±0.8 s (28.4%)
 
+commit 99339c19fd2934199bd2dd664ac523e4f0f49d57
+Date:   Mon Dec 15 22:28:59 2014 +0300
+
+Benchmarks.testBenchmark                           3.1±0.4 µs (14.1%)
+BenchmarkGomoku.gomoku1                            20.8±3.9 µs (18.6%)
+BenchmarkGomoku.gomoku1mut                         7.0±0.9 µs (13.5%)
+BenchmarkGomoku.gomoku100kMut                      700.8±102.9 ms (14.7%)
+BenchmarkGomoku.gomoku100kMutBatches               52.5±3.4 ms (6.5%)
+BenchmarkGomoku.gomoku100kMutAtomicCounter         40.8±2.3 ms (5.7%)
+BenchmarkGomoku.gomoku100kMutCounter               247.5±97.0 ms (39.2%)
+BenchmarkPerft.timePerftInitial2                   684.0±107.3 µs (15.7%)
+BenchmarkUct.uctGomoku100kSamplesMulti             720.4±1049.2 ms (145.6%)
+BenchmarkUct.uctGomoku100kSamplesSingle            3.0±0.7 s (23.8%)
+
 
 Macbook Pro
 
