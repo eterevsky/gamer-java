@@ -107,12 +107,11 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   }
 
   final Node<P, M> selectChildOrAddPending(int nsamples) {
-    boolean knowExactLocal;
     boolean learnedExact = false;
+    boolean knowExactLocal = false;
 
     synchronized(this) {
-      knowExactLocal = knowExact;
-      if (!knowExactLocal) {
+      if (!knowExact) {
         pendingSamples += nsamples;
         learnedExact = children == null &&
                        maybeInitChildren() &&
@@ -123,25 +122,26 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       // totalSamples should be incremented _after_ maybeInitChildren() is
       // called since it may take into account the old totalSamples value.
       totalSamples += nsamples;
-    }
+      knowExact = knowExact || learnedExact;
 
-    if (!knowExactLocal && !learnedExact) {
-      if (children == null) {
+      if (!knowExact && children == null) {
         @SuppressWarnings("unchecked")
-        Node<P, M> no_children_result = NO_CHILDREN;
-        return no_children_result;
-      } else {
-        return selectChild();
+        Node<P, M> noChildrenResult = NO_CHILDREN;
+        return noChildrenResult;
       }
+      knowExactLocal = knowExact;
     }
 
-    if (parent != null) {
-      parent.addSamplesAndUpdate(nsamples, payoff, this, learnedExact);
+    if (knowExact) {
+      if (knowExactLocal && parent != null) {
+        parent.addSamplesAndUpdate(nsamples, payoff, this, learnedExact);
+      }
+      @SuppressWarnings("unchecked")
+      Node<P, M> knowExactResult = KNOW_EXACT;
+      return knowExactResult;
     }
 
-    @SuppressWarnings("unchecked")
-    Node<P, M> know_exact_result = KNOW_EXACT;
-    return know_exact_result;
+    return selectChild();
   }
 
   final void addSamples(int nsamples, double value) {

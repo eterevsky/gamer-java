@@ -35,6 +35,9 @@ public final class GameRunner<P extends Position<P, M>, M extends Move>
 
   public static <P extends Position<P, M>, M extends Move>
       int playSingleGame(Match<P, M> match, boolean verbose) {
+    if (verbose) {
+      System.out.println(match);
+    }
     return playSingleGame(
         match.startPosition, match.player1, match.player2, verbose);
   }

@@ -50,7 +50,7 @@ class App {
 
     Tournament<P, M> tournament = new Tournament<>(startPosition, true);
 
-    tournament.setTimeout(10000);
+    tournament.setTimeout(2000);
     tournament.setGameThreads(1);
     tournament.setThreadsPerPlayer(cores);
     tournament.setRounds(1);
@@ -67,12 +67,12 @@ class App {
     MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
     player1.setTimeout(15000L);
     player1.setMaxWorkers(cores);
-    player1.setSamplesBatch(1);
-    player1.setChildrenThreshold(2);
+    player1.setSamplesBatch(16);
+//    player1.setChildrenThreshold(1);
     MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
     player2.setTimeout(15000L);
     player2.setMaxWorkers(cores);
-    player2.setSamplesBatch(4);
+    player2.setSamplesBatch(8);
     Match<P, M> match = new Match<>(startPosition, player1, player2);
 
     System.out.println(match);
@@ -81,6 +81,7 @@ class App {
   }
 
   public static void main(String[] args) throws Exception {
-    runGameFromPosition(chess.newGame());
+    runGameFromPosition(gomoku.newGame());
+    // runTournament(gomoku.newGame());
   }
 }
