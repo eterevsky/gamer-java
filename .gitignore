@@ -4,6 +4,9 @@
 java.hprof.txt
 target
 
+build
+.gradle
+
 .settings
 .classpath
 .project
