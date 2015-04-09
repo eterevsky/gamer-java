@@ -22,7 +22,7 @@ public final class Benchmarks {
     return total;
   }
 
-  public static void main(String[] args) {
+  public static void main() {
     BenchmarkSuite suite = new BenchmarkSuite();
     suite.add(Benchmarks.class);
     suite.add(BenchmarkGomoku.class);

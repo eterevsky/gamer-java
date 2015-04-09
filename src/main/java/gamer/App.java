@@ -1,5 +1,6 @@
 package gamer;
 
+import gamer.Benchmarks;
 import gamer.chess.Chess;
 import gamer.def.Move;
 import gamer.def.Position;
@@ -11,6 +12,15 @@ import gamer.players.RandomPlayer;
 import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
 import gamer.tournament.Tournament;
+
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 class App {
   private static <P extends Position<P, M>, M extends Move> void addUctPlayer(
@@ -39,9 +49,6 @@ class App {
     tournament.addPlayer(new NaiveMonteCarlo<P, M>());
     tournament.addPlayer(new RandomPlayer<P, M>());
   }
-
-  static Gomoku gomoku = Gomoku.getInstance();
-  static Chess chess = Chess.getInstance();
 
   static <P extends Position<P, M>, M extends Move> void runTournament(
       P startPosition) {
@@ -80,8 +87,42 @@ class App {
     System.out.println(match);
   }
 
+  private static Options initOptions() {
+    Options options = new Options();
+
+    OptionGroup mode = new OptionGroup();
+    mode.addOption(new Option("h", "help", false, "Show help message"));
+    mode.addOption(new Option("g", "game", false, "Run single game"));
+    mode.addOption(new Option("t", "tournament", false, "Run tournament"));
+    mode.addOption(new Option("b", "benchmark", false, "Run benchmarks"));
+    mode.setRequired(true);
+    options.addOptionGroup(mode);
+
+    return options;
+  }
+
   public static void main(String[] args) throws Exception {
-    runGameFromPosition(gomoku.newGame());
-    // runTournament(gomoku.newGame());
+    Options options = initOptions();
+    CommandLineParser parser = new BasicParser();
+    CommandLine cl;
+    try {
+      cl = parser.parse(options, args);
+    } catch (ParseException e) {
+      System.out.println(e.getMessage());
+      return;
+    }
+
+    if (cl.hasOption("help")) {
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp("gamer", options, true /* autoUsage */);
+    } else if (cl.hasOption("benchmark")) {
+      Benchmarks.main();
+    } else if (cl.hasOption("game")) {
+      runGameFromPosition(Gomoku.getInstance().newGame());
+    } else if (cl.hasOption("tournament")) {
+      runTournament(Gomoku.getInstance().newGame());
+    } else {
+      throw new RuntimeException("Internal error.");
+    }
   }
 }
