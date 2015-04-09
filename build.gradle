@@ -1,6 +1,8 @@
 apply plugin: 'application'
 apply plugin: 'java'
 
+mainClassName = 'gamer.App'
+
 repositories {
   mavenCentral()
 }
@@ -14,4 +16,14 @@ jar {
   manifest {
     attributes 'Main-Class': 'gamer.App'
   }
+}
+
+// Create a single jar with all dependencies.
+task fatjar(type: Jar) {
+	manifest {
+    attributes 'Main-Class': 'gamer.App'
+  }
+  baseName = project.name + '-all'
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  with jar
 }

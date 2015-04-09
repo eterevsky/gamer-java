@@ -10,6 +10,21 @@ public final class BenchmarkSuite {
 
   private static final long TIME_LIMIT_SECONDS = 30;
 
+  @Benchmark
+  public static long testBenchmark(int reps) {
+    long total = 0;
+
+    for (int irep = 0; irep < reps; irep++) {
+      long s = 0;
+      for (int i = 0; i < 10000; i++) {
+        s += i;
+      }
+      total += s;
+    }
+
+    return total;
+  }
+
   public void add(Class<?> c) {
     classes.add(c);
   }

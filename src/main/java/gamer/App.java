@@ -1,10 +1,14 @@
 package gamer;
 
-import gamer.Benchmarks;
+import gamer.benchmark.Benchmark;
+import gamer.benchmark.BenchmarkSuite;
+import gamer.chess.BenchmarkPerft;
 import gamer.chess.Chess;
 import gamer.def.Move;
 import gamer.def.Position;
+import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
+import gamer.players.BenchmarkUct;
 import gamer.players.MonteCarloUcb;
 import gamer.players.MonteCarloUct;
 import gamer.players.NaiveMonteCarlo;
@@ -87,6 +91,16 @@ class App {
     System.out.println(match);
   }
 
+  private static void runBenchmarks(CommandLine cl) {
+    BenchmarkSuite suite = new BenchmarkSuite();
+    suite.add(BenchmarkSuite.class);
+    suite.add(BenchmarkGomoku.class);
+    suite.add(BenchmarkPerft.class);
+    suite.add(BenchmarkUct.class);
+
+    suite.run();
+  }
+
   private static Options initOptions() {
     Options options = new Options();
 
@@ -108,7 +122,7 @@ class App {
     try {
       cl = parser.parse(options, args);
     } catch (ParseException e) {
-      System.out.println(e.getMessage());
+      System.err.println(e.getMessage());
       return;
     }
 
@@ -116,7 +130,7 @@ class App {
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp("gamer", options, true /* autoUsage */);
     } else if (cl.hasOption("benchmark")) {
-      Benchmarks.main();
+      runBenchmarks(cl);
     } else if (cl.hasOption("game")) {
       runGameFromPosition(Gomoku.getInstance().newGame());
     } else if (cl.hasOption("tournament")) {
