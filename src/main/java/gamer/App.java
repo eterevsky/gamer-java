@@ -24,6 +24,13 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.w3c.dom.Attr;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 class App {
   private static <P extends Position<P, M>, M extends Move> void addUctPlayer(
@@ -144,7 +151,31 @@ class App {
     return options;
   }
 
+  private static String getVersion() {
+    try {
+      Enumeration<URL> resources =
+          App.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+      while (resources.hasMoreElements()) {
+        Manifest manifest = new Manifest(resources.nextElement().openStream());
+        Attributes attr = manifest.getMainAttributes();
+
+        if (attr.getValue("Main-Class").equals("gamer.App")) {
+          return attr.getValue("Implementation-Version");
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return null;
+  }
+
   public static void main(String[] args) throws Exception {
+    String version = getVersion();
+    if (version != null) {
+      System.out.format("gamer %s\n", version);
+    }
+
+
     Options options = initOptions();
     CommandLineParser parser = new BasicParser();
     CommandLine cl;
