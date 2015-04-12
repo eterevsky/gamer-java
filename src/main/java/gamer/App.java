@@ -24,7 +24,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.w3c.dom.Attr;
 
 import java.io.IOException;
 import java.net.URL;
@@ -159,7 +158,7 @@ class App {
         Manifest manifest = new Manifest(resources.nextElement().openStream());
         Attributes attr = manifest.getMainAttributes();
 
-        if (attr.getValue("Main-Class").equals("gamer.App")) {
+        if ("gamer.App".equals(attr.getValue("Main-Class"))) {
           return attr.getValue("Implementation-Version");
         }
       }
@@ -169,12 +168,11 @@ class App {
     return null;
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     String version = getVersion();
     if (version != null) {
       System.out.format("gamer %s\n", version);
     }
-
 
     Options options = initOptions();
     CommandLineParser parser = new BasicParser();

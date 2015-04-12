@@ -20,6 +20,7 @@ class Fen {
       idx = 0;
     }
 
+    @SuppressWarnings("PointlessBitwiseExpression")
     StateBuilder parse() {
       StateBuilder builder = new StateBuilder();
 
@@ -118,6 +119,7 @@ class Fen {
     return parser.parse();
   }
 
+  @SuppressWarnings("PointlessBitwiseExpression")
   static String toFen(State<?> state) {
     StringBuilder builder = new StringBuilder();
     Board board = state.getBoard();

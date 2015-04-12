@@ -42,7 +42,7 @@ public final class GameRunner<P extends Position<P, M>, M extends Move>
         match.startPosition, match.player1, match.player2, verbose);
   }
 
-  public static <P extends Position<P, M>, M extends Move> int playSingleGame(
+  private static <P extends Position<P, M>, M extends Move> int playSingleGame(
       P position, Player<P, M> p1, Player<P, M> p2, boolean verbose) {
     while (!position.isTerminal()) {
       Player<P, M> player = position.getPlayerBool() ? p1 : p2;

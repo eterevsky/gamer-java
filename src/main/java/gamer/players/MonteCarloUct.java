@@ -33,7 +33,7 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
 
   @Override
   protected Node<P, M> getRoot(P position) {
-    return new UctNode<P, M>(null, position, null, nodeContext);
+    return new UctNode<>(null, position, null, nodeContext);
   }
 
   @Override

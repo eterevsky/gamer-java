@@ -92,7 +92,7 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
       for (ComputerPlayer<P, M> p2 : players) {
         if (p1 != p2) {
           for (int i = 0; i < rounds; i++)
-            games.add(new Match<P, M>(startPosition, p1, p2));
+            games.add(new Match<>(startPosition, p1, p2));
         }
       }
     }
@@ -106,7 +106,7 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
     ExecutorService executor = Executors.newFixedThreadPool(gameThreads);
 
     for (int i = 0; i < gameThreads; i++) {
-      executor.submit(new GameRunner<P, M>(gamesQueue, resultsQueue, verbose));
+      executor.submit(new GameRunner<>(gamesQueue, resultsQueue, verbose));
     }
 
     collectResults();

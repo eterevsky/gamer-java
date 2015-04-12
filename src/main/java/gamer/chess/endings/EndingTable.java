@@ -128,7 +128,7 @@ class EndingTable {
     }
 
     static {
-      instances = new ArrayList<EndingValue>(256);
+      instances = new ArrayList<>(256);
       instances.add(new EndingValue(EndingStatus.UNKNOWN, 0));
       for (int i = 1; i < 127; i++) {
         instances.add(new EndingValue(EndingStatus.WIN, i));

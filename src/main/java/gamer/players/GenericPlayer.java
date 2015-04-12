@@ -23,7 +23,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
 
   protected int samplesBatch = 1;
   protected String name = null;
-  protected NodeContext<P, M> nodeContext = new NodeContext<P, M>();
+  protected NodeContext<P, M> nodeContext = new NodeContext<>();
 
   @Override
   public boolean isHuman() {

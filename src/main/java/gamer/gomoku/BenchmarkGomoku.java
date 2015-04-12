@@ -109,7 +109,7 @@ public class BenchmarkGomoku {
   }
 
   static private class SamplerMutAtomic implements Callable<Double> {
-    AtomicInteger counter;
+    final AtomicInteger counter;
 
     SamplerMutAtomic(AtomicInteger counter) {
       this.counter = counter;

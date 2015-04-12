@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("PointlessBitwiseExpression")
 public class StateBuilder
     implements PositionMut<StateBuilder, ChessMove>, State<StateBuilder> {
   private Board board;

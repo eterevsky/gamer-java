@@ -42,6 +42,6 @@ public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
 
   @Override
   protected Node<P, M> getRoot(P position) {
-    return new NaiveNode<P, M>(position, nodeContext);
+    return new NaiveNode<>(position, nodeContext);
   }
 }

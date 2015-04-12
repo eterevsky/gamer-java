@@ -174,7 +174,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return toString(0);
   }
 
-  private final String toString(int indent) {
+  private String toString(int indent) {
     StringBuilder builder = new StringBuilder();
     builder.append('\n');
     for (int i = 0; i < indent; i++) {
@@ -198,7 +198,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return builder.toString();
   }
 
-  private final void addSamplesAndUpdate(
+  private void addSamplesAndUpdate(
       int nsamples, double value, Node<P, M> child,
       boolean childLearnedExactValue) {
     boolean learnedExactValue = false;
@@ -222,7 +222,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
           nsamples, PAYOFF_SCALE_FACTOR * value, this, learnedExactValue);
   }
 
-  private final boolean checkChildrenForExact() {
+  private boolean checkChildrenForExact() {
     double lo = 1E10;
     double hi = -1E10;
 

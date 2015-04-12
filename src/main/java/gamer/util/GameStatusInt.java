@@ -8,7 +8,7 @@ public final class GameStatusInt {
   private static int PLAYER_MASK = 8;
 
   public static int WIN = 2 | TERMINAL_MASK;
-  public static int LOSS = 0 | TERMINAL_MASK | PLAYER_MASK;
+  public static int LOSS = TERMINAL_MASK | PLAYER_MASK;
 
   public static boolean isTerminal(int status) {
     return (status & TERMINAL_MASK) != 0;

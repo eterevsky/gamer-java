@@ -31,6 +31,6 @@ public class MonteCarloUcb<P extends Position<P, M>, M extends Move>
 
   @Override
   protected Node<P, M> getRoot(P position) {
-    return new UcbNode<P, M>(position, nodeContext);
+    return new UcbNode<>(position, nodeContext);
   }
 }

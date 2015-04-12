@@ -2,7 +2,6 @@ apply plugin: 'application'
 apply plugin: 'idea'
 apply plugin: 'java'
 
-
 compileJava.options.encoding = 'UTF-8'
 
 mainClassName = 'gamer.App'

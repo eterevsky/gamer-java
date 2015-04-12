@@ -88,12 +88,12 @@ class AlgebraicNotation {
     }
 
     private boolean parseCastling() {
-      if (str == "O-O") {
+      if (str.equals("O-O")) {
         shortCastling = true;
         return true;
       }
 
-      if (str == "O-O-O") {
+      if (str.equals("O-O-O")) {
         longCastling = true;
         return true;
       }
