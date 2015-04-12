@@ -8,7 +8,11 @@ import java.util.List;
 public final class BenchmarkSuite {
   private List<Class<?>> classes = new ArrayList<>();
 
-  private static final long TIME_LIMIT_SECONDS = 30;
+  private final long timeLimitSeconds;
+
+  public BenchmarkSuite(int timeLimitSeconds) {
+    this.timeLimitSeconds = timeLimitSeconds;
+  }
 
   @Benchmark
   public static long testBenchmark(int reps) {
@@ -30,6 +34,11 @@ public final class BenchmarkSuite {
   }
 
   public void run() {
+    System.out.format(
+        "Running benchmarks.\nCores: %d\nJVM: %s %s\nTime limit: %d s\n",
+        Runtime.getRuntime().availableProcessors(),
+        System.getProperty("java.vm.name"), System.getProperty("java.version"),
+        timeLimitSeconds);
     for (Class<?> c : classes) {
       for (Method m : c.getDeclaredMethods()) {
         if (m.getAnnotation(Benchmark.class) != null) {
@@ -80,7 +89,7 @@ public final class BenchmarkSuite {
     return stats;
   }
 
-  private static void runBenchmark(Method benchmark) {
+  private void runBenchmark(Method benchmark) {
     try {
       long startTime = System.nanoTime();
 
@@ -91,7 +100,7 @@ public final class BenchmarkSuite {
 
       List<Double> times = new ArrayList<>();
 
-      while (System.nanoTime() - startTime < TIME_LIMIT_SECONDS * 1000000000 &&
+      while (System.nanoTime() - startTime < timeLimitSeconds * 1000000000 &&
              (times.size() < 6 ||
               genStats(times).error() > 0.05)) {
         double t = singleRun(benchmark, reps);
@@ -111,14 +120,14 @@ public final class BenchmarkSuite {
     return (System.nanoTime() - startTime) / 1E9;
   }
 
-  private static void printResults(Method benchmark, List<Double> samples) {
+  private void printResults(Method benchmark, List<Double> samples) {
     String fullName = benchmark.getDeclaringClass().getSimpleName() + "." +
                       benchmark.getName();
 
     Stats stats = genStats(samples);
 
     if (stats == null) {
-      System.out.format("%-50s >%ds\n", fullName, TIME_LIMIT_SECONDS);
+      System.out.format("%-50s >%ds\n", fullName, timeLimitSeconds);
       return;
     }
 

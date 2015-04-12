@@ -4,6 +4,7 @@ import gamer.benchmark.Benchmark;
 import gamer.benchmark.BenchmarkSuite;
 import gamer.chess.BenchmarkPerft;
 import gamer.chess.Chess;
+import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 import gamer.gomoku.BenchmarkGomoku;
@@ -71,17 +72,16 @@ class App {
     tournament.play();
   }
 
-  static <P extends Position<P, M>, M extends Move> void runGameFromPosition(
-      P startPosition) {
+  private static <P extends Position<P, M>, M extends Move> void
+      runGameFromPosition(P startPosition, long moveTime) {
     int cores = Runtime.getRuntime().availableProcessors();
 
     MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
-    player1.setTimeout(15000L);
+    player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(16);
-//    player1.setChildrenThreshold(1);
     MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
-    player2.setTimeout(15000L);
+    player2.setTimeout(moveTime * 1000);
     player2.setMaxWorkers(cores);
     player2.setSamplesBatch(8);
     Match<P, M> match = new Match<>(startPosition, player1, player2);
@@ -91,8 +91,28 @@ class App {
     System.out.println(match);
   }
 
+  private static void runSingleGame(CommandLine cl) {
+    String gameStr = cl.getOptionValue("game", "gomoku");
+    long moveTime = Integer.parseInt(cl.getOptionValue("move_time", "15"));
+
+    switch (gameStr) {
+      case "gomoku":
+        runGameFromPosition(Gomoku.getInstance().newGame(), moveTime);
+        break;
+
+      case "chess":
+        runGameFromPosition(Chess.getInstance().newGame(), moveTime);
+        break;
+
+      default:
+        throw new RuntimeException("Unknown game in --game.");
+    }
+  }
+
   private static void runBenchmarks(CommandLine cl) {
-    BenchmarkSuite suite = new BenchmarkSuite();
+    int timeLimit = Integer.parseInt(
+        cl.getOptionValue("benchmark_time_limit", "30"));
+    BenchmarkSuite suite = new BenchmarkSuite(timeLimit);
     suite.add(BenchmarkSuite.class);
     suite.add(BenchmarkGomoku.class);
     suite.add(BenchmarkPerft.class);
@@ -111,6 +131,13 @@ class App {
     mode.addOption(new Option("b", "benchmark", false, "Run benchmarks"));
     mode.setRequired(true);
     options.addOptionGroup(mode);
+
+    options.addOption(
+        "benchmark_time_limit", true,
+        "Time limit in seconds for a single benchmark. (Default: 30)");
+    options.addOption("game", true, "Game to played. (Default: gomoku)");
+    options.addOption("move_time", true,
+                      "Time per move in seconds. (Default: 15)");
 
     return options;
   }
@@ -132,7 +159,7 @@ class App {
     } else if (cl.hasOption("benchmark")) {
       runBenchmarks(cl);
     } else if (cl.hasOption("game")) {
-      runGameFromPosition(Gomoku.getInstance().newGame());
+      runSingleGame(cl);
     } else if (cl.hasOption("tournament")) {
       runTournament(Gomoku.getInstance().newGame());
     } else {
