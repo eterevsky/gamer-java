@@ -83,7 +83,7 @@ public final class TreeGame implements Game {
   }
 
   @Override
-  public int getPlayers() {
+  public int getPlayersCount() {
     return 2;
   }
 

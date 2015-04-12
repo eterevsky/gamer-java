@@ -9,9 +9,11 @@ public final class BenchmarkSuite {
   private List<Class<?>> classes = new ArrayList<>();
 
   private final long timeLimitSeconds;
+  private final String filter;
 
-  public BenchmarkSuite(int timeLimitSeconds) {
+  public BenchmarkSuite(int timeLimitSeconds, String filter) {
     this.timeLimitSeconds = timeLimitSeconds;
+    this.filter = filter;
   }
 
   @Benchmark
@@ -42,7 +44,11 @@ public final class BenchmarkSuite {
     for (Class<?> c : classes) {
       for (Method m : c.getDeclaredMethods()) {
         if (m.getAnnotation(Benchmark.class) != null) {
-          runBenchmark(m);
+          String name =
+              m.getDeclaringClass().getSimpleName() + "." + m.getName();
+          if (filter == null || name.contains(filter)) {
+            runBenchmark(m);
+          }
         }
       }
     }

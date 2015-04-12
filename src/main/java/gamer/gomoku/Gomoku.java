@@ -25,12 +25,12 @@ public final class Gomoku implements Game {
   }
 
   @Override
-  public int getPlayers() {
-	return 2;
+  public int getPlayersCount() {
+    return 2;
   }
 
   @Override
   public boolean hasRandomPlayer() {
-	return false;
+  return false;
   }
 }

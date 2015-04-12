@@ -21,7 +21,7 @@ public final class Chess implements Game {
 
   @Override
   public PositionMut<?, ?> newGameMut() {
-    throw new UnsupportedOperationException("Not implemented.");
+    return INITIAL.toBuilder();
   }
 
   @Override
@@ -30,7 +30,7 @@ public final class Chess implements Game {
   }
 
   @Override
-  public int getPlayers() {
+  public int getPlayersCount() {
     return 2;
   }
 }

@@ -1,10 +1,8 @@
 package gamer;
 
-import gamer.benchmark.Benchmark;
 import gamer.benchmark.BenchmarkSuite;
 import gamer.chess.BenchmarkPerft;
 import gamer.chess.Chess;
-import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 import gamer.gomoku.BenchmarkGomoku;
@@ -112,7 +110,8 @@ class App {
   private static void runBenchmarks(CommandLine cl) {
     int timeLimit = Integer.parseInt(
         cl.getOptionValue("benchmark_time_limit", "30"));
-    BenchmarkSuite suite = new BenchmarkSuite(timeLimit);
+    String filter = cl.getOptionValue("filter", null);
+    BenchmarkSuite suite = new BenchmarkSuite(timeLimit, filter);
     suite.add(BenchmarkSuite.class);
     suite.add(BenchmarkGomoku.class);
     suite.add(BenchmarkPerft.class);
@@ -136,8 +135,11 @@ class App {
         "benchmark_time_limit", true,
         "Time limit in seconds for a single benchmark. (Default: 30)");
     options.addOption("game", true, "Game to played. (Default: gomoku)");
-    options.addOption("move_time", true,
-                      "Time per move in seconds. (Default: 15)");
+    options.addOption(
+        "move_time", true, "Time per move in seconds. (Default: 15)");
+    options.addOption(
+        "filter", true,
+        "Only run benchmarks with this substring in the name. (Default: '')");
 
     return options;
   }

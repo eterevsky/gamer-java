@@ -5,7 +5,7 @@ public interface Game {
 
   PositionMut<?, ?> newGameMut();
 
-  int getPlayers();
+  int getPlayersCount();
 
   boolean hasRandomPlayer();
 }
