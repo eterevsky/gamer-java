@@ -1,9 +1,5 @@
 package gamer.gomoku;
 
-import static gamer.gomoku.Gomoku.POINTS;
-import static gamer.gomoku.Gomoku.SIZE;
-import static java.lang.Math.min;
-
 import gamer.def.IllegalMoveException;
 import gamer.def.PositionMut;
 import gamer.def.TerminalPositionException;
@@ -19,14 +15,17 @@ public final class GomokuStateMut
   private BitSet marked;
   private BitSet markedx;
   private int status;
+  private Gomoku game;
 
-  GomokuStateMut() {
-    marked = new BitSet(POINTS);
-    markedx = new BitSet(POINTS);
+  GomokuStateMut(Gomoku game) {
+    this.game = game;
+    marked = new BitSet(game.getPoints());
+    markedx = new BitSet(game.getPoints());
     status = GameStatusInt.init();
   }
 
   private GomokuStateMut(GomokuStateMut other) {
+    game = other.game;
     marked = (BitSet) other.marked.clone();
     markedx = (BitSet) other.markedx.clone();
     status = other.status;
@@ -72,7 +71,7 @@ public final class GomokuStateMut
   @Override
   public List<GomokuMove> getMoves() {
     List<GomokuMove> moves = new ArrayList<>();
-    for (int i = 0; i < POINTS; i++) {
+    for (int i = 0; i < game.getPoints(); i++) {
       if (!marked.get(i)) {
         moves.add(GomokuMove.of(i));
       }
@@ -88,7 +87,7 @@ public final class GomokuStateMut
 
     int i;
     do {
-      i = random.nextInt(POINTS);
+      i = random.nextInt(game.getPoints());
     } while (marked.get(i));
 
     return GomokuMove.of(i);
@@ -97,7 +96,7 @@ public final class GomokuStateMut
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < POINTS; i++) {
+    for (int i = 0; i < game.getPoints(); i++) {
       if (marked.get(i)) {
         if (markedx.get(i)) {
           builder.append('X');
@@ -108,7 +107,7 @@ public final class GomokuStateMut
         builder.append('.');
       }
 
-      if (i % SIZE == SIZE - 1) {
+      if (i % game.getSize() == game.getSize() - 1) {
         builder.append('\n');
       } else {
         builder.append(' ');
@@ -136,39 +135,12 @@ public final class GomokuStateMut
     return l >= 5;
   }
 
-  static int[] limLeft = new int[POINTS], limRight = new int[POINTS];
-  static int[] limTop = new int[POINTS], limBottom = new int[POINTS];
-  static int[] limLT = new int[POINTS], limRB = new int[POINTS];
-  static int[] limRT = new int[POINTS], limLB = new int[POINTS];
-
-  static {
-    for (int cell = 0; cell < POINTS; cell++) {
-      int x = cell % SIZE;
-      int y = cell / SIZE;
-
-      int left = min(x, 4);
-      int right = min(SIZE - x - 1, 4);
-      int top = min(y, 4);
-      int bottom = min(SIZE - y - 1, 4);
-
-      limLeft[cell] = cell - left;
-      limRight[cell] = cell + right;
-      limTop[cell] = cell - SIZE * top;
-      limBottom[cell] = cell + SIZE * bottom;
-      limLT[cell] = cell - (SIZE + 1) * min(left, top);
-      limRB[cell] = cell + (SIZE + 1) * min(right, bottom);
-      limRT[cell] = cell - (SIZE - 1) * min(right, top);
-      limLB[cell] = cell + (SIZE - 1) * min(left, bottom);
-    }
-  }
-
   private int updateStatus(boolean player, GomokuMove move) {
     int cell = move.point;
-    boolean won =
-        checkLine(cell, limLeft[cell], limRight[cell], 1) ||
-        checkLine(cell, limTop[cell], limBottom[cell], SIZE) ||
-        checkLine(cell, limLT[cell], limRB[cell], SIZE + 1) ||
-        checkLine(cell, limRT[cell], limLB[cell], SIZE - 1);
+    boolean won = checkLine(cell, game.limLeft[cell], game.limRight[cell], 1)
+        || checkLine(cell, game.limTop[cell], game.limBottom[cell], game.getSize())
+        || checkLine(cell, game.limLT[cell], game.limRB[cell], game.getSize() + 1)
+        || checkLine(cell, game.limRT[cell], game.limLB[cell], game.getSize() - 1);
 
 
     int status = GameStatusInt.init();
@@ -176,7 +148,7 @@ public final class GomokuStateMut
       status = GameStatusInt.switchPlayer(status);
     if (won) {
       status = GameStatusInt.setPayoff(status, player ? 1 : -1);
-    } else if (marked.nextClearBit(0) == POINTS) {
+    } else if (marked.nextClearBit(0) == game.getPoints()) {
       status = GameStatusInt.setPayoff(status, 0);
     }
 
@@ -205,7 +177,7 @@ public final class GomokuStateMut
 
   @Override
   public GomokuMove parseMove(String moveStr) {
-    return GomokuMove.of(moveStr);
+    return GomokuMove.of(moveStr, game.getSize());
   }
 
 }
