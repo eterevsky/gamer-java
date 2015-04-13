@@ -6,14 +6,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class BenchmarkSuite {
+  private static final double STUDENT_95 = 12.71;
+
   private List<Class<?>> classes = new ArrayList<>();
 
   private final long timeLimitSeconds;
   private final String filter;
+  private double precision = 0.05;
 
   public BenchmarkSuite(int timeLimitSeconds, String filter) {
     this.timeLimitSeconds = timeLimitSeconds;
     this.filter = filter;
+  }
+
+  public void setPrecision(double precision) {
+    this.precision = precision;
   }
 
   @Benchmark
@@ -64,9 +71,6 @@ public final class BenchmarkSuite {
     }
   }
 
-  private static final double STUDENT_95 = 12.71;
-  private static final double STUDENT_99 = 63.66;
-
   private static Stats genStats(List<Double> samples) {
     Stats stats = new Stats();
     stats.mean = 0;
@@ -108,7 +112,7 @@ public final class BenchmarkSuite {
 
       while (System.nanoTime() - startTime < timeLimitSeconds * 1000000000 &&
              (times.size() < 6 ||
-              genStats(times).error() > 0.05)) {
+              genStats(times).error() > precision)) {
         double t = singleRun(benchmark, reps);
         times.add(t / reps);
       }

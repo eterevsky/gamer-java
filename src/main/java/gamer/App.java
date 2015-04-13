@@ -118,6 +118,10 @@ class App {
         cl.getOptionValue("benchmark_time_limit", "30"));
     String filter = cl.getOptionValue("filter", null);
     BenchmarkSuite suite = new BenchmarkSuite(timeLimit, filter);
+    if (cl.hasOption("benchmark_precision")) {
+      suite.setPrecision(
+          Double.parseDouble(cl.getOptionValue("benchmark_precision")));
+    }
     suite.add(BenchmarkSuite.class);
     suite.add(BenchmarkGomoku.class);
     suite.add(BenchmarkPerft.class);
@@ -131,7 +135,7 @@ class App {
 
     OptionGroup mode = new OptionGroup();
     mode.addOption(new Option("h", "help", false, "Show help message"));
-    mode.addOption(new Option("g", "game", false, "Run single game"));
+    mode.addOption(new Option("g", "single_game", false, "Run single game"));
     mode.addOption(new Option("t", "tournament", false, "Run tournament"));
     mode.addOption(new Option("b", "benchmark", false, "Run benchmarks"));
     mode.setRequired(true);
@@ -146,6 +150,8 @@ class App {
     options.addOption(
         "filter", true,
         "Only run benchmarks with this substring in the name. (Default: '')");
+    options.addOption(
+        "benchmark_precision", true, "Benchmark precision. (Default: 0.05)");
 
     return options;
   }
