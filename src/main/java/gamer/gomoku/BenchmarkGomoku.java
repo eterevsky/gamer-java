@@ -1,6 +1,7 @@
 package gamer.gomoku;
 
 import gamer.benchmark.Benchmark;
+import gamer.def.PositionMut;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,7 +16,7 @@ import java.util.Random;
 public class BenchmarkGomoku {
   private static double batchMut(Random random, int nsamples) {
     int sum = 0;
-    GomokuStateMut state = Gomoku.getInstance().newGameMut();
+    PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
     for (int isamples = 0; isamples < nsamples; isamples++) {
       state.reset();
       while (!state.isTerminal()) {
@@ -60,7 +61,7 @@ public class BenchmarkGomoku {
     Random random = new Random();
 
     for (int i = 0; i < reps; i++) {
-      GomokuStateMut state = Gomoku.getInstance().newGameMut();
+      PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
       while (!state.isTerminal()) {
         state.apply(state.getRandomMove(random));
       }
@@ -119,7 +120,7 @@ public class BenchmarkGomoku {
     public Double call() {
       double s = 0;
       Random random = ThreadLocalRandom.current();
-      GomokuStateMut state = Gomoku.getInstance().newGameMut();
+      PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
 
       while (counter.getAndIncrement() < 100000) {
         state.reset();
@@ -172,7 +173,7 @@ public class BenchmarkGomoku {
     public Double call() {
       double s = 0;
       Random random = ThreadLocalRandom.current();
-      GomokuStateMut state = Gomoku.getInstance().newGameMut();
+      PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
 
       while (true) {
         synchronized (counter) {

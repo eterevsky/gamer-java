@@ -48,8 +48,16 @@ public class TestGomokuState {
   }
 
   @Test(timeout=50)
+  public void playBorders() {
+    testPlayGame(
+        "q10 q11 r10 r11 s10 s11 t10 t11 a11 a10 b11 b10 c11 c10 d11 d10 " +
+        "c12 c9 b13 b8 a14 a7 t15 t6 s16 s5 r17 r4 q18 q3 p19",
+        1);
+  }
+
+  @Test(timeout=50)
   public void playHorizontalOverlap() {
-    GomokuState state = new GomokuState();
+    GomokuState state = Gomoku.getInstance().newGame();
     state = state.play(GomokuMove.of(2, 3));
     state = state.play(GomokuMove.of(0, 1));
     state = state.play(GomokuMove.of(4, 3));
@@ -57,27 +65,16 @@ public class TestGomokuState {
     state = state.play(GomokuMove.of(1, 3));
     state = state.play(GomokuMove.of(2, 1));
     state = state.play(GomokuMove.of(0, 3));
-    state = state.play(GomokuMove.of(Gomoku.SIZE - 1, 0));
+    state = state.play(GomokuMove.of(18, 0));
     state = state.play(GomokuMove.of(10, 10));
-    state = state.play(GomokuMove.of(Gomoku.SIZE - 2, 0));
+    state = state.play(GomokuMove.of(17, 0));
 
     assertFalse(state.isTerminal());
   }
 
-  @Test(timeout=50)
-  public void playBorders() {
-//    if (Gomoku.SIZE != 19)
-//      return;
-
-    testPlayGame(
-        "q10 q11 r10 r11 s10 s11 t10 t11 a11 a10 b11 b10 c11 c10 d11 d10 " +
-        "c12 c9 b13 b8 a14 a7 t15 t6 s16 s5 r17 r4 q18 q3 p19",
-        1);
-  }
-
   @Test(expected = GameException.class, timeout=50)
   public void playNoMoveAfterEnd() {
-    GomokuState state = new GomokuState();
+    GomokuState state = Gomoku.getInstance().newGame();
     state = state.play(GomokuMove.of(2, 3));
     state = state.play(GomokuMove.of(6, 5));
     state = state.play(GomokuMove.of(4, 3));
@@ -96,15 +93,16 @@ public class TestGomokuState {
 
   @Test(expected = GameException.class, timeout=50)
   public void playTwoMovesBySamePlace() {
-    GomokuState state = new GomokuState();
+    GomokuState state = Gomoku.getInstance().newGame();
     state = state.play(GomokuMove.of(2, 3));
     state = state.play(GomokuMove.of(2, 3));
   }
 
   @Test(timeout=100)
   public void playDraw() {
-    GomokuState state = new GomokuState();
-    for (int i = 0; i < Gomoku.SIZE; i++) {
+		Gomoku gomoku = Gomoku.getInstance();
+    GomokuState state = gomoku.newGame();
+    for (int i = 0; i < gomoku.getSize(); i++) {
       int row;
       switch (i % 4) {
         case 1: row = i + 1; break;
@@ -112,7 +110,7 @@ public class TestGomokuState {
         default: row = i;
       }
 
-      for (int j = 0; j < Gomoku.SIZE; j++) {
+      for (int j = 0; j < gomoku.getSize(); j++) {
         state = state.play(GomokuMove.of(row, j));
       }
     }
@@ -123,7 +121,8 @@ public class TestGomokuState {
 
   @Test(timeout=100)
   public void playRandomMoves() {
-    GomokuState state = new GomokuState();
+		Gomoku gomoku = Gomoku.getInstance();
+    GomokuState state = gomoku.newGame();
     Random random = new Random(1234567890L);
 
     assertTrue(state.getPlayerBool());
@@ -135,6 +134,6 @@ public class TestGomokuState {
     }
 
     assertTrue(moves >= 9);
-    assertTrue(moves <= Gomoku.POINTS);
+    assertTrue(moves <= gomoku.getPoints());
   }
 }

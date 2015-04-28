@@ -1,19 +1,58 @@
 package gamer.gomoku;
 
-import gamer.def.Game;
+import static java.lang.Math.min;
 
+import gamer.def.Game;
+import gamer.def.PositionMut;
+import gamer.util.GameStatusInt;
+
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.lang.Math.min;
-
 public final class Gomoku implements Game {
+  public static Gomoku getInstance(int size) {
+    if (INSTANCES.containsKey(size)) {
+      return INSTANCES.get(size);
+    }
+
+    Gomoku game = new Gomoku(size);
+    INSTANCES.put(size, game);
+    return game;
+  }
+
+  public static Gomoku getInstance() {
+    return getInstance(DEFAULT_SIZE);
+  }
+
+  @Override
+  public GomokuState newGame() {
+    return initialState;
+  }
+
+  @Override
+  public PositionMut<?, GomokuMove> newGameMut() {
+    return size == 19 ? new GomokuStateMut19() : new GomokuStateMut(this);
+//    return new GomokuStateMut(this);
+  }
+
+  @Override
+  public int getPlayersCount() {
+    return 2;
+  }
+
+  @Override
+  public boolean hasRandomPlayer() {
+  return false;
+  }
+
+	static final int DEFAULT_SIZE = 19;
   private static final Map<Integer, Gomoku> INSTANCES = new HashMap<>();
 
   private final int size;
   private final int points;
   private final GomokuState initialState;
-
+	
   final int[] limLeft, limRight;
   final int[] limTop, limBottom;
   final int[] limLT, limRB;
@@ -56,39 +95,46 @@ public final class Gomoku implements Game {
       limLB[cell] = cell + (size - 1) * min(left, bottom);
     }
   }
-
-  public static Gomoku getInstance(int size) {
-    if (INSTANCES.containsKey(size)) {
-      return INSTANCES.get(size);
+	
+  private boolean checkLine(
+			BitSet marked, BitSet markedx, int center, int left, int right,
+	    int delta) {
+    boolean player = markedx.get(center);
+    int l = 1;
+    for (int cell = center - delta; cell >= left; cell -= delta) {
+      if (!marked.get(cell) || markedx.get(cell) != player)
+        break;
+      l++;
     }
 
-    Gomoku game = new Gomoku(size);
-    INSTANCES.put(size, game);
-    return game;
+    for (int cell = center + delta; cell <= right; cell += delta) {
+      if (!marked.get(cell) || markedx.get(cell) != player)
+        break;
+      l++;
+    }
+
+    return l >= 5;
   }
 
-  public static Gomoku getInstance() {
-    return getInstance(19);
-  }
+  int getStatus(
+			BitSet marked, BitSet markedx, boolean player, GomokuMove move) {
+    int cell = move.point;
+    boolean won =
+			     checkLine(marked, markedx, cell, limLeft[cell], limRight[cell], 1)
+        || checkLine(marked, markedx, cell, limTop[cell], limBottom[cell], size)
+        || checkLine(marked, markedx, cell, limLT[cell], limRB[cell], size + 1)
+        || checkLine(marked, markedx, cell, limRT[cell], limLB[cell], size - 1);
 
-  @Override
-  public GomokuState newGame() {
-    return initialState;
-  }
+    int status = GameStatusInt.init();
+    if (!player)
+      status = GameStatusInt.switchPlayer(status);
 
-  @Override
-  public GomokuStateMut newGameMut() {
-    return new GomokuStateMut(this);
-  }
-
-  @Override
-  public int getPlayersCount() {
-    return 2;
-  }
-
-  @Override
-  public boolean hasRandomPlayer() {
-  return false;
+    if (won) {
+      status = GameStatusInt.setPayoff(status, player ? -1 : 1);
+    } else if (marked.nextClearBit(0) == points) {
+      status = GameStatusInt.setPayoff(status, 0);
+    }
+    return status;
   }
 
   int getSize() {
