@@ -86,3 +86,19 @@ BenchmarkGomoku.gomoku100kMutCounter               182.7±4.1 ms (2.2%)
 BenchmarkPerft.timePerftInitial2                   558.5±27.8 µs (5.0%)
 BenchmarkUct.uctGomoku100kSamplesMulti             1093.9±480.2 ms (43.9%)
 BenchmarkUct.uctGomoku100kSamplesSingle            3.0±1.1 s (34.8%)
+
+gamer 0.1-6-g2c87f93
+Running benchmarks.
+Cores: 8
+JVM: Java HotSpot(TM) 64-Bit Server VM 1.8.0_40
+Time limit: 30 s
+BenchmarkSuite.testBenchmark                       3.1±0.2 µs (5.0%)
+BenchmarkGomoku.gomoku1                            19.7±1.0 µs (5.0%)
+BenchmarkGomoku.gomoku1mut                         5.3±0.3 µs (4.9%)
+BenchmarkGomoku.gomoku100kMut                      527.0±13.1 ms (2.5%)
+BenchmarkGomoku.gomoku100kMutBatches               153.6±7.2 ms (4.7%)
+BenchmarkGomoku.gomoku100kMutAtomicCounter         152.8±4.3 ms (2.8%)
+BenchmarkGomoku.gomoku100kMutCounter               156.1±7.4 ms (4.7%)
+BenchmarkPerft.timePerftInitial2                   625.7±29.6 µs (4.7%)
+BenchmarkUct.uctGomoku100kSamplesMulti             1173.1±605.6 ms (51.6%)
+BenchmarkUct.uctGomoku100kSamplesSingle            3.2±0.4 s (12.7%)

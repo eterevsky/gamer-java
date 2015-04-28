@@ -51,6 +51,11 @@ public class StateBuilder
     movesSinceCapture = state.getMovesSinceCapture();
     movesCount = state.getMovesCount();
   }
+	
+	@Override
+	public StateBuilder toMutable() {
+		return this;
+	}
 
   @Override
   public void reset() {

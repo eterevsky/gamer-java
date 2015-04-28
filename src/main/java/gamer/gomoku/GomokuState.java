@@ -2,6 +2,7 @@ package gamer.gomoku;
 
 import gamer.def.IllegalMoveException;
 import gamer.def.Position;
+import gamer.def.PositionMut;
 import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
@@ -35,6 +36,15 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     }
     status = this.game.getStatus(marked, markedx, !other.getPlayerBool(), move);
   }
+	
+	@Override
+	public GomokuStateMut toMutable() {
+		// if (getSize() == 19) {
+		// 	return new GomokuStateMut19(marked, markedx, status);
+		// } else {
+			return new GomokuStateMut(game, marked, markedx, status);
+		// }
+	}
 
   @Override
   public GomokuState play(GomokuMove move) {

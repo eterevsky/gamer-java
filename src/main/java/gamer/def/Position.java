@@ -24,4 +24,6 @@ public interface Position<P extends Position<P, M>, M extends Move> {
   String moveToString(M move);
 
   M parseMove(String moveStr);
+	
+	<P1 extends PositionMut<P1, M>> P1 toMutable();
 }

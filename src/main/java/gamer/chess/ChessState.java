@@ -44,6 +44,10 @@ public final class ChessState
   public String asFen() {
     return Fen.toFen(this);
   }
+	
+	public StateBuilder toMutable() {
+		return toBuilder();
+	}
 
   // State implementation
 

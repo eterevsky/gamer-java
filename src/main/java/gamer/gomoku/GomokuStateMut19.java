@@ -33,6 +33,17 @@ public final class GomokuStateMut19
     status = other.status;
   }
 
+	GomokuStateMut19(BitSet marked, BitSet markedx, int status) {
+		this.marked = (BitSet) marked.clone();
+		this.markedx = (BitSet) markedx.clone();
+		this.status = status;
+	}
+
+	@Override
+	public GomokuStateMut19 toMutable() {
+		return this;
+	}
+
   @Override
   public boolean isTerminal() {
     return GameStatusInt.isTerminal(status);

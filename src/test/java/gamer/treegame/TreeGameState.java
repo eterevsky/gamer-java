@@ -1,7 +1,7 @@
 package gamer.treegame;
 
 import gamer.def.GameException;
-import gamer.def.Position;
+import gamer.def.PositionMut;
 import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
@@ -11,11 +11,13 @@ import java.util.Random;
 
 
 public final class TreeGameState
-    implements Position<TreeGameState, TreeGameMove> {
-  private final Node node;
+    implements PositionMut<TreeGameState, TreeGameMove> {
+  private Node node;
+	private TreeGame game;
 
-  TreeGameState(Node node) {
+  TreeGameState(Node node, TreeGame game) {
     this.node = node;
+		this.game = game;
   }
 
   public int getId() {
@@ -61,8 +63,22 @@ public final class TreeGameState
     if (!node.children.contains(newNode)) {
       throw new GameException();
     }
-    return new TreeGameState(newNode);
+    return new TreeGameState(newNode, game);
   }
+	
+	@Override
+	public void apply(TreeGameMove move) {
+    Node newNode = move.node;
+    if (!node.children.contains(newNode)) {
+      throw new GameException();
+    }
+		node = newNode;
+	}
+	
+	@Override
+	public void reset() {
+		node = game.root;
+	}
 
   @Override
   public String toString() {
@@ -101,4 +117,9 @@ public final class TreeGameState
   public TreeGameMove parseMove(String moveStr) {
     throw new UnsupportedOperationException();
   }
+	
+	@Override
+	public TreeGameState toMutable() {
+		return new TreeGameState(node, game);
+	}
 }

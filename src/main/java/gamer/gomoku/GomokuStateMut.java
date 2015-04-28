@@ -23,6 +23,13 @@ public final class GomokuStateMut
     markedx = new BitSet(game.getPoints());
     status = GameStatusInt.init();
   }
+	
+	GomokuStateMut(Gomoku game, BitSet marked, BitSet markedx, int status) {
+		this.game = game;
+		this.marked = (BitSet) marked.clone();
+		this.markedx = (BitSet) markedx.clone();
+		this.status = status;
+	}
 
   private GomokuStateMut(GomokuStateMut other) {
     game = other.game;
@@ -30,6 +37,11 @@ public final class GomokuStateMut
     markedx = (BitSet) other.markedx.clone();
     status = other.status;
   }
+
+	@Override
+	public GomokuStateMut toMutable() {
+		return new GomokuStateMut(this);
+	}
 
   @Override
   public boolean isTerminal() {

@@ -10,7 +10,7 @@ import java.util.Map;
 
 // Used mainly for unit tests which require games with very simple game trees.
 public final class TreeGame implements Game {
-  private final Node root;
+  final Node root;
 
   public static class Builder {
     Map<Integer, Node> nodes = new HashMap<>();
@@ -70,7 +70,7 @@ public final class TreeGame implements Game {
 
   @Override
   public TreeGameState newGame() {
-    return new TreeGameState(root);
+    return new TreeGameState(root, this);
   }
 
   Node getNode(int id) {
@@ -78,8 +78,8 @@ public final class TreeGame implements Game {
   }
 
   @Override
-  public PositionMut<?, ?> newGameMut() {
-    throw new UnsupportedOperationException("Not implemented.");
+  public TreeGameState newGameMut() {
+    return new TreeGameState(root, this);
   }
 
   @Override
