@@ -12,11 +12,8 @@ def getVersionName = { ->
 }
 
 compileJava.options.encoding = 'UTF-8'
-
 mainClassName = 'gamer.App'
-
 sourceCompatibility = '1.7'
-
 version = getVersionName()
 
 repositories {
