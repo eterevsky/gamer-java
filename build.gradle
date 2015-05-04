@@ -2,11 +2,22 @@ apply plugin: 'application'
 apply plugin: 'idea'
 apply plugin: 'java'
 
+def getVersionName = { ->
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine 'git', 'describe', '--dirty'
+    standardOutput = stdout
+  }
+  return stdout.toString().trim()
+}
+
 compileJava.options.encoding = 'UTF-8'
 
 mainClassName = 'gamer.App'
 
 sourceCompatibility = '1.7'
+
+version = getVersionName()
 
 repositories {
   mavenCentral()
@@ -17,20 +28,28 @@ dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
-def getVersionName = { ->
-  def stdout = new ByteArrayOutputStream()
-  exec {
-    commandLine 'git', 'describe'
-    standardOutput = stdout
-  }
-  return stdout.toString().trim()
-}
-
 jar {
   manifest {
     attributes 'Main-Class': 'gamer.App'
-    attributes 'Implementation-Version': getVersionName()
+    attributes 'Implementation-Version': version
   }
+}
+
+// Create a single jar with all dependencies.
+task fatjar(type: Jar) {
+  baseName = project.name + '-all'
+  doFirst {
+    manifest {
+      attributes 'Main-Class': 'gamer.App'
+      attributes 'Implementation-Version': version
+    }
+  }
+  from {
+    configurations.compile.collect {
+      it.isDirectory() ? it : zipTree(it)
+    }
+  }
+  with jar
 }
 
 run {
@@ -39,13 +58,3 @@ run {
   }
 }
 
-// Create a single jar with all dependencies.
-task fatjar(type: Jar) {
-  manifest {
-    attributes 'Main-Class': 'gamer.App'
-    attributes 'Implementation-Version': getVersionName()
-  }
-  baseName = project.name + '-all'
-  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-  with jar
-}
