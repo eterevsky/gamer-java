@@ -6,8 +6,7 @@ compileJava.options.encoding = 'UTF-8'
 
 mainClassName = 'gamer.App'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '1.7'
 
 repositories {
   mavenCentral()
@@ -31,6 +30,12 @@ jar {
   manifest {
     attributes 'Main-Class': 'gamer.App'
     attributes 'Implementation-Version': getVersionName()
+  }
+}
+
+run {
+  if (project.hasProperty('args'))  {
+    args project.args.split('\\s')
   }
 }
 
