@@ -62,6 +62,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 	@Override
 	public String toString() {
     StringBuilder builder = new StringBuilder();
+    builder.append("GomokuState\n");
     for (int i = 0; i < getPoints(); i++) {
       if (marked.get(i)) {
 				builder.append(markedx.get(i) ? 'X' : 'O');
