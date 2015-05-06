@@ -139,6 +139,6 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 	}
 	
 	private int getSize() {
-		return game.getPoints();
+		return game.getSize();
 	}
 }
