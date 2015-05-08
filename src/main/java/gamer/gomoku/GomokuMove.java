@@ -33,10 +33,6 @@ public final class GomokuMove implements Move {
     return GomokuMove.of(col * size + row);
   }
 	
-	static GomokuMove of(int col, int row) {
-		return of(col, row, Gomoku.DEFAULT_SIZE);
-	}
-
   static GomokuMove of(String moveStr, int size) {
     char colChar = moveStr.charAt(0);
     int col;
@@ -65,14 +61,7 @@ public final class GomokuMove implements Move {
     return of(col, row - 1, size);
   }
 	
-  static GomokuMove of(String moveStr) {
-	  return of(moveStr, Gomoku.DEFAULT_SIZE);
-  }
-	
-	static {
-		createInstances(19);
-	}
-
+  @Override
   String toString(int size) {
     int col = point / size;
     int row = point % size;

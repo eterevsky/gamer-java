@@ -16,11 +16,10 @@ import java.util.Random;
 public class BenchmarkGomoku {
   private static double batchMut(Random random, int nsamples) {
     int sum = 0;
-    PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
     for (int isamples = 0; isamples < nsamples; isamples++) {
-      state.reset();
+      PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGame();
       while (!state.isTerminal()) {
-        state.apply(state.getRandomMove(random));
+        state.play(state.getRandomMove(random));
       }
       sum += state.getPayoff(0);
     }
@@ -40,22 +39,6 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static int gomoku1(int reps) {
-    int payoff = 0;
-    Random random = new Random();
-
-    for (int i = 0; i < reps; i++) {
-      GomokuState state = Gomoku.getInstance().newGame();
-      while (!state.isTerminal()) {
-        state = state.play(state.getRandomMove(random));
-      }
-      payoff = state.getPayoff(0);
-    }
-
-    return payoff;
-  }
-
-  @Benchmark
   public static int gomoku1mut(int reps) {
     int payoff = 0;
     Random random = new Random();
@@ -63,7 +46,7 @@ public class BenchmarkGomoku {
     for (int i = 0; i < reps; i++) {
       PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
       while (!state.isTerminal()) {
-        state.apply(state.getRandomMove(random));
+        state.play(state.getRandomMove(random));
       }
       payoff += state.getPayoff(0);
     }
@@ -120,7 +103,7 @@ public class BenchmarkGomoku {
     public Double call() {
       double s = 0;
       Random random = ThreadLocalRandom.current();
-      PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
+      PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGame();
 
       while (counter.getAndIncrement() < 100000) {
         state.reset();
@@ -173,16 +156,15 @@ public class BenchmarkGomoku {
     public Double call() {
       double s = 0;
       Random random = ThreadLocalRandom.current();
-      PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGameMut();
 
       while (true) {
         synchronized (counter) {
           if (counter.value++ > 100000)
             break;
         }
-        state.reset();
+        PositionMut<?, GomokuMove> state = Gomoku.getInstance().newGame();
         while (!state.isTerminal()) {
-          state.apply(state.getRandomMove(random));
+          state.play(state.getRandomMove(random));
         }
         s += state.getPayoff(0);
       }
@@ -192,7 +174,7 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku100kMutCounter(int reps) {
+  public static double gomoku100kMutSynchronizedCounter(int reps) {
     double sum = 0;
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);

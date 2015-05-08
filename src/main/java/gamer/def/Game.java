@@ -3,9 +3,12 @@ package gamer.def;
 public interface Game {
   Position<?, ?> newGame();
 
-  PositionMut<?, ?> newGameMut();
-
   int getPlayersCount();
 
-  boolean hasRandomPlayer();
+  /**
+   * True if the game has probabilistic moves.
+   */
+  default boolean isRandom() {
+    return false;
+  }
 }

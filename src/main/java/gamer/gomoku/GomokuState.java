@@ -2,7 +2,6 @@ package gamer.gomoku;
 
 import gamer.def.IllegalMoveException;
 import gamer.def.Position;
-import gamer.def.PositionMut;
 import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
@@ -12,71 +11,28 @@ import java.util.List;
 import java.util.Random;
 
 public final class GomokuState implements Position<GomokuState, GomokuMove> {
-  private final BitSet marked;
-  private final BitSet markedx;
-  private final int status;
-  private final Gomoku game;
+  private final int size;
+  private BitSet marked;
+  private BitSet markedx;
+  private int status;
 
-  GomokuState(Gomoku game) {
-    this.game = game;
+  GomokuState(int size) {
+    this.size = size;
     marked = new BitSet(game.getPoints());
     markedx = new BitSet(game.getPoints());
     status = GameStatusInt.init();
   }
-
-  private GomokuState(GomokuState other, GomokuMove move) {
+	
+  private GomokuStateMut(GomokuStateMut other) {
     game = other.game;
     marked = (BitSet) other.marked.clone();
-    marked.set(move.point);
-    if (other.getPlayerBool()) {
-      markedx = (BitSet) other.markedx.clone();
-      markedx.set(move.point);
-    } else {
-      markedx = other.markedx;
-    }
-    status = this.game.getStatus(marked, markedx, !other.getPlayerBool(), move);
+    markedx = (BitSet) other.markedx.clone();
+    status = other.status;
   }
-	
+
 	@Override
 	public GomokuStateMut toMutable() {
-		// if (getSize() == 19) {
-		// 	return new GomokuStateMut19(marked, markedx, status);
-		// } else {
-			return new GomokuStateMut(game, marked, markedx, status);
-		// }
-	}
-
-  @Override
-  public GomokuState play(GomokuMove move) {
-    if (isTerminal()) {
-      throw new TerminalPositionException();
-    }
-
-    if (marked.get(move.point)) {
-      throw new IllegalMoveException(this, move, "point is not empty");
-    }
-
-    return new GomokuState(this, move);
-  }
-	
-	@Override
-	public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("GomokuState\n");
-    for (int i = 0; i < getPoints(); i++) {
-      if (marked.get(i)) {
-				builder.append(markedx.get(i) ? 'X' : 'O');
-      } else {
-        builder.append('.');
-      }
-
-      if (i % getSize() == getSize() - 1) {
-        builder.append('\n');
-      } else {
-        builder.append(' ');
-      }
-		}
-		return builder.toString();
+		return new GomokuStateMut(this);
 	}
 
   @Override
@@ -85,9 +41,41 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
   }
 
   @Override
+  public GomokuStateMut play(GomokuMove move) {
+    GomokuStateMut next = new GomokuStateMut(this);
+    next.apply(move);
+    return next;
+  }
+
+  @Override
+  public void apply(GomokuMove move) {
+    if (isTerminal()) {
+      throw new IllegalMoveException(this, move, "state is terminal");
+    }
+
+    if (marked.get(move.point)) {
+      throw new IllegalMoveException(this, move, "point is not empty");
+    }
+
+    marked.set(move.point);
+    if (getPlayerBool()) {
+      markedx.set(move.point);
+    }
+
+    status = updateStatus(getPlayerBool(), move);
+  }
+
+  @Override
+  public void reset() {
+    marked.clear();
+    markedx.clear();
+    status = GameStatusInt.init();
+  }
+
+  @Override
   public List<GomokuMove> getMoves() {
     List<GomokuMove> moves = new ArrayList<>();
-    for (int i = 0; i < getPoints(); i++) {
+    for (int i = 0; i < game.getPoints(); i++) {
       if (!marked.get(i)) {
         moves.add(GomokuMove.of(i));
       }
@@ -103,16 +91,77 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
     int i;
     do {
-      i = random.nextInt(getPoints());
+      i = random.nextInt(game.getPoints());
     } while (marked.get(i));
 
     return GomokuMove.of(i);
   }
 
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < game.getPoints(); i++) {
+      if (marked.get(i)) {
+        if (markedx.get(i)) {
+          builder.append('X');
+        } else {
+          builder.append('O');
+        }
+      } else {
+        builder.append('.');
+      }
+
+      if (i % game.getSize() == game.getSize() - 1) {
+        builder.append('\n');
+      } else {
+        builder.append(' ');
+      }
+    }
+
+    return builder.toString();
+  }
+
+  private boolean checkLine(int center, int left, int right, int delta) {
+    boolean player = markedx.get(center);
+    int l = 1;
+    for (int cell = center - delta; cell >= left; cell -= delta) {
+      if (!marked.get(cell) || markedx.get(cell) != player)
+        break;
+      l++;
+    }
+
+    for (int cell = center + delta; cell <= right; cell += delta) {
+      if (!marked.get(cell) || markedx.get(cell) != player)
+        break;
+      l++;
+    }
+
+    return l >= 5;
+  }
+
+  private int updateStatus(boolean player, GomokuMove move) {
+    int cell = move.point;
+    boolean won = checkLine(cell, game.limLeft[cell], game.limRight[cell], 1)
+        || checkLine(cell, game.limTop[cell], game.limBottom[cell], game.getSize())
+        || checkLine(cell, game.limLT[cell], game.limRB[cell], game.getSize() + 1)
+        || checkLine(cell, game.limRT[cell], game.limLB[cell], game.getSize() - 1);
+
+
+    int status = GameStatusInt.init();
+    if (!player)
+      status = GameStatusInt.switchPlayer(status);
+    if (won) {
+      status = GameStatusInt.setPayoff(status, player ? 1 : -1);
+    } else if (marked.nextClearBit(0) == game.getPoints()) {
+      status = GameStatusInt.setPayoff(status, 0);
+    }
+
+    return status;
+  }
 
   @Override
   public String moveToString(GomokuMove move) {
-    return move.toString(getSize());
+    return move.toString();
   }
 
   @Override
@@ -132,14 +181,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
   @Override
   public GomokuMove parseMove(String moveStr) {
-    return GomokuMove.of(moveStr, getSize());
+    return GomokuMove.of(moveStr, game.getSize());
   }
-	
-	private int getPoints() {
-		return game.getPoints();
-	}
-	
-	private int getSize() {
-		return game.getSize();
-	}
+
 }

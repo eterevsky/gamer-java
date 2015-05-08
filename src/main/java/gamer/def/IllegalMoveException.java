@@ -1,6 +1,5 @@
 package gamer.def;
 
-@SuppressWarnings("serial")
 public class IllegalMoveException extends GameException {
   public <P extends Position<P, M>, M extends Move> IllegalMoveException(
       P position, M move, String message) {
