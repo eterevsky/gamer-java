@@ -6,62 +6,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class GomokuMove implements Move {
-  final int point;
-
-  private static final List<GomokuMove> instances = new ArrayList<>();
+  private static final List<GomokuMove> INSTANCES = new ArrayList<>();
   private static final String COL_LETTER = "abcdefghjklmnopqrstuvwxyz";
+  final int point;
 
   private GomokuMove(int point) {
     this.point = point;
   }
 
   static void createInstances(int size) {
-    for (int point = instances.size(); point < size * size; point++) {
-      instances.add(new GomokuMove(point));
+    for (int point = INSTANCES.size(); point < size * size; point++) {
+      INSTANCES.add(new GomokuMove(point));
     }
   }
 
   static GomokuMove of(int point) {
-    return instances.get(point);
+    return INSTANCES.get(point);
   }
 
   static GomokuMove of(int col, int row, int size) {
     if (col < 0 || col >= size || row < 0 || row > size) {
       throw new RuntimeException(
-          String.format("Wrong coodinates: %d %d", col, row));
+          String.format("Wrong move: %d %d (size: %d)", col, row, size));
     }
-    return GomokuMove.of(col * size + row);
+    return GomokuMove.of(row * size + col);
   }
 	
   static GomokuMove of(String moveStr, int size) {
+    moveStr = moveStr.toLowerCase();
     char colChar = moveStr.charAt(0);
-    int col;
-    if ('a' <= colChar && colChar <= 'h') {
-      col = colChar - 'a';
-    } else if ('j' <= colChar && colChar <= 'z') {
-      col = colChar - 'a' - 1;
-    } else if ('A' <= colChar && colChar <= 'H') {
-      col = colChar - 'A';
-    } else if ('J' <= colChar && colChar <= 'Z') {
-      col = colChar - 'A' - 1;
-    } else {
-      throw new RuntimeException("Can't parse: " + moveStr);
-    }
-
-    int row = 0;
-    for (int i = 1; i < moveStr.length(); i++) {
-      char c = moveStr.charAt(i);
-      if (c < '0' || c > '9') {
-        throw new RuntimeException("Can't parse: " + moveStr);
-      }
-
-      row = 10 * row + (c - '0');
-    }
-
+    int col = COL_LETTER.indexOf(colChar);
+    int row = Integer.parseInt(moveStr.substring(1));
     return of(col, row - 1, size);
   }
 	
-  @Override
   String toString(int size) {
     int col = point / size;
     int row = point % size;

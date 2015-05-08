@@ -6,13 +6,16 @@ import java.util.Random;
 /**
  * The class describing a game position.
  */
-public interface Position<P extends Position<P, M>, M extends Move> {
+public interface Position<P extends Position<P, M>, M extends Move>
+    extends Cloneable {
   /**
-   * Get the player number of a player to move. The first player to move in the 
-   * beginning of the game has number 0. 
+   * Get the player number of a player to move. The first player to move in the
+   * beginning of the game has number 0.
    * @return Player number or -1 for the probabilistic move.
    */
-  int getPlayer();
+  default int getPlayer() {
+    return getPlayerBool() ? 0 : 1;
+  }
 
   /**
    * True if the current player is player 0.
@@ -45,16 +48,19 @@ public interface Position<P extends Position<P, M>, M extends Move> {
   /**
    * Get a single random move in the current position. If the game is with
    * chanсe and the next move is probabilistic, the result of getRandomMove
-   * conforms the moves distribution. 
+   * conforms the moves distribution.
    */
-  M getRandomMove(Random random);
+  default M getRandomMove(Random rng) {
+    List<M> moves = getMoves();
+    return moves.get(rng.nextInt(moves.size()));
+  }
 
   /**
    * Apply a move to the current position.
    */
   void play(M move);
-  
-  void play(String moveStr) {
+
+  default void play(String moveStr) {
     this.play(this.parseMove(moveStr));
   }
 
@@ -63,16 +69,6 @@ public interface Position<P extends Position<P, M>, M extends Move> {
   }
 
   M parseMove(String moveStr);
-	
-  /**
-   * Make a copy of current position as a mutable position. The position is
-   * cloned even if the current position is already mutable. 
-   */
-	<P1 extends PositionMut<P1, M>> P1 toMutable();
 
-  /**
-   * Make a copy of current position, if possible, immutable. May return 
-   * current object if it is already immutable.
-   */
-	<P1 extends PositionMut<P1, M>> P1 toImmutable();
+  P clone();
 }

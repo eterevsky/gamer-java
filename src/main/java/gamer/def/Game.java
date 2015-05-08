@@ -3,7 +3,9 @@ package gamer.def;
 public interface Game {
   Position<?, ?> newGame();
 
-  int getPlayersCount();
+  default int getPlayersCount() {
+    return 2;
+  }
 
   /**
    * True if the game has probabilistic moves.

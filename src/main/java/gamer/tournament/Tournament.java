@@ -19,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public final class Tournament<P extends Position<P, M>, M extends Move> {
   private final P startPosition;
   private final List<ComputerPlayer<P, M>> players = new ArrayList<>();
+  private final boolean verbose;
   private Integer timeout = null;
   private int threadsPerPlayer = 1;
   private int gameThreads = 1;
@@ -26,7 +27,6 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
       null;
   private Queue<Match<P, M>> gamesQueue;
   private BlockingQueue<Match<P, M>> resultsQueue;
-  private final boolean verbose;
   private int rounds = 1;
 
   public Tournament(P startPosition) {
@@ -58,21 +58,6 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
 
   public void setRounds(int rounds) {
     this.rounds = rounds;
-  }
-
-  private static class PlayerResult implements Comparable<PlayerResult> {
-    final ComputerPlayer<?, ?> player;
-    final Double result;
-
-    @Override
-    public int compareTo(PlayerResult o) {
-      return o.result.compareTo(result);
-    }
-
-    PlayerResult(ComputerPlayer<?, ?> p, double r) {
-      player = p;
-      result = r;
-    }
   }
 
   public void play() {
@@ -166,6 +151,21 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
         presults.put(p2, 0.0);
       }
       results.put(p, presults);
+    }
+  }
+
+  private static class PlayerResult implements Comparable<PlayerResult> {
+    final ComputerPlayer<?, ?> player;
+    final Double result;
+
+    PlayerResult(ComputerPlayer<?, ?> p, double r) {
+      player = p;
+      result = r;
+    }
+
+    @Override
+    public int compareTo(PlayerResult o) {
+      return o.result.compareTo(result);
     }
   }
 }

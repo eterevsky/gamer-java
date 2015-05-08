@@ -16,7 +16,6 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
   private final long maxSamples;
   private final int samplesBatch;
   private final Random random;
-  private boolean verbose = false;
   private Solver<P, M> solver = null;
 
   Sampler(Node<P, M> root,
@@ -35,17 +34,13 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
     this.solver = solver;
   }
 
-  void setVerbose(boolean verbose) {
-    this.verbose = verbose;
-  }
-
   @Override
   public void run() {
     Random rnd = random == null ? ThreadLocalRandom.current() : random;
 
     while (!root.knowExact() &&
-           (maxSamples <= 0 || root.getSamples() < maxSamples) &&
-           (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
+        (maxSamples <= 0 || root.getSamples() < maxSamples) &&
+        (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
       Node<P, M> node = root;
       Node<P, M> next = node.selectChildOrAddPending(samplesBatch);
       while (next != Node.NO_CHILDREN && next != Node.KNOW_EXACT) {
@@ -53,32 +48,17 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
         next = node.selectChildOrAddPending(samplesBatch);
       }
 
-      if (verbose)
-        System.out.format("%s", node);
-
       if (next == Node.KNOW_EXACT) {
-        if (verbose)
-          System.out.println(root);
         continue;
       }
 
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
-//        PositionMut<?, M> position = node.getPosition().toMutable();
-//        Solver.Result<M> sResult = null;
-//        int moves = 0;
-//        do {
-//          position.apply(position.getRandomMove(rnd));
-//          // sResult = (solver != null) ? solver.solve(position) : null;
-//          moves += 1;
-//        } while (!position.isTerminal() && sResult == null);
-
-        P position = node.getPosition();
+        Position<?, M> position = node.getPosition().clone();
         Solver.Result<M> sResult = null;
         int moves = 0;
         do {
-          position = position.play(position.getRandomMove(rnd));
-          // position.apply(position.getRandomMove(rnd));
+          position.play(position.getRandomMove(rnd));
           // sResult = (solver != null) ? solver.solve(position) : null;
           moves += 1;
         } while (!position.isTerminal() && sResult == null);
@@ -90,11 +70,6 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
         }
       }
       node.addSamples(samplesBatch, value / samplesBatch);
-
-      if (verbose) {
-        System.out.format("%s", node);
-        System.out.println(root);
-      }
     }
   }
 }

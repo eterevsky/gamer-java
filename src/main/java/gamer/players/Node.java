@@ -9,34 +9,20 @@ import java.util.Collection;
 import java.util.List;
 
 abstract class Node<P extends Position<P, M>, M extends Move> {
+  @SuppressWarnings("rawtypes")
+  static final DummyNode KNOW_EXACT = new DummyNode();
+  @SuppressWarnings("rawtypes")
+  static final DummyNode NO_CHILDREN = new DummyNode();
+
+  protected final NodeContext<P, M> context;
   private final P position;
   private final M move;
   private final Node<P, M> parent;
-  protected final NodeContext<P, M> context;
   protected List<Node<P, M>> children = null;
   private boolean knowExact = false;
   private double payoff;  // Payoff for player 0
   private int totalSamples = 0;
   private int pendingSamples = 0;
-
-  @SuppressWarnings("rawtypes")
-  private final static class DummyNode extends Node {
-    @Override
-    protected DummyNode selectChild() {
-      throw new RuntimeException("shouldn't be called");
-    }
-
-    @Override
-    protected boolean maybeInitChildren() {
-      throw new RuntimeException("shouldn't be called");
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  static final DummyNode KNOW_EXACT = new DummyNode();
-
-  @SuppressWarnings("rawtypes")
-  static final DummyNode NO_CHILDREN = new DummyNode();
 
   private Node() {
     position = null;
@@ -67,6 +53,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   }
 
   abstract protected Node<P, M> selectChild();
+
   abstract protected boolean maybeInitChildren();
 
   final Node<P, M> getParent() {
@@ -239,5 +226,18 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     payoff = PAYOFF_SCALE_FACTOR * (position.getPlayerBool() ? hi : lo);
     knowExact = true;
     return true;
+  }
+
+  @SuppressWarnings("rawtypes")
+  private final static class DummyNode extends Node {
+    @Override
+    protected DummyNode selectChild() {
+      throw new RuntimeException("shouldn't be called");
+    }
+
+    @Override
+    protected boolean maybeInitChildren() {
+      throw new RuntimeException("shouldn't be called");
+    }
   }
 }

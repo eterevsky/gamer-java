@@ -9,8 +9,11 @@ public interface ComputerPlayer<P extends Position<P, M>, M extends Move>
   }
 
   void setRandom(Random random);
+
   void setMaxWorkers(int maxWorkers);
+
   void setMaxSamples(long maxSamples);
+
   void setTimeout(long timout);
 
   void addSolver(Solver<P, M> solver);
