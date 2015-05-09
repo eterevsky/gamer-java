@@ -2,7 +2,6 @@ package gamer.players;
 
 import gamer.def.Move;
 import gamer.def.Position;
-import gamer.def.PositionMut;
 import gamer.def.Solver;
 
 import java.util.Random;
@@ -54,7 +53,7 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
 
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
-        Position<?, M> position = node.getPosition().clone();
+        Position<?, M> position = node.getState().clone();
         Solver.Result<M> sResult = null;
         int moves = 0;
         do {

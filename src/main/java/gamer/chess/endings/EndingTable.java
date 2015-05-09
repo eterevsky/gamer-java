@@ -2,7 +2,6 @@ package gamer.chess.endings;
 
 import gamer.chess.ChessMove;
 import gamer.chess.ChessState;
-import gamer.chess.StateBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -215,10 +214,12 @@ class EndingTable {
 
         ChessState state = decode(i);
         for (ChessMove move : state.getMoves()) {
-          ChessState next = state.play(move);
+          ChessState next = state.clone();
+          next.play(move);
 
           EndingStatus status;
-          if (state.isCapture(move)) {
+          int moveTo = move.to;
+          if (!state.getBoard().isEmpty(moveTo)) {
             if (n == 3) {
               status = EndingStatus.DRAW;
             } else {
@@ -277,6 +278,6 @@ class EndingTable {
   }
 
   private ChessState decode(int idx) {
-    return new ChessState(new StateBuilder());
+    return new ChessState();
   }
 }

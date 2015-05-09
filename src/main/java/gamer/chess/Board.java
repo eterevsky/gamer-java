@@ -2,7 +2,15 @@ package gamer.chess;
 
 import java.util.Arrays;
 
-final class Board {
+public final class Board {
+  private byte[] board = new byte[64];
+
+  Board() {}
+
+  Board(byte[] board) {
+    this.board = board;
+  }
+
   static int a2i(String a) {
     assert a.length() == 2;
     return (a.charAt(0) - 'a') * 8 + a.charAt(1) - '1';
@@ -26,14 +34,6 @@ final class Board {
 
   static String i2cola(int idx) {
     return String.format("%c", 'a' + idx / 8);
-  }
-
-  private byte[] board = new byte[64];
-
-  Board() {}
-
-  Board(byte[] board) {
-    this.board = board;
   }
 
   void reset() {
@@ -79,7 +79,7 @@ final class Board {
     board[from] = Pieces.EMPTY;
   }
 
-  boolean isEmpty(int cell) {
+  public boolean isEmpty(int cell) {
     return board[cell] == Pieces.EMPTY;
   }
 

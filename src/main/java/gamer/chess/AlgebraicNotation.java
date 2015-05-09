@@ -1,6 +1,71 @@
 package gamer.chess;
 
 class AlgebraicNotation {
+  static ChessMove parse(State<?> state, String moveStr) {
+    MoveComponents components = new MoveComponents(moveStr);
+    ChessMove move = null;
+    Board board = state.getBoard();
+
+    for (ChessMove m : state.getMoves()) {
+      if (m.to == components.to &&
+          board.getPiece(m.from) == components.piece &&
+          m.promote == components.promote &&
+          (components.fromCell == -1 || m.from == components.fromCell) &&
+          (components.fromRow == 0 ||
+           Board.i2row(m.from) == components.fromRow) &&
+          (components.fromCol == 0 ||
+           Board.i2col(m.from) == components.fromCol)) {
+        if (move != null) {
+          throw new RuntimeException(
+              "Ambiguous move notation: " + moveStr +
+              " (alternatives: " + move.toString() + " " + m.toString());
+        }
+        move = m;
+      }
+    }
+
+    if (move == null)
+      throw new RuntimeException("Illegal move: " + moveStr);
+
+    return move;
+  }
+
+  static String moveToString(State<?> state, ChessMove move) {
+    Board board = state.getBoard();
+    byte piece = board.getPiece(move.from);
+    if (piece == Pieces.KING) {
+      if (move.to == move.from + 16) {
+        return "O-O";
+      }
+      if (move.to == move.from - 16) {
+        return "O-O-O";
+      }
+    }
+
+    StringBuilder builder = new StringBuilder();
+
+    if (piece != Pieces.PAWN) {
+      builder.append(Pieces.PIECE_LETTER[piece]);
+    } else if (!board.isEmpty(move.to)) {
+      builder.append(Board.i2cola(move.from));
+    }
+
+    // TODO: disambiguation
+
+    if (!board.isEmpty(move.to)) {
+      builder.append("x");
+    }
+
+    builder.append(Board.i2a(move.to));
+
+    if (move.promote != 0) {
+      builder.append("=");
+      builder.append(Pieces.PIECE_LETTER[move.promote]);
+    }
+
+    return builder.toString();
+  }
+
   private static class MoveComponents {
     boolean shortCastling = false;
     boolean longCastling = false;
@@ -142,71 +207,6 @@ class AlgebraicNotation {
       back();
       return 0;
     }
-  }
-
-  static ChessMove parse(State<?> state, String moveStr) {
-    MoveComponents components = new MoveComponents(moveStr);
-    ChessMove move = null;
-    Board board = state.getBoard();
-
-    for (ChessMove m : state.getMoves()) {
-      if (m.to == components.to &&
-          board.getPiece(m.from) == components.piece &&
-          m.promote == components.promote &&
-          (components.fromCell == -1 || m.from == components.fromCell) &&
-          (components.fromRow == 0 ||
-           Board.i2row(m.from) == components.fromRow) &&
-          (components.fromCol == 0 ||
-           Board.i2col(m.from) == components.fromCol)) {
-        if (move != null) {
-          throw new RuntimeException(
-              "Ambiguous move notation: " + moveStr +
-              " (alternatives: " + move.toString() + " " + m.toString());
-        }
-        move = m;
-      }
-    }
-
-    if (move == null)
-      throw new RuntimeException("Illegal move: " + moveStr);
-
-    return move;
-  }
-
-  static String moveToString(State<?> state, ChessMove move) {
-    Board board = state.getBoard();
-    byte piece = board.getPiece(move.from);
-    if (piece == Pieces.KING) {
-      if (move.to == move.from + 16) {
-        return "O-O";
-      }
-      if (move.to == move.from - 16) {
-        return "O-O-O";
-      }
-    }
-
-    StringBuilder builder = new StringBuilder();
-
-    if (piece != Pieces.PAWN) {
-      builder.append(Pieces.PIECE_LETTER[piece]);
-    } else if (!board.isEmpty(move.to)) {
-      builder.append(Board.i2cola(move.from));
-    }
-
-    // TODO: disambiguation
-
-    if (!board.isEmpty(move.to)) {
-      builder.append("x");
-    }
-
-    builder.append(Board.i2a(move.to));
-
-    if (move.promote != 0) {
-      builder.append("=");
-      builder.append(Pieces.PIECE_LETTER[move.promote]);
-    }
-
-    return builder.toString();
   }
 
 }

@@ -33,7 +33,7 @@ public final class Gomoku implements Game {
   }
 
   @Override
-  public Position<?, GomokuMove> newGame() {
+  public GomokuState newGame() {
     return new GomokuState(size, limits);
   }
 

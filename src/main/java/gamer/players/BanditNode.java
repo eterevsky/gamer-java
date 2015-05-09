@@ -17,7 +17,7 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
 
     Node<P, M> bestChild = null;
     double bestChildPrio = 0;
-    boolean player = getPosition().getPlayerBool();
+    boolean player = getState().getPlayerBool();
 
     for (Node<P, M> child : children) {
       if (child.getTotalSamples() == 0) {

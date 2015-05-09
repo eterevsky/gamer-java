@@ -15,15 +15,13 @@ class Pieces {
   static final byte BLACK = 8;
 
   static final byte MAX = 14;
-
+  static final char PIECE_LETTER[] = {
+    '?', 'p', 'R', 'N', 'B', 'Q', 'K'
+  };
   private static final char PIECE_NAMES[] = {
       '\u00B7', '\u2659', '\u2656', '\u2658', '\u2657', '\u2655', '\u2654', '?',
       '?', '\u265F', '\u265C', '\u265E', '\u265D', '\u265B', '\u265A'
     };
-
-  static final char PIECE_LETTER[] = {
-    '?', 'p', 'R', 'N', 'B', 'Q', 'K'
-  };
 
   static byte a2piece(String s) {
     if (s.length() != 1) {

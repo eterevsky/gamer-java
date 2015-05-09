@@ -15,34 +15,35 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   static final DummyNode NO_CHILDREN = new DummyNode();
 
   protected final NodeContext<P, M> context;
-  private final P position;
+  private final P state;
   private final M move;
   private final Node<P, M> parent;
   protected List<Node<P, M>> children = null;
   private boolean knowExact = false;
-  private double payoff;  // Payoff for player 0
+  /** Payoff for player 0 */
+  private double payoff;
   private int totalSamples = 0;
   private int pendingSamples = 0;
 
   private Node() {
-    position = null;
+    state = null;
     move = null;
     parent = null;
     context = null;
   }
 
-  Node(Node<P, M> parent, P position, M move, NodeContext<P, M> context) {
+  Node(Node<P, M> parent, P state, M move, NodeContext<P, M> context) {
     this.context = context;
     this.parent = parent;
-    this.position = position;
+    this.state = state;
     this.move = move;
 
-    if (position != null) {
-      if (position.isTerminal()) {
-        this.payoff = position.getPayoff(0);
+    if (state != null) {
+      if (state.isTerminal()) {
+        this.payoff = state.getPayoff(0);
         this.knowExact = true;
       } else if (context.solver != null) {
-        Solver.Result<M> result = context.solver.solve(position);
+        Solver.Result<M> result = context.solver.solve(state);
         if (result != null) {
           this.payoff =
               result.payoff * Math.pow(PAYOFF_SCALE_FACTOR, result.moves);
@@ -60,8 +61,8 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return parent;
   }
 
-  final P getPosition() {
-    return position;
+  final P getState() {
+    return state;
   }
 
   final M getMove() {
@@ -150,7 +151,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
           "Requested children from a node without children.");
     }
     for (Node<P, M> child : children) {
-      if (child.position.equals(position))
+      if (child.state.equals(position))
         return child;
     }
     return null;
@@ -223,7 +224,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
         hi = v;
     }
 
-    payoff = PAYOFF_SCALE_FACTOR * (position.getPlayerBool() ? hi : lo);
+    payoff = PAYOFF_SCALE_FACTOR * (state.getPlayerBool() ? hi : lo);
     knowExact = true;
     return true;
   }

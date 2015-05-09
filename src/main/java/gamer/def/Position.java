@@ -51,6 +51,9 @@ public interface Position<P extends Position<P, M>, M extends Move>
    * conforms the moves distribution.
    */
   default M getRandomMove(Random rng) {
+    if (isTerminal()) {
+      throw new TerminalPositionException("terminal state: " + toString());
+    }
     List<M> moves = getMoves();
     return moves.get(rng.nextInt(moves.size()));
   }
@@ -71,4 +74,6 @@ public interface Position<P extends Position<P, M>, M extends Move>
   M parseMove(String moveStr);
 
   P clone();
+
+  String toString();
 }

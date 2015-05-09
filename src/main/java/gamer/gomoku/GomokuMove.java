@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class GomokuMove implements Move {
+  private static final String COL_LETTER = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
   private static final List<GomokuMove> INSTANCES = new ArrayList<>();
-  private static final String COL_LETTER = "abcdefghjklmnopqrstuvwxyz";
   final int point;
 
   private GomokuMove(int point) {
@@ -31,7 +31,7 @@ public final class GomokuMove implements Move {
     }
     return GomokuMove.of(row * size + col);
   }
-	
+
   static GomokuMove of(String moveStr, int size) {
     moveStr = moveStr.toLowerCase();
     char colChar = moveStr.charAt(0);
@@ -39,10 +39,10 @@ public final class GomokuMove implements Move {
     int row = Integer.parseInt(moveStr.substring(1));
     return of(col, row - 1, size);
   }
-	
+
   String toString(int size) {
-    int col = point / size;
-    int row = point % size;
+    int row = point / size;
+    int col = point % size;
     return String.format("%c%d", COL_LETTER.charAt(col), row + 1);
   }
 

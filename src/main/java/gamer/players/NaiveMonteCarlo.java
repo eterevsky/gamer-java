@@ -29,10 +29,10 @@ public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
 
     @Override
     public boolean maybeInitChildren() {
-      List<M> moves = getPosition().getMoves();
+      List<M> moves = getState().getMoves();
       children = new ArrayList<>(moves.size());
       for (M move : moves) {
-        P newState = getPosition().clone();
+        P newState = getState().clone();
         newState.play(move);
         children.add(new LeafNode<>(this, newState, move, context));
       }

@@ -39,7 +39,7 @@ public final class TestMonteCarloUcb {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
     move = player.selectMove(state);
     assertEquals(3, move.getNodeId());
@@ -58,7 +58,7 @@ public final class TestMonteCarloUcb {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
     move = player.selectMove(state);
     assertEquals(5, move.getNodeId());
