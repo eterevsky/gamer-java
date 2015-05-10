@@ -42,7 +42,7 @@ public final class TestNaiveMonteCarlo {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
     move = player.selectMove(state);
     assertEquals(3, move.getNodeId());
@@ -61,10 +61,10 @@ public final class TestNaiveMonteCarlo {
     // Unlike UCT this should generate the incorrect move.
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
-    state = state.play(player.selectMove(state));
-    state = state.play(player.selectMove(state));
+    state.play(player.selectMove(state));
+    state.play(player.selectMove(state));
 
     assertTrue(state.isTerminal());
     assertEquals(-1, state.getPayoff(0));
@@ -84,7 +84,7 @@ public final class TestNaiveMonteCarlo {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
     move = player.selectMove(state);
     assertEquals(5, move.getNodeId());

@@ -33,7 +33,7 @@ public final class TestMonteCarloUct {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
     move = player.selectMove(state);
     assertEquals(3, move.getNodeId());
@@ -49,10 +49,10 @@ public final class TestMonteCarloUct {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
-    state = state.play(player.selectMove(state));
-    state = state.play(player.selectMove(state));
+    state.play(player.selectMove(state));
+    state.play(player.selectMove(state));
 
     assertTrue(state.isTerminal());
     assertEquals(1, state.getPayoff(0));
@@ -66,7 +66,7 @@ public final class TestMonteCarloUct {
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
 
-    state = state.play(state.getMoveToNode(2));
+    state.play(state.getMoveToNode(2));
     TreeGameMove move = player.selectMove(state);
     assertEquals(5, move.getNodeId());
   }
@@ -81,7 +81,7 @@ public final class TestMonteCarloUct {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());
-    state = state.play(move);
+    state.play(move);
 
     move = player.selectMove(state);
     assertEquals(5, move.getNodeId());
@@ -97,8 +97,8 @@ public final class TestMonteCarloUct {
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());
-    state = state.play(move);
-    state = state.play(state.getMoveToNode(4));
+    state.play(move);
+    state.play(state.getMoveToNode(4));
 
     move = player.selectMove(state);
     assertEquals(7, move.getNodeId());
