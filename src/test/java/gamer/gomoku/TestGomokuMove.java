@@ -7,6 +7,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class TestGomokuMove {
+  @BeforeClass
+  public static void setup() {
+    GomokuMove.createInstances(19);
+  }
 
   @BeforeClass
   public static void setup() {
