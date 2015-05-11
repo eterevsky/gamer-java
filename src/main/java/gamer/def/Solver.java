@@ -1,5 +1,9 @@
 package gamer.def;
 
+/**
+ * Provide exact solutions (optimal moves) for a subset of possible game
+ * positions.
+ */
 public interface Solver<P extends Position<P, M>, M extends Move> {
   public static class Result<M extends Move> {
     public int payoff;
@@ -13,6 +17,8 @@ public interface Solver<P extends Position<P, M>, M extends Move> {
     }
   }
 
-  // null in case result is unknown.
+  /**
+   * @return null in case result is unknown.
+   */
   Result<M> solve(P position);
 }

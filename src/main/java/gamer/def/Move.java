@@ -1,7 +1,12 @@
 package gamer.def;
 
-// Immutable
+/**
+ * A move. Immutable.
+ */
 public interface Move {
   @Override
   int hashCode();
+  
+  @Override
+  String toString();
 }

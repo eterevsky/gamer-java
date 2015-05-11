@@ -1,16 +1,85 @@
 package gamer.chess;
 
-import static gamer.chess.Pieces.EMPTY;
-import static gamer.chess.Pieces.PAWN;
-import static gamer.chess.Pieces.ROOK;
-import static gamer.chess.Pieces.KNIGHT;
-import static gamer.chess.Pieces.BISHOP;
-import static gamer.chess.Pieces.QUEEN;
-import static gamer.chess.Pieces.KING;
-import static gamer.chess.Pieces.WHITE;
-import static gamer.chess.Pieces.BLACK;
+import static gamer.chess.Pieces.*;
 
 class Fen {
+  static ChessState parse(String fen) {
+    Parser parser = new Parser(fen);
+    return parser.parse();
+  }
+
+  @SuppressWarnings("PointlessBitwiseExpression")
+  static String toFen(State<?> state) {
+    StringBuilder builder = new StringBuilder();
+    int nempty = 0;
+
+    for (int cell = 0; cell < 64; cell++) {
+      int row = 7 - cell / 8;
+      int col = cell % 8;
+      byte piece = state.get(col, row);
+
+      if (piece != EMPTY && nempty > 0) {
+        builder.append(nempty);
+        nempty = 0;
+      }
+
+      switch (piece) {
+        case WHITE | PAWN: builder.append('P'); break;
+        case WHITE | ROOK: builder.append('R'); break;
+        case WHITE | KNIGHT: builder.append('N'); break;
+        case WHITE | BISHOP: builder.append('B'); break;
+        case WHITE | QUEEN: builder.append('Q'); break;
+        case WHITE | KING: builder.append('K'); break;
+        case BLACK | PAWN: builder.append('p'); break;
+        case BLACK | ROOK: builder.append('r'); break;
+        case BLACK | KNIGHT: builder.append('n'); break;
+        case BLACK | BISHOP: builder.append('b'); break;
+        case BLACK | QUEEN: builder.append('q'); break;
+        case BLACK | KING: builder.append('k'); break;
+        case EMPTY: nempty++;
+      }
+
+      if (col == 8 && nempty > 0) {
+        builder.append(nempty);
+        nempty = 0;
+      }
+
+      if (col == 8 && row > 1)
+        builder.append('/');
+    }
+
+    builder.append(state.getPlayerBool() ? " w " : " b ");
+    int castlings = state.getCastlings();
+
+    if (castlings == 0) {
+      builder.append('-');
+    } else {
+      if ((castlings & State.WHITE_SHORT_CASTLING) != 0)
+        builder.append('K');
+      if ((castlings & State.WHITE_LONG_CASTLING) != 0)
+        builder.append('Q');
+      if ((castlings & State.BLACK_SHORT_CASTLING) != 0)
+        builder.append('k');
+      if ((castlings & State.BLACK_LONG_CASTLING) != 0)
+        builder.append('q');
+    }
+
+    builder.append(' ');
+
+    if (state.getEnPassant() >= 0) {
+      builder.append(Board.i2a(state.getEnPassant()));
+    } else {
+      builder.append('-');
+    }
+
+    builder.append(' ');
+    builder.append(state.getMovesSinceCapture());
+    builder.append(' ');
+    builder.append(state.getMovesCount() / 2);
+
+    return builder.toString();
+  }
+
   private static class Parser {
     private String fen;
     private int idx;
@@ -20,9 +89,15 @@ class Fen {
       idx = 0;
     }
 
+    static private int tp(int cell) {
+      int row = 8 - cell / 8;
+      int col = cell % 8 + 1;
+      return Board.cr2i(col, row);
+    }
+
     @SuppressWarnings("PointlessBitwiseExpression")
-    StateBuilder parse() {
-      StateBuilder builder = new StateBuilder();
+    ChessState parse() {
+      ChessState builder = new ChessState();
 
       int cell = 0;
       for (char c : getComponent().toCharArray()) {
@@ -94,12 +169,6 @@ class Fen {
       return builder;
     }
 
-    static private int tp(int cell) {
-      int row = 8 - cell / 8;
-      int col = cell % 8 + 1;
-      return Board.cr2i(col, row);
-    }
-
     private String getComponent() {
       while (idx < fen.length() && Character.isWhitespace(fen.charAt(idx))) {
         idx++;
@@ -112,84 +181,5 @@ class Fen {
 
       return fen.substring(start, idx);
     }
-  }
-
-  static StateBuilder parse(String fen) {
-    Parser parser = new Parser(fen);
-    return parser.parse();
-  }
-
-  @SuppressWarnings("PointlessBitwiseExpression")
-  static String toFen(State<?> state) {
-    StringBuilder builder = new StringBuilder();
-    Board board = state.getBoard();
-
-    int nempty = 0;
-
-    for (int cell = 0; cell < 64; cell++) {
-      int row = 8 - cell / 8;
-      int col = cell % 8 + 1;
-      byte piece = board.get(col, row);
-
-      if (piece != EMPTY && nempty > 0) {
-        builder.append(nempty);
-        nempty = 0;
-      }
-
-      switch (piece) {
-        case WHITE | PAWN: builder.append('P'); break;
-        case WHITE | ROOK: builder.append('R'); break;
-        case WHITE | KNIGHT: builder.append('N'); break;
-        case WHITE | BISHOP: builder.append('B'); break;
-        case WHITE | QUEEN: builder.append('Q'); break;
-        case WHITE | KING: builder.append('K'); break;
-        case BLACK | PAWN: builder.append('p'); break;
-        case BLACK | ROOK: builder.append('r'); break;
-        case BLACK | KNIGHT: builder.append('n'); break;
-        case BLACK | BISHOP: builder.append('b'); break;
-        case BLACK | QUEEN: builder.append('q'); break;
-        case BLACK | KING: builder.append('k'); break;
-        case EMPTY: nempty++;
-      }
-
-      if (col == 8 && nempty > 0) {
-        builder.append(nempty);
-        nempty = 0;
-      }
-
-      if (col == 8 && row > 1)
-        builder.append('/');
-    }
-
-    builder.append(state.getPlayerBool() ? " w " : " b ");
-    int castlings = state.getCastlings();
-
-    if (castlings == 0) {
-      builder.append('-');
-    } else {
-      if ((castlings & State.WHITE_SHORT_CASTLING) != 0)
-        builder.append('K');
-      if ((castlings & State.WHITE_LONG_CASTLING) != 0)
-        builder.append('Q');
-      if ((castlings & State.BLACK_SHORT_CASTLING) != 0)
-        builder.append('k');
-      if ((castlings & State.BLACK_LONG_CASTLING) != 0)
-        builder.append('q');
-    }
-
-    builder.append(' ');
-
-    if (state.getEnPassant() >= 0) {
-      builder.append(Board.i2a(state.getEnPassant()));
-    } else {
-      builder.append('-');
-    }
-
-    builder.append(' ');
-    builder.append(state.getMovesSinceCapture());
-    builder.append(' ');
-    builder.append(state.getMovesCount() / 2);
-
-    return builder.toString();
   }
 }

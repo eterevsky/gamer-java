@@ -25,7 +25,7 @@ public final class TestRandomPlayer {
     RandomPlayer<TreeGameState, TreeGameMove> player = new RandomPlayer<>();
 
     while (!state.isTerminal()) {
-      state = state.play(player.selectMove(state));
+      state.play(player.selectMove(state));
     }
 
     assertEquals(1, state.getPayoff(0));

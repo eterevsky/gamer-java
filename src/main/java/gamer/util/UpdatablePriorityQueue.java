@@ -6,16 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class UpdatablePriorityQueue<T> {
-  private static class Element<T> {
-    Element(T value, double priority) {
-      this.value = value;
-      this.priority = priority;
-    }
-
-    T value;
-    double priority;
-  }
-
   private final List<Element<T>> heap;
   private final Map<T, Integer> position;
 
@@ -65,7 +55,7 @@ public final class UpdatablePriorityQueue<T> {
   private void bubbleDown(int index) {
     Element<T> element = heap.get(index);
     while (true) {
-      int leftChild = 2*index + 1;
+      int leftChild = 2 * index + 1;
       int rightChild = leftChild + 1;
       if (leftChild >= heap.size())
         break;
@@ -95,5 +85,15 @@ public final class UpdatablePriorityQueue<T> {
 
     heap.set(index, element);
     position.put(element.value, index);
+  }
+
+  private static class Element<T> {
+    T value;
+    double priority;
+
+    Element(T value, double priority) {
+      this.value = value;
+      this.priority = priority;
+    }
   }
 }

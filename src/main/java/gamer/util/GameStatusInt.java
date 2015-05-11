@@ -6,7 +6,6 @@ public final class GameStatusInt {
   private static int PAYOFF_MASK = 3;
   private static int TERMINAL_MASK = 4;
   private static int PLAYER_MASK = 8;
-
   public static int WIN = 2 | TERMINAL_MASK;
   public static int LOSS = TERMINAL_MASK | PLAYER_MASK;
 

@@ -1,7 +1,7 @@
 package gamer.chess;
 
 import gamer.def.Game;
-import gamer.def.PositionMut;
+import gamer.def.Position;
 
 public final class Chess implements Game {
   private static final Chess INSTANCE = new Chess();
@@ -16,21 +16,6 @@ public final class Chess implements Game {
 
   @Override
   public ChessState newGame() {
-    return INITIAL;
-  }
-
-  @Override
-  public PositionMut<?, ?> newGameMut() {
-    return INITIAL.toBuilder();
-  }
-
-  @Override
-  public boolean hasRandomPlayer() {
-    return false;
-  }
-
-  @Override
-  public int getPlayersCount() {
-    return 2;
+    return INITIAL.clone();
   }
 }

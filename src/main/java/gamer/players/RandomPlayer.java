@@ -40,11 +40,6 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
   }
 
   @Override
-  public boolean isHuman() {
-    return false;
-  }
-
-  @Override
   public M selectMove(P position) {
     return position.getRandomMove(
         random == null ? ThreadLocalRandom.current() : random);

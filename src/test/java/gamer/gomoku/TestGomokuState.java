@@ -1,27 +1,29 @@
 package gamer.gomoku;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
 import gamer.def.GameException;
+import org.junit.Test;
 
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 public class TestGomokuState {
-  private void testPlayGame(String gameStr, int expectedPayoff) {
-    GomokuState state = Gomoku.getInstance().newGame();
+  private GomokuState playGame(String gameStr) {
+    GomokuState state = Gomoku.getInstance(19).newGame();
     boolean player = true;
 
     for (String moveStr : gameStr.split(" ")) {
       assertEquals(player, state.getPlayerBool());
       assertFalse(state.isTerminal());
-      state = state.play(GomokuMove.of(moveStr));
+      state.play(state.parseMove(moveStr));
       player = !player;
     }
 
+    return state;
+  }
+
+  private void testPlayGame(String gameStr, int expectedPayoff) {
+    GomokuState state = playGame(gameStr);
     assertTrue(state.isTerminal());
     assertEquals(expectedPayoff, state.getPayoff(0));
   }
@@ -57,45 +59,22 @@ public class TestGomokuState {
 
   @Test(timeout=50)
   public void playHorizontalOverlap() {
-    GomokuState state = Gomoku.getInstance().newGame();
-    state = state.play(GomokuMove.of(2, 3));
-    state = state.play(GomokuMove.of(0, 1));
-    state = state.play(GomokuMove.of(4, 3));
-    state = state.play(GomokuMove.of(1, 1));
-    state = state.play(GomokuMove.of(1, 3));
-    state = state.play(GomokuMove.of(2, 1));
-    state = state.play(GomokuMove.of(0, 3));
-    state = state.play(GomokuMove.of(18, 0));
-    state = state.play(GomokuMove.of(10, 10));
-    state = state.play(GomokuMove.of(17, 0));
-
+    GomokuState state = playGame("c3 a2 e4 b2 b4 c2 a4 t1 m11 s1");
     assertFalse(state.isTerminal());
   }
 
   @Test(expected = GameException.class, timeout=50)
   public void playNoMoveAfterEnd() {
-    GomokuState state = Gomoku.getInstance().newGame();
-    state = state.play(GomokuMove.of(2, 3));
-    state = state.play(GomokuMove.of(6, 5));
-    state = state.play(GomokuMove.of(4, 3));
-    state = state.play(GomokuMove.of(5, 6));
-    state = state.play(GomokuMove.of(1, 3));
-    state = state.play(GomokuMove.of(4, 7));
-    state = state.play(GomokuMove.of(0, 3));
-    state = state.play(GomokuMove.of(3, 8));
-    state = state.play(GomokuMove.of(10, 10));
-    state = state.play(GomokuMove.of(2, 9));
-
+    GomokuState state = playGame("c4 g6 e4 f7 b4 e8 a4 d9 m11 c10");
     assertEquals(-1, state.getPayoff(0));
-
-    state = state.play(GomokuMove.of(1, 1));
+    state.play(state.parseMove("b2"));
   }
 
   @Test(expected = GameException.class, timeout=50)
   public void playTwoMovesBySamePlace() {
     GomokuState state = Gomoku.getInstance().newGame();
-    state = state.play(GomokuMove.of(2, 3));
-    state = state.play(GomokuMove.of(2, 3));
+    state.play(state.parseMove("c4"));
+    state.play(state.parseMove("c4"));
   }
 
   @Test(timeout=100)
@@ -111,7 +90,7 @@ public class TestGomokuState {
       }
 
       for (int j = 0; j < gomoku.getSize(); j++) {
-        state = state.play(GomokuMove.of(row, j));
+        state.play(GomokuMove.of(row, j, gomoku.getSize()));
       }
     }
 
@@ -129,11 +108,48 @@ public class TestGomokuState {
     int moves = 0;
 
     while (!state.isTerminal()) {
-      state = state.play(state.getRandomMove(random));
+      state.play(state.getRandomMove(random));
       moves++;
     }
 
     assertTrue(moves >= 9);
-    assertTrue(moves <= gomoku.getPoints());
+    assertTrue(moves <= gomoku.getSize() * gomoku.getSize());
+  }
+
+  @Test(timeout=50)
+  public void playRandomOnSmallBoard() {
+    Gomoku gomoku = Gomoku.getInstance(4);
+
+    Random random = new Random(1234567890L);
+    for (int igame = 0; igame < 10; igame++) {
+      GomokuState state = gomoku.newGame();
+      int moves = 0;
+      while (!state.isTerminal()) {
+        state.play(state.getRandomMove(random));
+        moves++;
+      }
+
+      assertEquals(16, moves);
+      assertTrue(state.isTerminal());
+      assertEquals(0, state.getPayoff(0));
+    }
+  }
+
+  @Test
+  public void cloneIndependent() {
+    GomokuState state = Gomoku.getInstance(19).newGame();
+    GomokuState stateClone = state.clone();
+
+    state.play("b2");
+    assertEquals(1, state.get("b2"));
+    assertEquals(0, stateClone.get("b2"));
+
+    state.play("a3");
+    assertEquals(2, state.get("a3"));
+    assertEquals(0, stateClone.get("a3"));
+
+    stateClone.play("a3");
+    assertEquals(2, state.get("a3"));
+    assertEquals(1, stateClone.get("a3"));
   }
 }

@@ -1,24 +1,24 @@
 package gamer.chess;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestChessState {
 
   @Test
   public void foolsMate() {
-    ChessState state0 = Chess.getInstance().newGame();
-    ChessState state1 = state0.play(ChessMove.of("f2", "f3"));
-    ChessState state2 = state1.play(ChessMove.of("e7", "e5"));
-    ChessState state3 = state2.play(ChessMove.of("g2", "g4"));
-    ChessState state4 = state3.play(ChessMove.of("d8", "h4"));
-    assertTrue(state4.isTerminal());
-    assertEquals(-1, state4.getPayoff(0));
+    ChessState state = Chess.getInstance().newGame();
+    state.play(ChessMove.of("f2", "f3"));
+    state.play(ChessMove.of("e7", "e5"));
+    state.play(ChessMove.of("g2", "g4"));
+    state.play(ChessMove.of("d8", "h4"));
+    assertTrue(state.isTerminal());
+    assertEquals(-1, state.getPayoff(0));
   }
 
   @Test
@@ -29,10 +29,21 @@ public class TestChessState {
     ChessState state = Chess.getInstance().newGame();
 
     for (String move : moves) {
-      state = state.play(move);
+      state.play(move);
     }
     assertTrue(state.isTerminal());
     assertEquals(1, state.getPayoff(0));
   }
 
+  @Test
+  public void cloneIsIndependent() {
+    ChessState state = Chess.getInstance().newGame();
+    ChessState stateClone = state.clone();
+    state.play("e4");
+    assertEquals(Pieces.EMPTY, state.get("e2"));
+    assertEquals(Pieces.white(Pieces.PAWN), state.get("e4"));
+    assertEquals(Pieces.white(Pieces.PAWN), stateClone.get("e2"));
+    assertEquals(Pieces.EMPTY, stateClone.get("e4"));
+    stateClone.play("e4");
+  }
 }

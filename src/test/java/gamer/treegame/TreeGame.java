@@ -2,15 +2,33 @@ package gamer.treegame;
 
 import gamer.def.Game;
 import gamer.def.GameException;
-import gamer.def.PositionMut;
 import gamer.util.GameStatusInt;
 
 import java.util.HashMap;
 import java.util.Map;
 
-// Used mainly for unit tests which require games with very simple game trees.
+/**
+ * Used mainly for unit tests which require games with very simple game trees.
+ */
 public final class TreeGame implements Game {
   final Node root;
+
+  private TreeGame(Node root) {
+    this.root = root;
+  }
+
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  @Override
+  public TreeGameState newGame() {
+    return new TreeGameState(root, this);
+  }
+
+  Node getNode(int id) {
+    return root.getDescendantById(id);
+  }
 
   public static class Builder {
     Map<Integer, Node> nodes = new HashMap<>();
@@ -58,37 +76,5 @@ public final class TreeGame implements Game {
       this.addNode(id, GameStatusInt.init());
       return this;
     }
-  }
-
-  public static Builder newBuilder() {
-    return new Builder();
-  }
-
-  private TreeGame(Node root) {
-    this.root = root;
-  }
-
-  @Override
-  public TreeGameState newGame() {
-    return new TreeGameState(root, this);
-  }
-
-  Node getNode(int id) {
-    return root.getDescendantById(id);
-  }
-
-  @Override
-  public TreeGameState newGameMut() {
-    return new TreeGameState(root, this);
-  }
-
-  @Override
-  public int getPlayersCount() {
-    return 2;
-  }
-
-  @Override
-  public boolean hasRandomPlayer() {
-    return false;
   }
 }

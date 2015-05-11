@@ -21,11 +21,12 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
       if (getTotalSamples() < context.childrenThreshold)
         return false;
 
-      List<M> moves = getPosition().getMoves();
+      List<M> moves = getState().getMoves();
       children = new ArrayList<>(moves.size());
       for (M move : moves) {
-        P newPosition = getPosition().play(move);
-        children.add(new UctNode<>(this, newPosition, move, context));
+        P newState = getState().clone();
+        newState.play(move);
+        children.add(new UctNode<>(this, newState, move, context));
       }
       return true;
     }
