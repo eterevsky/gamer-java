@@ -1,19 +1,15 @@
 package gamer.gomoku;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import gamer.def.TerminalPositionException;
-import org.junit.Test;
-
 import gamer.def.GameException;
+import org.junit.Test;
 
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 public class TestGomokuState {
-  private GomokuState playGame(String gameStr, int size) {
-    GomokuState state = Gomoku.getInstance(size).newGame();
+  private GomokuState playGame(String gameStr) {
+    GomokuState state = Gomoku.getInstance(19).newGame();
     boolean player = true;
 
     for (String moveStr : gameStr.split(" ")) {
@@ -137,5 +133,23 @@ public class TestGomokuState {
       assertTrue(state.isTerminal());
       assertEquals(0, state.getPayoff(0));
     }
+  }
+
+  @Test
+  public void cloneIndependent() {
+    GomokuState state = Gomoku.getInstance(19).newGame();
+    GomokuState stateClone = state.clone();
+
+    state.play("b2");
+    assertEquals(1, state.get("b2"));
+    assertEquals(0, stateClone.get("b2"));
+
+    state.play("a3");
+    assertEquals(2, state.get("a3"));
+    assertEquals(0, stateClone.get("a3"));
+
+    stateClone.play("a3");
+    assertEquals(2, state.get("a3"));
+    assertEquals(1, stateClone.get("a3"));
   }
 }
