@@ -1,6 +1,6 @@
 package gamer.chess;
 
-class Pieces {
+public final class Pieces {
   static final byte PIECE_MASK = 7;
 
   static final byte EMPTY = 0;
@@ -42,6 +42,10 @@ class Pieces {
 
   static boolean color(byte p) {
     return (p & BLACK) == 0;
+  }
+
+  public static boolean isEmpty(byte p) {
+    return p == EMPTY;
   }
 
   static boolean isWhite(byte p) {

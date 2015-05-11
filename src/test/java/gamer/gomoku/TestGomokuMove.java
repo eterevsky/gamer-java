@@ -12,11 +12,6 @@ public class TestGomokuMove {
     GomokuMove.createInstances(19);
   }
 
-  @BeforeClass
-  public static void setup() {
-    GomokuMove.createInstances(19);
-  }
-
   @Test
   public void equals() {
     assertEquals(GomokuMove.of(0, 0, 9), GomokuMove.of(0, 0, 9));

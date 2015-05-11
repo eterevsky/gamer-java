@@ -10,10 +10,10 @@ interface State<S extends State<S>> extends Position<S, ChessMove> {
 
   int MOVES_WITHOUT_CAPTURE = 100;
 
-  /**
-   * @return The board. Not the copy, so the result shouldn't be edited.
-   */
-  Board getBoard();
+  byte get(int square);
+  byte get(String square);
+  /** Zero-based. */
+  byte get(int col, int row);
   byte getCastlings();
   int getEnPassant();
   int getMovesSinceCapture();

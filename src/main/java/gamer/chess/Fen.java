@@ -1,14 +1,6 @@
 package gamer.chess;
 
-import static gamer.chess.Pieces.EMPTY;
-import static gamer.chess.Pieces.PAWN;
-import static gamer.chess.Pieces.ROOK;
-import static gamer.chess.Pieces.KNIGHT;
-import static gamer.chess.Pieces.BISHOP;
-import static gamer.chess.Pieces.QUEEN;
-import static gamer.chess.Pieces.KING;
-import static gamer.chess.Pieces.WHITE;
-import static gamer.chess.Pieces.BLACK;
+import static gamer.chess.Pieces.*;
 
 class Fen {
   static ChessState parse(String fen) {
@@ -19,14 +11,12 @@ class Fen {
   @SuppressWarnings("PointlessBitwiseExpression")
   static String toFen(State<?> state) {
     StringBuilder builder = new StringBuilder();
-    Board board = state.getBoard();
-
     int nempty = 0;
 
     for (int cell = 0; cell < 64; cell++) {
-      int row = 8 - cell / 8;
-      int col = cell % 8 + 1;
-      byte piece = board.get(col, row);
+      int row = 7 - cell / 8;
+      int col = cell % 8;
+      byte piece = state.get(col, row);
 
       if (piece != EMPTY && nempty > 0) {
         builder.append(nempty);

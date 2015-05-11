@@ -2,6 +2,7 @@ package gamer.chess.endings;
 
 import gamer.chess.ChessMove;
 import gamer.chess.ChessState;
+import gamer.chess.Pieces;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,136 +14,6 @@ class EndingTable {
   private EndingTable previous;
   private EndingTable dual;
   private byte[] table;
-
-  enum EndingStatus {
-    UNKNOWN,
-    WIN,
-    LOSS,
-    DRAW,
-    ILLEGAL;
-
-    boolean worseThan(EndingStatus other) {
-      assert this != ILLEGAL;
-      assert other != ILLEGAL;
-      switch (this) {
-        case UNKNOWN:
-          return other == EndingStatus.LOSS || other == EndingStatus.DRAW;
-
-        case WIN:
-          return other == EndingStatus.UNKNOWN ||
-                 other == EndingStatus.LOSS ||
-                 other == EndingStatus.DRAW;
-
-        case LOSS:
-          return false;
-
-        case DRAW:
-          return other == EndingStatus.LOSS;
-
-        case ILLEGAL:
-          throw new RuntimeException();
-      }
-
-      throw new RuntimeException("Can't happen");
-    }
-  }
-
-  static class EndingValue {
-    final EndingStatus status;
-    final int moves;
-    final byte byteValue;
-    private static final List<EndingValue> instances;
-
-    static public EndingValue of(EndingStatus status) {
-      assert status != EndingStatus.WIN;
-      assert status != EndingStatus.LOSS;
-      return fromByte(toByte(status, 0));
-    }
-
-    static public EndingValue of(EndingStatus status, int moves) {
-      return fromByte(toByte(status, moves));
-    }
-
-    static public EndingValue fromByte(byte i) {
-      return instances.get(i + 128);
-    }
-
-    static public EndingValue fromState(ChessState state) {
-      switch (state.getPayoff(0)) {
-        case 1:
-          if (state.getPlayerBool()) {
-            return of(EndingStatus.ILLEGAL);
-          } else {
-            return of(EndingStatus.LOSS, 0);
-          }
-
-        case -1:
-          if (!state.getPlayerBool()) {
-            return of(EndingStatus.ILLEGAL);
-          } else {
-            return of(EndingStatus.LOSS, 0);
-          }
-
-        case 0:
-          return of(EndingStatus.DRAW);
-
-        default:
-          return of(EndingStatus.UNKNOWN);
-      }
-    }
-
-    public byte asByte() {
-      return byteValue;
-    }
-
-    private EndingValue(EndingStatus status, int moves) {
-      this.status = status;
-      this.moves = moves;
-      this.byteValue = toByte(status, moves);
-    }
-
-    private static byte toByte(EndingStatus status, int moves) {
-      switch (status) {
-        case UNKNOWN:
-          return -128;
-
-        case WIN:
-          assert moves > 0;
-          assert moves < 127;
-          return (byte) (moves - 128);
-
-        case LOSS:
-          assert moves >= 0;
-          assert moves < 127;
-          return (byte) moves;
-
-        case DRAW:
-          return 127;
-
-        case ILLEGAL:
-          return -1;
-      }
-
-      throw new RuntimeException("Can't happen");
-    }
-
-    static {
-      instances = new ArrayList<>(256);
-      instances.add(new EndingValue(EndingStatus.UNKNOWN, 0));
-      for (int i = 1; i < 127; i++) {
-        instances.add(new EndingValue(EndingStatus.WIN, i));
-      }
-      instances.add(new EndingValue(EndingStatus.ILLEGAL, 0));
-      for (int i = 0; i < 127; i++) {
-        instances.add(new EndingValue(EndingStatus.LOSS, i));
-      }
-      instances.add(new EndingValue(EndingStatus.DRAW, 0));
-
-      for (int i = -128; i < 128; i++) {
-        assert fromByte((byte)i).asByte() == i;
-      }
-    }
-  }
 
   EndingTable(int npieces, EndingTable previous) {
     n = npieces;
@@ -219,7 +90,7 @@ class EndingTable {
 
           EndingStatus status;
           int moveTo = move.to;
-          if (!state.getBoard().isEmpty(moveTo)) {
+          if (Pieces.isEmpty(state.get(moveTo))) {
             if (n == 3) {
               status = EndingStatus.DRAW;
             } else {
@@ -279,5 +150,136 @@ class EndingTable {
 
   private ChessState decode(int idx) {
     return new ChessState();
+  }
+
+  enum EndingStatus {
+    UNKNOWN,
+    WIN,
+    LOSS,
+    DRAW,
+    ILLEGAL;
+
+    boolean worseThan(EndingStatus other) {
+      assert this != ILLEGAL;
+      assert other != ILLEGAL;
+      switch (this) {
+        case UNKNOWN:
+          return other == EndingStatus.LOSS || other == EndingStatus.DRAW;
+
+        case WIN:
+          return other == EndingStatus.UNKNOWN ||
+                 other == EndingStatus.LOSS ||
+                 other == EndingStatus.DRAW;
+
+        case LOSS:
+          return false;
+
+        case DRAW:
+          return other == EndingStatus.LOSS;
+
+        case ILLEGAL:
+          throw new RuntimeException();
+      }
+
+      throw new RuntimeException("Can't happen");
+    }
+  }
+
+  static class EndingValue {
+    private static final List<EndingValue> instances;
+
+    static {
+      instances = new ArrayList<>(256);
+      instances.add(new EndingValue(EndingStatus.UNKNOWN, 0));
+      for (int i = 1; i < 127; i++) {
+        instances.add(new EndingValue(EndingStatus.WIN, i));
+      }
+      instances.add(new EndingValue(EndingStatus.ILLEGAL, 0));
+      for (int i = 0; i < 127; i++) {
+        instances.add(new EndingValue(EndingStatus.LOSS, i));
+      }
+      instances.add(new EndingValue(EndingStatus.DRAW, 0));
+
+      for (int i = -128; i < 128; i++) {
+        assert fromByte((byte)i).asByte() == i;
+      }
+    }
+
+    final EndingStatus status;
+    final int moves;
+    final byte byteValue;
+
+    private EndingValue(EndingStatus status, int moves) {
+      this.status = status;
+      this.moves = moves;
+      this.byteValue = toByte(status, moves);
+    }
+
+    static public EndingValue of(EndingStatus status) {
+      assert status != EndingStatus.WIN;
+      assert status != EndingStatus.LOSS;
+      return fromByte(toByte(status, 0));
+    }
+
+    static public EndingValue of(EndingStatus status, int moves) {
+      return fromByte(toByte(status, moves));
+    }
+
+    static public EndingValue fromByte(byte i) {
+      return instances.get(i + 128);
+    }
+
+    static public EndingValue fromState(ChessState state) {
+      switch (state.getPayoff(0)) {
+        case 1:
+          if (state.getPlayerBool()) {
+            return of(EndingStatus.ILLEGAL);
+          } else {
+            return of(EndingStatus.LOSS, 0);
+          }
+
+        case -1:
+          if (!state.getPlayerBool()) {
+            return of(EndingStatus.ILLEGAL);
+          } else {
+            return of(EndingStatus.LOSS, 0);
+          }
+
+        case 0:
+          return of(EndingStatus.DRAW);
+
+        default:
+          return of(EndingStatus.UNKNOWN);
+      }
+    }
+
+    private static byte toByte(EndingStatus status, int moves) {
+      switch (status) {
+        case UNKNOWN:
+          return -128;
+
+        case WIN:
+          assert moves > 0;
+          assert moves < 127;
+          return (byte) (moves - 128);
+
+        case LOSS:
+          assert moves >= 0;
+          assert moves < 127;
+          return (byte) moves;
+
+        case DRAW:
+          return 127;
+
+        case ILLEGAL:
+          return -1;
+      }
+
+      throw new RuntimeException("Can't happen");
+    }
+
+    public byte asByte() {
+      return byteValue;
+    }
   }
 }

@@ -4,11 +4,10 @@ class AlgebraicNotation {
   static ChessMove parse(State<?> state, String moveStr) {
     MoveComponents components = new MoveComponents(moveStr);
     ChessMove move = null;
-    Board board = state.getBoard();
 
     for (ChessMove m : state.getMoves()) {
       if (m.to == components.to &&
-          board.getPiece(m.from) == components.piece &&
+          Pieces.piece(state.get(m.from)) == components.piece &&
           m.promote == components.promote &&
           (components.fromCell == -1 || m.from == components.fromCell) &&
           (components.fromRow == 0 ||
@@ -31,8 +30,7 @@ class AlgebraicNotation {
   }
 
   static String moveToString(State<?> state, ChessMove move) {
-    Board board = state.getBoard();
-    byte piece = board.getPiece(move.from);
+    byte piece = Pieces.piece(state.get(move.from));
     if (piece == Pieces.KING) {
       if (move.to == move.from + 16) {
         return "O-O";
@@ -46,13 +44,13 @@ class AlgebraicNotation {
 
     if (piece != Pieces.PAWN) {
       builder.append(Pieces.PIECE_LETTER[piece]);
-    } else if (!board.isEmpty(move.to)) {
+    } else if (state.get(move.to) != Pieces.EMPTY) {
       builder.append(Board.i2cola(move.from));
     }
 
     // TODO: disambiguation
 
-    if (!board.isEmpty(move.to)) {
+    if (state.get(move.to) != Pieces.EMPTY) {
       builder.append("x");
     }
 

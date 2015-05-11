@@ -40,15 +40,6 @@ public final class ChessState implements State<ChessState> {
     this.board = new Board();
   }
 
-  ChessState(State<?> state) {
-    board = state.getBoard();
-    player = state.getPlayerBool();
-    castlings = state.getCastlings();
-    enPassant = state.getEnPassant();
-    movesSinceCapture = state.getMovesSinceCapture();
-    movesCount = state.getMovesCount();
-  }
-
   static ChessState fromFen(String fen) {
     return Fen.parse(fen);
   }
@@ -92,9 +83,6 @@ public final class ChessState implements State<ChessState> {
     return moves;
   }
 
-  /**
-   * Not checking if the move is valid. Should we?
-   */
   @Override
   public void play(ChessMove move) {
     if (moves == null)
@@ -144,7 +132,16 @@ public final class ChessState implements State<ChessState> {
 
   @Override
   public ChessState clone() {
-    return new ChessState(this);
+    try {
+      ChessState result = (ChessState) super.clone();
+      result.board = board.clone();
+      if (moves != null) {
+        result.moves = new ArrayList<>(moves);
+      }
+      return result;
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError(e);
+    }
   }
 
   @Override
@@ -152,7 +149,7 @@ public final class ChessState implements State<ChessState> {
     StringBuilder builder = new StringBuilder();
     for (int row = 8; row >= 1; row--) {
       for (int col = 1; col <= 8; col++) {
-        builder.append(" " + Pieces.piece2a(board.get(col, row)));
+        builder.append(" ").append(Pieces.piece2a(board.get(col, row)));
       }
       builder.append("\n");
     }
@@ -161,13 +158,19 @@ public final class ChessState implements State<ChessState> {
 
   // Implement State
 
-  @Override
-  public Board getBoard() {
-    return board;
+  @Override public byte get(int square) {
+    return board.get(square);
   }
 
-  @Override
-  public byte getCastlings() {
+  @Override public byte get(String square) {
+    return board.get(square);
+  }
+
+  @Override public byte get(int col, int row) {
+    return board.get(col + 1, row + 1);
+  }
+
+  @Override public byte getCastlings() {
     return castlings;
   }
 
@@ -175,8 +178,7 @@ public final class ChessState implements State<ChessState> {
     this.castlings = castlings;
   }
 
-  @Override
-  public int getEnPassant() {
+  @Override public int getEnPassant() {
     return enPassant;
   }
 
@@ -184,8 +186,7 @@ public final class ChessState implements State<ChessState> {
     enPassant = square;
   }
 
-  @Override
-  public int getMovesSinceCapture() {
+  @Override public int getMovesSinceCapture() {
     return movesSinceCapture;
   }
 
@@ -193,8 +194,7 @@ public final class ChessState implements State<ChessState> {
     movesSinceCapture = moves;
   }
 
-  @Override
-  public int getMovesCount() {
+  @Override public int getMovesCount() {
     return movesCount;
   }
 
@@ -213,15 +213,6 @@ public final class ChessState implements State<ChessState> {
 
   public void setPlayer(boolean player) {
     this.player = player;
-  }
-
-  List<ChessMove> disownMoves() {
-    if (moves == null)
-      generateMoves();
-
-    List<ChessMove> temp = moves;
-    moves = null;
-    return temp;
   }
 
   private byte newCastlings() {
@@ -347,36 +338,36 @@ public final class ChessState implements State<ChessState> {
       if ((castlings & WHITE_SHORT_CASTLING) != 0 &&
           board.isEmpty("f1") && board.isEmpty("g1") &&
           moves.contains(ChessMove.of("e1", "f1"))) {
-        assert board.get("e1") == (WHITE | KING);
+        assert board.get("e1") == white(KING);
         assert board.isEmpty("f1");
         assert board.isEmpty("g1");
-        assert board.get("h1") == (WHITE | ROOK);
+        assert board.get("h1") == white(ROOK);
         addKingMoveIfValid(ChessMove.of("e1", "g1"));
       }
       if ((castlings & WHITE_LONG_CASTLING) != 0 &&
           board.isEmpty("b1") && board.isEmpty("c1") && board.isEmpty("d1") &&
           moves.contains(ChessMove.of("e1", "d1"))) {
-        assert board.get("e1") == (WHITE | KING);
+        assert board.get("e1") == white(KING);
         assert board.isEmpty("d1");
         assert board.isEmpty("c1");
         assert board.isEmpty("b1");
-        assert board.get("a1") == (WHITE | ROOK);
+        assert board.get("a1") == white(ROOK);
         addKingMoveIfValid(ChessMove.of("e1", "c1"));
       }
     } else {
       if ((castlings & BLACK_SHORT_CASTLING) != 0 &&
           board.isEmpty("f8") && board.isEmpty("g8") &&
           moves.contains(ChessMove.of("e8", "f8"))) {
-        assert board.get("e8") == (BLACK | KING);
+        assert board.get("e8") == black(KING);
         assert board.isEmpty("f8");
         assert board.isEmpty("g8");
-        assert board.get("h8") == (BLACK | ROOK);
+        assert board.get("h8") == black(ROOK);
         addKingMoveIfValid(ChessMove.of("e8", "g8"));
       }
       if ((castlings & BLACK_LONG_CASTLING) != 0 &&
           board.isEmpty("b8") && board.isEmpty("c8") && board.isEmpty("d8") &&
           moves.contains(ChessMove.of("e8", "d8"))) {
-        assert board.get("e8") == (BLACK | KING);
+        assert board.get("e8") == black(KING);
         assert board.isEmpty("d8");
         assert board.isEmpty("c8");
         assert board.isEmpty("b8");

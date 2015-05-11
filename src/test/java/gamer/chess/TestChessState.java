@@ -1,12 +1,12 @@
 package gamer.chess;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestChessState {
 
@@ -35,4 +35,15 @@ public class TestChessState {
     assertEquals(1, state.getPayoff(0));
   }
 
+  @Test
+  public void cloneIsIndependent() {
+    ChessState state = Chess.getInstance().newGame();
+    ChessState stateClone = state.clone();
+    state.play("e4");
+    assertEquals(Pieces.EMPTY, state.get("e2"));
+    assertEquals(Pieces.white(Pieces.PAWN), state.get("e4"));
+    assertEquals(Pieces.white(Pieces.PAWN), stateClone.get("e2"));
+    assertEquals(Pieces.EMPTY, stateClone.get("e4"));
+    stateClone.play("e4");
+  }
 }
