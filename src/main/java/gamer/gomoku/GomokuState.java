@@ -13,8 +13,8 @@ import java.util.Random;
 public final class GomokuState implements Position<GomokuState, GomokuMove> {
   private final int size;
   private final Limits limits;
-  private final BitSet marked;
-  private final BitSet markedx;
+  private BitSet marked;
+  private BitSet markedx;
   private int status;
 
   GomokuState(int size, Limits limits) {
@@ -23,14 +23,6 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     marked = new BitSet(size * size);
     markedx = new BitSet(size * size);
     status = GameStatusInt.init();
-  }
-
-  private GomokuState(GomokuState other) {
-    size = other.size;
-    limits = other.limits;
-    marked = (BitSet) other.marked.clone();
-    markedx = (BitSet) other.markedx.clone();
-    status = other.status;
   }
 
   @Override
@@ -119,7 +111,28 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
   @Override
   public GomokuState clone() {
-    return new GomokuState(this);
+    try {
+      GomokuState result = (GomokuState) super.clone();
+      result.marked = (BitSet) marked.clone();
+      result.markedx = (BitSet) markedx.clone();
+      return result;
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError(e);
+    }
+  }
+
+  /**
+   * Get contents of a point.
+   * @param point String representation of a point.
+   * @return 0 - empty, 1 - X (first player), 2 - O (second player)
+   */
+  public int get(String point) {
+    GomokuMove move = GomokuMove.of(point, size);
+    if (marked.get(move.point)) {
+      return markedx.get(move.point) ? 1 : 2;
+    } else {
+      return 0;
+    }
   }
 
   private void updateStatus(boolean player, GomokuMove move) {
@@ -158,5 +171,4 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
     return l >= 5;
   }
-
 }
