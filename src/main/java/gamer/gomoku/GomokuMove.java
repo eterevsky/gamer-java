@@ -33,7 +33,7 @@ public final class GomokuMove implements Move {
   }
 
   static GomokuMove of(String moveStr, int size) {
-    moveStr = moveStr.toLowerCase();
+    moveStr = moveStr.toUpperCase();
     char colChar = moveStr.charAt(0);
     int col = COL_LETTER.indexOf(colChar);
     int row = Integer.parseInt(moveStr.substring(1));

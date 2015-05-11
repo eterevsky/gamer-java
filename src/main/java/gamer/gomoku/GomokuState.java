@@ -132,7 +132,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
             point, limits.ne[point], limits.sw[point], size - 1, player);
 
     status = GameStatusInt.init();
-    if (!player)
+    if (player)
       status = GameStatusInt.switchPlayer(status);
     if (won) {
       status = GameStatusInt.setPayoff(status, player ? 1 : -1);

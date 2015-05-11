@@ -1,11 +1,16 @@
 package gamer.gomoku;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class TestGomokuMove {
+  @BeforeClass
+  public static void setup() {
+    GomokuMove.createInstances(19);
+  }
 
   @Test
   public void equals() {
