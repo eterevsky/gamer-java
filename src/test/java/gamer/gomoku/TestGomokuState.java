@@ -67,7 +67,7 @@ public class TestGomokuState {
     assertFalse(state.isTerminal());
   }
 
-  @Test(expected = TerminalPositionException.class, timeout=50)
+  @Test(expected = GameException.class, timeout=50)
   public void playNoMoveAfterEnd() {
     GomokuState state = playGame("c4 g6 e4 f7 b4 e8 a4 d9 m11 c10", 19);
     assertEquals(-1, state.getPayoff(0));

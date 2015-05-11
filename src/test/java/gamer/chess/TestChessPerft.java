@@ -8,8 +8,8 @@ public class TestChessPerft {
   int castlings = 0;
 
   long perft(ChessState state, int depth) {
-    if (depth == 0)
-      return 1;
+    if (depth == 1)
+      return state.getMoves().size();
 
     long total = 0;
     for (ChessMove move : state.getMoves()) {
@@ -17,7 +17,9 @@ public class TestChessPerft {
           Math.abs(move.from - move.to) == 16) {
         castlings++;
       }
-      total += perft(state.play(move), depth - 1);
+      ChessState nextState = state.clone();
+      nextState.play(move);
+      total += perft(nextState, depth - 1);
     }
 
     return total;

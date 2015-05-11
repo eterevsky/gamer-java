@@ -29,7 +29,7 @@ public class TestChessState {
     ChessState state = Chess.getInstance().newGame();
 
     for (String move : moves) {
-      state = state.play(move);
+      state.play(move);
     }
     assertTrue(state.isTerminal());
     assertEquals(1, state.getPayoff(0));
