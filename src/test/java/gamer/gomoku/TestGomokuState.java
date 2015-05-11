@@ -23,7 +23,7 @@ public class TestGomokuState {
   }
 
   private void testPlayGame(String gameStr, int expectedPayoff) {
-    GomokuState state = playGame(gameStr, 19);
+    GomokuState state = playGame(gameStr);
     assertTrue(state.isTerminal());
     assertEquals(expectedPayoff, state.getPayoff(0));
   }
@@ -59,13 +59,13 @@ public class TestGomokuState {
 
   @Test(timeout=50)
   public void playHorizontalOverlap() {
-    GomokuState state = playGame("c3 a2 e4 b2 b4 c2 a4 t1 m11 s1", 19);
+    GomokuState state = playGame("c3 a2 e4 b2 b4 c2 a4 t1 m11 s1");
     assertFalse(state.isTerminal());
   }
 
   @Test(expected = GameException.class, timeout=50)
   public void playNoMoveAfterEnd() {
-    GomokuState state = playGame("c4 g6 e4 f7 b4 e8 a4 d9 m11 c10", 19);
+    GomokuState state = playGame("c4 g6 e4 f7 b4 e8 a4 d9 m11 c10");
     assertEquals(-1, state.getPayoff(0));
     state.play(state.parseMove("b2"));
   }
