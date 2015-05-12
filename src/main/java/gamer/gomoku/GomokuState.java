@@ -6,45 +6,39 @@ import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
 public final class GomokuState implements Position<GomokuState, GomokuMove> {
   private final int size;
   private final Limits limits;
-  private BitSet marked;
-  private BitSet markedx;
+  private byte[] board;
+
   private int status;
 
   GomokuState(int size, Limits limits) {
     this.size = size;
     this.limits = limits;
-    marked = new BitSet(size * size);
-    markedx = new BitSet(size * size);
+    board = new byte[size * size];
     status = GameStatusInt.init();
   }
 
-  @Override
-  public boolean getPlayerBool() {
+  @Override public boolean getPlayerBool() {
     return GameStatusInt.getPlayerBool(status);
   }
 
-  @Override
-  public boolean isTerminal() {
+  @Override public boolean isTerminal() {
     return GameStatusInt.isTerminal(status);
   }
 
-  @Override
-  public int getPayoff(int player) {
+  @Override public int getPayoff(int player) {
     return GameStatusInt.getPayoff(status, player);
   }
 
-  @Override
-  public List<GomokuMove> getMoves() {
+  @Override public List<GomokuMove> getMoves() {
     List<GomokuMove> moves = new ArrayList<>();
     for (int i = 0; i < size * size; i++) {
-      if (!marked.get(i)) {
+      if (board[i] == 0) {
         moves.add(GomokuMove.of(i));
       }
     }
@@ -52,53 +46,44 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     return moves;
   }
 
-  @Override
-  public GomokuMove getRandomMove(Random random) {
+  @Override public GomokuMove getRandomMove(Random random) {
     if (isTerminal())
       throw new TerminalPositionException();
 
     int i;
     do {
       i = random.nextInt(size * size);
-    } while (marked.get(i));
+    } while (board[i] != 0);
 
     return GomokuMove.of(i);
   }
 
-  @Override
-  public void play(GomokuMove move) {
+  @Override public void play(GomokuMove move) {
     if (isTerminal()) {
       throw new IllegalMoveException(this, move, "state is terminal");
     }
 
-    if (marked.get(move.point)) {
+    if (board[move.point] != 0) {
       throw new IllegalMoveException(this, move, "point is not empty");
     }
 
-    marked.set(move.point);
-    if (getPlayerBool()) {
-      markedx.set(move.point);
-    }
-
-    updateStatus(getPlayerBool(), move);
+    board[move.point] = getPlayerBool() ? (byte)1 : (byte)2;
+    updateStatus(getPlayerBool(), move.point);
   }
 
-  @Override
-  public String moveToString(GomokuMove move) {
+  @Override public String moveToString(GomokuMove move) {
     return move.toString(size);
   }
 
-  @Override
-  public GomokuMove parseMove(String moveStr) {
+  @Override public GomokuMove parseMove(String moveStr) {
     return GomokuMove.of(moveStr, size);
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < size * size; i++) {
-      if (marked.get(i)) {
-        builder.append(markedx.get(i) ? 'X' : 'O');
+      if (board[i] != 0) {
+        builder.append((board[i] == 1) ? 'X' : 'O');
       } else {
         builder.append('.');
       }
@@ -109,12 +94,10 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     return builder.toString();
   }
 
-  @Override
-  public GomokuState clone() {
+  @Override public GomokuState clone() {
     try {
       GomokuState result = (GomokuState) super.clone();
-      result.marked = (BitSet) marked.clone();
-      result.markedx = (BitSet) markedx.clone();
+      result.board = board.clone();
       return result;
     } catch (CloneNotSupportedException e) {
       throw new AssertionError(e);
@@ -128,15 +111,10 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
    */
   public int get(String point) {
     GomokuMove move = GomokuMove.of(point, size);
-    if (marked.get(move.point)) {
-      return markedx.get(move.point) ? 1 : 2;
-    } else {
-      return 0;
-    }
+    return board[move.point];
   }
 
-  private void updateStatus(boolean player, GomokuMove move) {
-    int point = move.point;
+  private void updateStatus(boolean player, int point) {
     boolean won = checkLine(point, limits.w[point], limits.e[point], 1, player)
         || checkLine(point, limits.n[point], limits.s[point], size, player)
         || checkLine(
@@ -149,22 +127,28 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
       status = GameStatusInt.switchPlayer(status);
     if (won) {
       status = GameStatusInt.setPayoff(status, player ? 1 : -1);
-    } else if (marked.nextClearBit(0) == size * size) {
-      status = GameStatusInt.setPayoff(status, 0);
+      return;
+    } 
+    
+    for (int i = 0; i < board.length; i++) {
+      if (board[i] == 0)
+        return;
     }
+    status = GameStatusInt.setPayoff(status, 0);
   }
 
   private boolean checkLine(
       int center, int lo, int hi, int delta, boolean player) {
     int l = 1;
+    byte v = player ? (byte)1 : (byte)2;
     for (int cell = center - delta; cell >= lo; cell -= delta) {
-      if (!marked.get(cell) || markedx.get(cell) != player)
+      if (board[cell] != v)
         break;
       l++;
     }
 
     for (int cell = center + delta; cell <= hi; cell += delta) {
-      if (!marked.get(cell) || markedx.get(cell) != player)
+      if (board[cell] != v)
         break;
       l++;
     }

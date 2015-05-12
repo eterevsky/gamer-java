@@ -1,7 +1,7 @@
 package gamer;
 
 import gamer.benchmark.BenchmarkSuite;
-import gamer.chess.BenchmarkPerft;
+import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
 import gamer.def.Move;
 import gamer.def.Position;
@@ -123,8 +123,8 @@ class App {
           Double.parseDouble(cl.getOptionValue("benchmark_precision")));
     }
     suite.add(BenchmarkSuite.class);
+    suite.add(BenchmarkChess.class);
     suite.add(BenchmarkGomoku.class);
-    suite.add(BenchmarkPerft.class);
     suite.add(BenchmarkUct.class);
 
     suite.run();
