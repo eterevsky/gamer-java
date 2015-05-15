@@ -117,8 +117,9 @@ public class BenchmarkGomoku {
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
     GomokuState initialState = Gomoku.getInstance().newGame();
+    int queueLen = cores * 2;
 
-    for (int i = 0; i < reps; i++) {
+    for (int rep = 0; rep < reps; rep++) {
       BlockingQueue<Job> jobsQueue = new LinkedBlockingQueue<>();
       BlockingQueue<Job> resultsQueue = new LinkedBlockingQueue<>();
 
@@ -130,24 +131,30 @@ public class BenchmarkGomoku {
       int receivedResults = 0;
 
       try {
-        while (receivedResults < 100000) {
-          while (sentJobs - receivedResults < 2 * cores) {
-            if (sentJobs < 100000) {
-              jobsQueue.put(new Job(initialState));
-              sentJobs += 1;
-            } else {
-              jobsQueue.put(new Job(null));
-            }
-          }
+        for (int i = 0; i < queueLen; i++) {
+          jobsQueue.put(new Job(initialState));
+        }
 
+        for (int sent = queueLen; sent < 100000; sent++) {
           Job result = resultsQueue.take();
           sum += result.result;
-          receivedResults += 1;
+          jobsQueue.put(new Job(initialState));
+        }
+
+        for (int i = 0; i < cores; i++) {
+          jobsQueue.put(new Job(null));
+        }
+
+        for (int i = 0; i < queueLen; i++) {
+          Job result = resultsQueue.take();
+          sum += result.result;
         }
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
     }
+
+    executor.shutdown();
 
     return sum;
   }

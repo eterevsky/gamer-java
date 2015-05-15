@@ -133,13 +133,11 @@ public class TestChessPerft {
 
   @Test
   public void pos44() {
-   System.out.println(castlings);
    assertEquals(422333, perft(POSITION4, 4));
   }
 
   @Test
   public void pos45() {
-   System.out.println(castlings);
    assertEquals(15833292, perft(POSITION4, 5));
   }
 
