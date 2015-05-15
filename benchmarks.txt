@@ -70,6 +70,23 @@ BenchmarkGomoku.gomoku100kMutSynchronizedCounter   140.7±7.0 ms (5.0%)
 BenchmarkUct.uctGomoku100kSamplesMulti             356.9±54.5 ms (15.3%)
 BenchmarkUct.uctGomoku100kSamplesSingle            2.3±0.1 s (5.0%)
 
+gamer 0.1-39-g337ed0a
+Running benchmarks.
+Cores: 32
+JVM: OpenJDK 64-Bit Server VM 1.8.0-google-v7
+Time limit: 300 s
+BenchmarkSuite.testBenchmark                       3.1±0.2 µs (5.0%)
+BenchmarkChess.chess1                              974.0±56.0 µs (5.7%)
+BenchmarkChess.perftInitial3                       689.9±34.3 µs (5.0%)
+BenchmarkGomoku.gomoku1                            9.8±0.5 µs (5.0%)
+BenchmarkGomoku.gomoku100k                         968.7±48.3 ms (5.0%)
+BenchmarkGomoku.gomoku100kBatches                  80.4±4.0 ms (5.0%)
+BenchmarkGomoku.gomoku100kAtomicCounter            64.7±3.1 ms (4.7%)
+BenchmarkGomoku.gomoku100kSyncCounter              199.3±10.6 ms (5.3%)
+BenchmarkGomoku.gomoku100kQueue                    370.1±18.5 ms (5.0%)
+BenchmarkUct.uctGomoku100kSamplesSingle            2.2±0.2 s (10.7%)
+BenchmarkUct.uctGomoku100kSamplesMulti             432.9±33.6 ms (7.8%)
+
 
 Macbook Pro
 
