@@ -4,7 +4,8 @@ import gamer.benchmark.Benchmark;
 import gamer.def.Position;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -12,8 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.List;
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BenchmarkGomoku {
   @Benchmark
@@ -33,8 +33,8 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku100k(int reps) {
-    double sum = 0;
+  public static int gomoku100k(int reps) {
+    int sum = 0;
     Random random = new Random();
 
     for (int i = 0; i < reps; i++) {
@@ -79,7 +79,7 @@ public class BenchmarkGomoku {
       counter.set(0);
 
       for (int ithread = 0; ithread < cores; ithread++) {
-        futures.add(executor.submit(new SamplerMutAtomic(counter)));
+        futures.add(executor.submit(() -> samplerAtomicCounter(counter)));
       }
 
       sum += gatherResults(futures);
@@ -112,8 +112,8 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static double gomoku100kQueue(int reps) {
-    double sum = 0;
+  public static int gomoku100kQueue(int reps) {
+    int sum = 0;
     int cores = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(cores);
     GomokuState initialState = Gomoku.getInstance().newGame();
@@ -127,9 +127,6 @@ public class BenchmarkGomoku {
         executor.submit(new SamplerQueue(jobsQueue, resultsQueue));
       }
 
-      int sentJobs = 0;
-      int receivedResults = 0;
-
       try {
         for (int i = 0; i < queueLen; i++) {
           jobsQueue.put(new Job(initialState));
@@ -138,7 +135,10 @@ public class BenchmarkGomoku {
         for (int sent = queueLen; sent < 100000; sent++) {
           Job result = resultsQueue.take();
           sum += result.result;
-          jobsQueue.put(new Job(initialState));
+
+          // Reusing previous job object.
+          result.state = initialState;
+          jobsQueue.put(result);
         }
 
         for (int i = 0; i < cores; i++) {
@@ -183,37 +183,28 @@ public class BenchmarkGomoku {
     return sum;
   }
 
+  static private Double samplerAtomicCounter(AtomicInteger counter) {
+    double s = 0;
+    Random random = ThreadLocalRandom.current();
+
+    while (counter.getAndIncrement() < 100000) {
+      Position<?, GomokuMove> state = Gomoku.getInstance().newGame();
+      while (!state.isTerminal()) {
+        state.play(state.getRandomMove(random));
+      }
+      s += state.getPayoff(0);
+    }
+
+    return s;
+  }
+
   static private class WrappedInt {
     int value;
     WrappedInt() { value = 0; }
   }
 
-  static private class SamplerMutAtomic implements Callable<Double> {
-    final AtomicInteger counter;
-
-    SamplerMutAtomic(AtomicInteger counter) {
-      this.counter = counter;
-    }
-
-    @Override
-    public Double call() {
-      double s = 0;
-      Random random = ThreadLocalRandom.current();
-
-      while (counter.getAndIncrement() < 100000) {
-        Position<?, GomokuMove> state = Gomoku.getInstance().newGame();
-        while (!state.isTerminal()) {
-          state.play(state.getRandomMove(random));
-        }
-        s += state.getPayoff(0);
-      }
-
-      return s;
-    }
-  }
-
   static private class SamplerSyncCounter implements Callable<Double> {
-    WrappedInt counter;
+    final WrappedInt counter;
 
     SamplerSyncCounter(WrappedInt counter) {
       this.counter = counter;

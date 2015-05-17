@@ -1,11 +1,15 @@
 package gamer.gomoku;
 
 import gamer.def.GameException;
+import gamer.util.ConfidenceInterval;
 import org.junit.Test;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TestGomokuState {
   private GomokuState playGame(String gameStr) {
@@ -135,8 +139,7 @@ public class TestGomokuState {
     }
   }
 
-  @Test
-  public void cloneIndependent() {
+  @Test public void cloneIndependent() {
     GomokuState state = Gomoku.getInstance(19).newGame();
     GomokuState stateClone = state.clone();
 
@@ -151,5 +154,32 @@ public class TestGomokuState {
     stateClone.play("a3");
     assertEquals(2, state.get("a3"));
     assertEquals(1, stateClone.get("a3"));
+  }
+
+  // 11x11 win: 0.515376 ± 0.000112, loss: 0.484595 ± 0.000112
+  // 19x19 win: 0.50685 ± 0.00009
+  @Test public void resultStatistics() {
+    int win = 0;
+    int total = 10000;
+
+    Random rng = ThreadLocalRandom.current();
+
+    for (int i = 0; i < total; i++) {
+      GomokuState state = Gomoku.getInstance(19).newGame();
+      while (!state.isTerminal()) {
+        state.play(state.getRandomMove(rng));
+      }
+
+      int payoff = state.getPayoff(0);
+
+      if (payoff == 1) {
+        win++;
+      }
+    }
+
+    ConfidenceInterval.Interval interval = ConfidenceInterval.binomialWilson(
+        win, total - win);
+
+    assertTrue(Math.abs(interval.center - 0.50685) < 2 * interval.err + 0.0001);
   }
 }
