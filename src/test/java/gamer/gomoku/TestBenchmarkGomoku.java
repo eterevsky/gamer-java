@@ -11,9 +11,9 @@ public class TestBenchmarkGomoku {
 
 
   @Test
-  public void gomoku1() {
+  public void gomoku() {
     int total = 1000;
-    int payoff = BenchmarkGomoku.gomoku1(total);
+    int payoff = BenchmarkGomoku.gomoku(total);
     int win = (payoff + total) / 2;
     ConfidenceInterval.Interval interval = ConfidenceInterval.binomialWilson(
         win, total - win);
@@ -22,9 +22,9 @@ public class TestBenchmarkGomoku {
   }
 
   @Test
-  public void gomoku100kQueue() {
+  public void gomokuBlockingQueue() {
     int total = 1000;
-    int payoff = BenchmarkGomoku.gomoku100kQueue(1);
+    int payoff = BenchmarkGomoku.gomokuBlockingQueue(1);
     int win = (payoff + total) / 2;
     ConfidenceInterval.Interval interval = ConfidenceInterval.binomialWilson(
         win, total - win);
