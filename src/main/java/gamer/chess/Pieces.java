@@ -37,7 +37,14 @@ public final class Pieces {
   }
 
   static char piece2a(byte p) {
-    return PIECE_NAMES[p];
+    if (p == 0) {
+      return '\u00B7';
+    }
+    if (color(p)) {
+      return Character.toUpperCase(PIECE_LETTER[p]);
+    } else {
+      return Character.toLowerCase(PIECE_LETTER[p - 8]);
+    }
   }
 
   static boolean color(byte p) {

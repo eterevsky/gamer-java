@@ -53,5 +53,5 @@ run {
   if (project.hasProperty('args'))  {
     args project.args.split('\\s')
   }
+  jvmArgs = ['-Dfile.encoding=utf8']
 }
-
