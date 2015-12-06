@@ -22,13 +22,14 @@ public final class DominionState
   }
 
   private Dominion game;
-  private int player = 0;
+  private int player = -1;
   private Map<DominionCard, Integer> supply;
   private List<Deck> decks = new ArrayList<>();
   private List<List<DominionCard>> discards = new ArrayList<>();
   private List<List<DominionCard>> hands = new ArrayList<>();
   private List<DominionCard> playedActions = new ArrayList<>();
-  boolean terminal = false;
+  private boolean terminal = false;
+  private Phase phase = Phase.GAME_START;
 
   DominionState(Dominion game) {
     this.game = game;
@@ -43,7 +44,6 @@ public final class DominionState
       }
       decks.add(deck);
       discards.add(new ArrayList<>());
-      drawNewHand(i);
     }
   }
 
@@ -58,7 +58,21 @@ public final class DominionState
   }
 
   public int getPayoff(int player) {
-    throw new TerminalPositionException();
+    if (!terminal)
+      throw new TerminalPositionException();
+
+    int winner = -1;
+    int maxScore = -100;
+    for (int iplayer = 0; iplayer < game.getPlayersCount(); iplayer++) {
+      int score = streamFullDeck(iplayer)
+          .mapToInt(c -> c.winningPoints(this)).sum();
+      if (score > maxScore) {
+        winner = iplayer;
+        maxScore = score;
+      }
+    }
+
+    return winner == player ? game.getPlayersCount() - 1 : -1;
   }
 
   public List<DominionMove> getMoves() {

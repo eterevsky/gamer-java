@@ -1,14 +1,13 @@
 package gamer.dominion;
 
+import gamer.def.Game;
+import gamer.def.GameException;
+import gamer.dominion.cards.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import gamer.def.Game;
-import gamer.def.GameException;
-import gamer.def.Position;
-import gamer.dominion.cards.*;
 
 public final class Dominion implements Game {
   public static class Builder {
