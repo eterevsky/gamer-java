@@ -195,7 +195,7 @@ class App {
       formatter.printHelp("gamer", options, true /* autoUsage */);
     } else if (cl.hasOption("benchmark")) {
       runBenchmarks(cl);
-    } else if (cl.hasOption("game")) {
+    } else if (cl.hasOption("single_game")) {
       runSingleGame(cl);
     } else if (cl.hasOption("tournament")) {
       runTournament(Gomoku.getInstance().newGame());
