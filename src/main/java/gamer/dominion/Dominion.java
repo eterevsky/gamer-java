@@ -8,10 +8,11 @@ import java.util.Map;
 import gamer.def.Game;
 import gamer.def.GameException;
 import gamer.def.Position;
+import gamer.dominion.cards.*;
 
 public final class Dominion implements Game {
   public static class Builder {
-    private int nplayers;
+    int nplayers;
     private List<DominionCard> optionalCards;
 
     public Builder(int nplayers) {
@@ -45,21 +46,27 @@ public final class Dominion implements Game {
     }
   }
 
+  private static List<DominionCard> CARDS = populateCards();
+  static final DominionCard COPPER = getCardByName("Copper");
+  static final DominionCard ESTATE = getCardByName("Estate");
+  static final DominionCard PROVINCE = getCardByName("Province");
+
   private final int nplayers;
-  private final List<DominionCard> cards;
+  private final Map<DominionCard, Integer> piles;
 
   private Dominion(int nplayers, List<DominionCard> optionalCards) {
     this.nplayers = nplayers;
-    this.cards = new ArrayList<>();
-    this.cards.add(getCardByName("Copper"));
-    this.cards.add(getCardByName("Silver"));
-    this.cards.add(getCardByName("Gold"));
-    this.cards.add(getCardByName("Estate"));
-    this.cards.add(getCardByName("Dutchy"));
-    this.cards.add(getCardByName("Province"));
+    this.piles = new HashMap<>();
+    addCard(this.piles, "Copper", nplayers);
+    addCard(this.piles, "Silver", nplayers);
+    addCard(this.piles, "Gold", nplayers);
+    addCard(this.piles, "Estate", nplayers);
+    addCard(this.piles, "Dutchy", nplayers);
+    addCard(this.piles, "Province", nplayers);
+
     // TODO: check that there are exactly 10 optional cards.
     for (DominionCard card : optionalCards) {
-      this.cards.add(card);
+      addCard(this.piles, card.getName(), nplayers);
     }
   }
 
@@ -87,48 +94,8 @@ public final class Dominion implements Game {
     return true;
   }
 
-  private static final List<DominionCard> CARDS = populateCards();
-
-  private static class Copper implements DominionCard {
-    public String getName() { return "Copper"; }
-    public boolean isOptional() { return false;}
-    public int buyingValue() { return 1; }
-    public int cost() { return 0; }
-  }
-
-  private static class Silver implements DominionCard {
-    public String getName() { return "Silver"; }
-    public boolean isOptional() { return false;}
-    public int buyingValue() { return 2; }
-    public int cost() { return 3; }
-  }
-
-  private static class Gold implements DominionCard {
-    public String getName() { return "Gold"; }
-    public boolean isOptional() { return false;}
-    public int buyingValue() { return 3; }
-    public int cost() { return 6; }
-  }
-
-  private static class Estate implements DominionCard {
-    public String getName() { return "Estate"; }
-    public boolean isOptional() { return false;}
-    public int cost() { return 2; }
-    public int winningPoints(DominionState state) { return 1; }
-  }
-
-  private static class Dutchy implements DominionCard {
-    public String getName() { return "Dutchy"; }
-    public boolean isOptional() { return false;}
-    public int cost() { return 5; }
-    public int winningPoints(DominionState state) { return 3; }
-  }
-
-  private static class Province implements DominionCard {
-    public String getName() { return "Province"; }
-    public boolean isOptional() { return false;}
-    public int cost() { return 8; }
-    public int winningPoints(DominionState state) { return 6; }
+  Map<DominionCard, Integer> getSupply() {
+    return this.piles;
   }
 
   private static List<DominionCard> populateCards() {
@@ -141,5 +108,14 @@ public final class Dominion implements Game {
     instances.add(new Province());
 
     return instances;
+  }
+
+  private static void addCard(
+      Map<DominionCard, Integer> piles, String cardName, int nplayers) {
+    DominionCard card = getCardByName(cardName);
+    if (piles.containsKey(card)) {
+      throw new GameException("Duplicate card in a game: " + cardName);
+    }
+    piles.put(card, card.startingNumber(nplayers));
   }
 }

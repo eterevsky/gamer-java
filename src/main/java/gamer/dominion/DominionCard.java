@@ -1,6 +1,6 @@
 package gamer.dominion;
 
-interface DominionCard {
+public interface DominionCard {
   String getName();
 
   default boolean isOptional() {
@@ -15,5 +15,9 @@ interface DominionCard {
 
   default int winningPoints(DominionState state) {
     return 0;
+  }
+
+  default int startingNumber(int nplayers) {
+    return 10;
   }
 }
