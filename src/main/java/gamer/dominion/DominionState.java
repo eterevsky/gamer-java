@@ -15,10 +15,11 @@ import gamer.def.TerminalPositionException;
 public final class DominionState
     implements Position<DominionState, DominionMove> {
   enum Phase {
-    GAME_START,
-    ACTIONS,
-    BUYING,
-
+    START_GAME,
+    ACTION,
+    ACTION_RESOLUTION,
+    BUY,
+    END_MOVE  // Take cards
   }
 
   private Dominion game;
@@ -50,6 +51,9 @@ public final class DominionState
   // Position<> implementation.
 
   public int getPlayer() {
+    if (phase == Phase.START_GAME || phase == Phase.ACTION_RESOLUTION) {
+      return -1;
+    }
     return player;
   }
 
@@ -76,7 +80,14 @@ public final class DominionState
   }
 
   public List<DominionMove> getMoves() {
-    return new ArrayList<>();
+    switch (phase) {
+      case START_GAME:
+        return null;  // Too many possible moves.
+
+      case ACTIONS:
+
+    }
+
   }
 
   public DominionMove getRandomMove(Random rng) {
