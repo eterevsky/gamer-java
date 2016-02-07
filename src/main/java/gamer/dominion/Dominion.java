@@ -4,10 +4,7 @@ import gamer.def.Game;
 import gamer.def.GameException;
 import gamer.dominion.cards.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class Dominion implements Game {
   public static class Builder {
@@ -45,10 +42,14 @@ public final class Dominion implements Game {
     }
   }
 
-  private static List<DominionCard> CARDS = populateCards();
-  static final DominionCard COPPER = getCardByName("Copper");
-  static final DominionCard ESTATE = getCardByName("Estate");
-  static final DominionCard PROVINCE = getCardByName("Province");
+  static List<DominionCard> CARDS = Arrays.asList(
+      Copper.getInstance(),
+      Silver.getInstance(),
+      Gold.getInstance(),
+      Estate.getInstance(),
+      Dutchy.getInstance(),
+      Province.getInstance()
+  );
 
   private final int nplayers;
   private final Map<DominionCard, Integer> piles;
@@ -95,18 +96,6 @@ public final class Dominion implements Game {
 
   Map<DominionCard, Integer> getSupply() {
     return this.piles;
-  }
-
-  private static List<DominionCard> populateCards() {
-    List<DominionCard> instances = new ArrayList<>();
-    instances.add(new Copper());
-    instances.add(new Silver());
-    instances.add(new Gold());
-    instances.add(new Estate());
-    instances.add(new Dutchy());
-    instances.add(new Province());
-
-    return instances;
   }
 
   private static void addCard(

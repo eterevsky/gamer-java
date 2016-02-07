@@ -11,15 +11,18 @@ import java.util.stream.Stream;
 
 import gamer.def.Position;
 import gamer.def.TerminalPositionException;
+import gamer.dominion.cards.Copper;
+import gamer.dominion.cards.Estate;
+import gamer.dominion.cards.Province;
 
 public final class DominionState
     implements Position<DominionState, DominionMove> {
   enum Phase {
-    START_GAME,
-    ACTION,
-    ACTION_RESOLUTION,
-    BUY,
-    END_MOVE  // Take cards
+    START_GAME,         // Dealing cards.
+    ACTION,             // Select action to perform.
+    ACTION_SPECIFIC,    // Action sub-move.
+    BUY,                // Buy cards
+    END_MOVE            // Take cards
   }
 
   private Dominion game;
@@ -29,8 +32,9 @@ public final class DominionState
   private List<List<DominionCard>> discards = new ArrayList<>();
   private List<List<DominionCard>> hands = new ArrayList<>();
   private List<DominionCard> playedActions = new ArrayList<>();
+  private ActionState actionState = null;
   private boolean terminal = false;
-  private Phase phase = Phase.GAME_START;
+  private Phase phase = Phase.START_GAME;
 
   DominionState(Dominion game) {
     this.game = game;
@@ -38,10 +42,10 @@ public final class DominionState
     for (int i = 0; i < game.getPlayersCount(); i++) {
       Deck deck = new Deck();
       for (int j = 0; j < 7; j++) {
-        deck.add(Dominion.COPPER);
+        deck.add(Copper.getInstance());
       }
       for (int j = 0; j < 3; j++) {
-        deck.add(Dominion.ESTATE);
+        deck.add(Estate.getInstance());
       }
       decks.add(deck);
       discards.add(new ArrayList<>());
@@ -51,10 +55,11 @@ public final class DominionState
   // Position<> implementation.
 
   public int getPlayer() {
-    if (phase == Phase.START_GAME || phase == Phase.ACTION_RESOLUTION) {
-      return -1;
+    switch (phase) {
+      case START_GAME: return -1;
+      case ACTION_SPECIFIC: return actionState.getPlayer();
+      default: return player;
     }
-    return player;
   }
 
   public boolean isTerminal() {
@@ -84,10 +89,20 @@ public final class DominionState
       case START_GAME:
         return null;  // Too many possible moves.
 
-      case ACTIONS:
+      case ACTION:
+        List<DominionMove> moves = new ArrayList<>();
+        moves.add(DominionMove.ACTIONS_TO_BUYS);
+        for (DominionCard card : hands.get(player)) {
+          if (card.isAction()) {
+            moves.add(DominionMove.playCard(card));
+          }
+        }
+        return moves;
 
+      default:
+        // TODO
+        return null;
     }
-
   }
 
   public DominionMove getRandomMove(Random rng) {
@@ -128,7 +143,7 @@ public final class DominionState
   }
 
   private void checkTerminal() {
-    if (supply.get(Dominion.PROVINCE) == 0) {
+    if (supply.get(Province.getInstance()) == 0) {
       terminal = true;
       return;
     }

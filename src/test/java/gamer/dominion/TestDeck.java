@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
+
+import gamer.dominion.cards.Copper;
+import gamer.dominion.cards.Province;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -15,12 +18,9 @@ public class TestDeck {
   @Test
   public void shuffle() {
     Deck deck = new Deck();
-    deck.add(Dominion.COPPER);
-    deck.add(Dominion.COPPER);
-    deck.add(Dominion.PROVINCE);
-
-    int ncopper = 0;
-    int nprovince = 0;
+    deck.add(Copper.getInstance());
+    deck.add(Copper.getInstance());
+    deck.add(Province.getInstance());
 
     Stream<DominionCard> s = deck.stream();
     assertEquals(3, s.count());
@@ -34,7 +34,7 @@ public class TestDeck {
     shuffled.add(deck.draw(rng));
     assertTrue(deck.isEmpty());
 
-    assertEquals(2, Collections.frequency(shuffled, Dominion.COPPER));
-    assertEquals(1, Collections.frequency(shuffled, Dominion.PROVINCE));
+    assertEquals(2, Collections.frequency(shuffled, Copper.getInstance()));
+    assertEquals(1, Collections.frequency(shuffled, Province.getInstance()));
   }
 }

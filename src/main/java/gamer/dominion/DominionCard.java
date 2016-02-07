@@ -1,5 +1,7 @@
 package gamer.dominion;
 
+import gamer.def.GameException;
+
 public interface DominionCard {
   String getName();
 
@@ -19,5 +21,11 @@ public interface DominionCard {
 
   default int startingNumber(int nplayers) {
     return 10;
+  }
+
+  default boolean isAction() { return false; }
+
+  default ActionState play() {
+    throw new GameException("Not an action card.");
   }
 }
