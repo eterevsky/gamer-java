@@ -1,10 +1,12 @@
 package gamer.dominion.cards;
 
 import gamer.dominion.DominionCard;
+import gamer.dominion.DominionMove;
 import gamer.dominion.DominionState;
 
 public final class Estate implements DominionCard {
   private static final Estate INSTANCE = new Estate();
+  private static final DominionMove BUY = DominionMove.buyCard(INSTANCE);
 
   private Estate() {}
 
@@ -28,4 +30,7 @@ public final class Estate implements DominionCard {
   public int startingNumber(int nplayers) {
     return nplayers > 2 ? 12 : 8;
   }
+
+  @Override
+  public DominionMove getBuy() { return BUY; }
 }

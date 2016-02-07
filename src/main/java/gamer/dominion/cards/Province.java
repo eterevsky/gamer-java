@@ -1,10 +1,12 @@
 package gamer.dominion.cards;
 
 import gamer.dominion.DominionCard;
+import gamer.dominion.DominionMove;
 import gamer.dominion.DominionState;
 
 public final class Province implements DominionCard {
   private static final Province INSTANCE = new Province();
+  private static final DominionMove BUY = DominionMove.buyCard(INSTANCE);
 
   private Province() {}
 
@@ -40,4 +42,7 @@ public final class Province implements DominionCard {
     }
     throw new RuntimeException("Unexpected number of players.");
   }
+
+  @Override
+  public DominionMove getBuy() { return BUY; }
 }

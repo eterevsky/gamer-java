@@ -5,6 +5,12 @@ import gamer.def.GameException;
 public interface DominionCard {
   String getName();
 
+  DominionMove getBuy();
+
+  default DominionMove getMove() {
+    throw new GameException("Not an action.");
+  }
+
   default boolean isOptional() {
     return true;
   }

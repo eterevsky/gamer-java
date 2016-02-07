@@ -1,38 +1,33 @@
 package gamer.dominion;
 
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Stream;
-
 import gamer.def.Position;
 import gamer.def.TerminalPositionException;
 import gamer.dominion.cards.Copper;
 import gamer.dominion.cards.Estate;
 import gamer.dominion.cards.Province;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
+
 public final class DominionState
     implements Position<DominionState, DominionMove> {
-  enum Phase {
-    START_GAME,         // Dealing cards.
-    ACTION,             // Select action to perform.
-    ACTION_SPECIFIC,    // Action sub-move.
-    BUY,                // Buy cards
-    END_MOVE            // Take cards
-  }
-
   private Dominion game;
   private int player = -1;
   private Map<DominionCard, Integer> supply;
   private List<Deck> decks = new ArrayList<>();
   private List<List<DominionCard>> discards = new ArrayList<>();
   private List<List<DominionCard>> hands = new ArrayList<>();
-  private List<DominionCard> playedActions = new ArrayList<>();
+  private List<DominionCard> playedCards = new ArrayList<>();
   private ActionState actionState = null;
+  private int actions = 1;
+  private int buys = 1;
+  private int treasure = 0;
   private boolean terminal = false;
   private Phase phase = Phase.START_GAME;
 
@@ -52,23 +47,28 @@ public final class DominionState
     }
   }
 
-  // Position<> implementation.
-
+  @Override
   public int getPlayer() {
     switch (phase) {
-      case START_GAME: return -1;
-      case ACTION_SPECIFIC: return actionState.getPlayer();
-      default: return player;
+      case START_GAME:
+        return -1;
+      case ACTION_SPECIFIC:
+        return actionState.getPlayer();
+      default:
+        return player;
     }
   }
 
+  // Position<> implementation.
+
+  @Override
   public boolean isTerminal() {
     return terminal;
   }
 
+  @Override
   public int getPayoff(int player) {
-    if (!terminal)
-      throw new TerminalPositionException();
+    if (!terminal) { throw new TerminalPositionException(); }
 
     int winner = -1;
     int maxScore = -100;
@@ -84,36 +84,64 @@ public final class DominionState
     return winner == player ? game.getPlayersCount() - 1 : -1;
   }
 
+  @Override
   public List<DominionMove> getMoves() {
-    switch (phase) {
-      case START_GAME:
-        return null;  // Too many possible moves.
+    List<DominionMove> moves = null;
 
+    switch (phase) {
       case ACTION:
-        List<DominionMove> moves = new ArrayList<>();
-        moves.add(DominionMove.ACTIONS_TO_BUYS);
-        for (DominionCard card : hands.get(player)) {
-          if (card.isAction()) {
-            moves.add(DominionMove.playCard(card));
+        moves = new ArrayList<>();
+        moves.add(DominionMove.BUY_PHASE);
+
+        if (actions > 0) {
+          for (DominionCard card : hands.get(player)) {
+            if (card.isAction()) {
+              moves.add(card.getMove());
+            }
           }
         }
-        return moves;
+        break;
+
+      case ACTION_SPECIFIC:
+        moves = actionState.getMoves();
+        break;
+
+      case BUY:
+        moves = new ArrayList<>();
+        moves.add(DominionMove.CLEANUP);
+        if (buys > 0) {
+          for (Map.Entry<DominionCard, Integer> entry : supply.entrySet()) {
+            DominionCard card = entry.getKey();
+            if (entry.getValue() > 0 && card.cost() <= treasure) {
+              moves.add(card.getBuy());
+            }
+          }
+        }
+        break;
+
+      case START_GAME:
+      case CLEANUP:
+        break;
 
       default:
-        // TODO
-        return null;
+        throw new RuntimeException("Unexpected turn phase.");
     }
+
+    return moves;
   }
 
-  public DominionMove getRandomMove(Random rng) {
-    throw new UnsupportedOperationException();
-  }
-
+  @Override
   public void play(DominionMove move) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public DominionMove parseMove(String moveStr) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public DominionMove getRandomMove(Random rng) {
     throw new UnsupportedOperationException();
   }
 
@@ -124,8 +152,6 @@ public final class DominionState
   public String toString() {
     throw new UnsupportedOperationException();
   }
-
-  // Dominion-specific actions.
 
   private void drawNewHand(int iplayer) {
     Deck deck = decks.get(iplayer);
@@ -142,6 +168,8 @@ public final class DominionState
     }
   }
 
+  // Dominion-specific actions.
+
   private void checkTerminal() {
     if (supply.get(Province.getInstance()) == 0) {
       terminal = true;
@@ -153,8 +181,16 @@ public final class DominionState
 
   private Stream<DominionCard> streamFullDeck(int iplayer) {
     return Stream.concat(
-               Stream.concat(decks.get(iplayer).stream(),
-                             discards.get(iplayer).stream()),
-               hands.get(iplayer).stream());
+        Stream.concat(decks.get(iplayer).stream(),
+            discards.get(iplayer).stream()),
+        hands.get(iplayer).stream());
+  }
+
+  enum Phase {
+    START_GAME,         // Dealing cards.
+    ACTION,             // Select action to perform.
+    ACTION_SPECIFIC,    // Action sub-move.
+    BUY,                // Buy cards
+    CLEANUP             // Take cards
   }
 }

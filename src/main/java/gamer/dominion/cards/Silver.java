@@ -1,9 +1,11 @@
 package gamer.dominion.cards;
 
 import gamer.dominion.DominionCard;
+import gamer.dominion.DominionMove;
 
 public final class Silver implements DominionCard {
   private static final Silver INSTANCE = new Silver();
+  private static final DominionMove BUY = DominionMove.buyCard(INSTANCE);
 
   private Silver() {}
 
@@ -27,4 +29,7 @@ public final class Silver implements DominionCard {
   public int startingNumber(int nplayers) {
     return nplayers > 4 ? 80 : 40;
   }
+
+  @Override
+  public DominionMove getBuy() { return BUY; }
 }

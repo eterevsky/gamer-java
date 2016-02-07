@@ -1,10 +1,12 @@
 package gamer.dominion.cards;
 
 import gamer.dominion.DominionCard;
+import gamer.dominion.DominionMove;
 import gamer.dominion.DominionState;
 
 public final class Dutchy implements DominionCard {
   private static final Dutchy INSTANCE = new Dutchy();
+  private static final DominionMove BUY = DominionMove.buyCard(INSTANCE);
 
   private Dutchy() {}
 
@@ -28,4 +30,7 @@ public final class Dutchy implements DominionCard {
   public int startingNumber(int nplayers) {
     return nplayers > 2 ? 12 : 8;
   }
+
+  @Override
+  public DominionMove getBuy() { return BUY; }
 }
