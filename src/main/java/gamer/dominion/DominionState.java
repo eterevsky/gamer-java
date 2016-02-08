@@ -121,7 +121,7 @@ public final class DominionState
 
       case START_GAME:
       case CLEANUP:
-        break;
+        break;  // return null
 
       default:
         throw new RuntimeException("Unexpected turn phase.");
@@ -141,17 +141,21 @@ public final class DominionState
   }
 
   @Override
-  public DominionMove getRandomMove(Random rng) {
+  public void playRandomMove(Random rng) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public DominionState clone() {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public String toString() {
     throw new UnsupportedOperationException();
   }
+
+  // Dominion-specific actions.
 
   private void drawNewHand(int iplayer) {
     Deck deck = decks.get(iplayer);
@@ -167,8 +171,6 @@ public final class DominionState
       hand.add(deck.draw(rng));
     }
   }
-
-  // Dominion-specific actions.
 
   private void checkTerminal() {
     if (supply.get(Province.getInstance()) == 0) {

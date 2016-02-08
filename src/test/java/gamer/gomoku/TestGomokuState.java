@@ -5,7 +5,6 @@ import gamer.util.ConfidenceInterval;
 import org.junit.Test;
 
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,28 +31,28 @@ public class TestGomokuState {
     assertEquals(expectedPayoff, state.getPayoff(0));
   }
 
-  @Test(timeout=50)
+  @Test(timeout = 50)
   public void playVertical() {
     testPlayGame("c3 d3 c4 b4 c5 c2 c6 e6 c7", 1);
   }
 
-  @Test(timeout=50)
+  @Test(timeout = 50)
   public void playHorizontal() {
     testPlayGame("c3 d3 c4 b4 c5 c2 c6 e6 c7", 1);
   }
 
-  @Test(timeout=50)
+  @Test(timeout = 50)
   public void playDiagonal1() {
     testPlayGame("e5 f4 f5 g5 e3 e6 f6 h6 g7 h8 h7 k8 d4 j7", -1);
   }
 
-  @Test(timeout=50)
+  @Test(timeout = 50)
   public void playDiagonal2() {
     testPlayGame(
         "e6 e7 f7 f6 d8 e8 e9 d7 f8 g5 g7 h6 d10 c7 c11", 1);
   }
 
-  @Test(timeout=50)
+  @Test(timeout = 50)
   public void playBorders() {
     testPlayGame(
         "q10 q11 r10 r11 s10 s11 t10 t11 a11 a10 b11 b10 c11 c10 d11 d10 " +
@@ -61,36 +60,41 @@ public class TestGomokuState {
         1);
   }
 
-  @Test(timeout=50)
+  @Test(timeout = 50)
   public void playHorizontalOverlap() {
     GomokuState state = playGame("c3 a2 e4 b2 b4 c2 a4 t1 m11 s1");
     assertFalse(state.isTerminal());
   }
 
-  @Test(expected = GameException.class, timeout=50)
+  @Test(expected = GameException.class, timeout = 50)
   public void playNoMoveAfterEnd() {
     GomokuState state = playGame("c4 g6 e4 f7 b4 e8 a4 d9 m11 c10");
     assertEquals(-1, state.getPayoff(0));
     state.play(state.parseMove("b2"));
   }
 
-  @Test(expected = GameException.class, timeout=50)
+  @Test(expected = GameException.class, timeout = 50)
   public void playTwoMovesBySamePlace() {
     GomokuState state = Gomoku.getInstance().newGame();
     state.play(state.parseMove("c4"));
     state.play(state.parseMove("c4"));
   }
 
-  @Test(timeout=100)
+  @Test(timeout = 100)
   public void playDraw() {
-		Gomoku gomoku = Gomoku.getInstance();
+    Gomoku gomoku = Gomoku.getInstance();
     GomokuState state = gomoku.newGame();
     for (int i = 0; i < gomoku.getSize(); i++) {
       int row;
       switch (i % 4) {
-        case 1: row = i + 1; break;
-        case 2: row = i - 1; break;
-        default: row = i;
+        case 1:
+          row = i + 1;
+          break;
+        case 2:
+          row = i - 1;
+          break;
+        default:
+          row = i;
       }
 
       for (int j = 0; j < gomoku.getSize(); j++) {
@@ -102,9 +106,9 @@ public class TestGomokuState {
     assertEquals(0, state.getPayoff(0));
   }
 
-  @Test(timeout=100)
+  @Test(timeout = 100)
   public void playRandomMoves() {
-		Gomoku gomoku = Gomoku.getInstance();
+    Gomoku gomoku = Gomoku.getInstance();
     GomokuState state = gomoku.newGame();
     Random random = new Random(1234567890L);
 
@@ -112,7 +116,7 @@ public class TestGomokuState {
     int moves = 0;
 
     while (!state.isTerminal()) {
-      state.play(state.getRandomMove(random));
+      state.playRandomMove(random);
       moves++;
     }
 
@@ -120,7 +124,7 @@ public class TestGomokuState {
     assertTrue(moves <= gomoku.getSize() * gomoku.getSize());
   }
 
-  @Test(timeout=50)
+  @Test(timeout = 50)
   public void playRandomOnSmallBoard() {
     Gomoku gomoku = Gomoku.getInstance(4);
 
@@ -129,7 +133,7 @@ public class TestGomokuState {
       GomokuState state = gomoku.newGame();
       int moves = 0;
       while (!state.isTerminal()) {
-        state.play(state.getRandomMove(random));
+        state.playRandomMove(random);
         moves++;
       }
 
@@ -139,7 +143,8 @@ public class TestGomokuState {
     }
   }
 
-  @Test public void cloneIndependent() {
+  @Test
+  public void cloneIndependent() {
     GomokuState state = Gomoku.getInstance(19).newGame();
     GomokuState stateClone = state.clone();
 
@@ -158,16 +163,17 @@ public class TestGomokuState {
 
   // 11x11 win: 0.515376 ± 0.000112, loss: 0.484595 ± 0.000112
   // 19x19 win: 0.50685 ± 0.00009
-  @Test public void resultStatistics() {
+  @Test
+  public void resultStatistics() {
     int win = 0;
     int total = 10000;
 
-    Random rng = ThreadLocalRandom.current();
+    Random rng = new Random(1234567890L);
 
     for (int i = 0; i < total; i++) {
       GomokuState state = Gomoku.getInstance(19).newGame();
       while (!state.isTerminal()) {
-        state.play(state.getRandomMove(rng));
+        state.playRandomMove(rng);
       }
 
       int payoff = state.getPayoff(0);

@@ -2,7 +2,6 @@ package gamer.dominion;
 
 import gamer.def.Game;
 import gamer.def.GameException;
-import gamer.dominion.cards.*;
 
 import java.util.*;
 
@@ -25,7 +24,7 @@ public final class Dominion implements Game {
     }
 
     public Builder addCard(String cardName) {
-      return addCard(getCardByName(cardName));
+      return addCard(Cards.getCardByName(cardName));
     }
 
     private Builder addCard(DominionCard card) {
@@ -42,41 +41,23 @@ public final class Dominion implements Game {
     }
   }
 
-  static List<DominionCard> CARDS = Arrays.asList(
-      Copper.getInstance(),
-      Silver.getInstance(),
-      Gold.getInstance(),
-      Estate.getInstance(),
-      Dutchy.getInstance(),
-      Province.getInstance()
-  );
-
   private final int nplayers;
   private final Map<DominionCard, Integer> piles;
 
   private Dominion(int nplayers, List<DominionCard> optionalCards) {
     this.nplayers = nplayers;
     this.piles = new HashMap<>();
-    addCard(this.piles, "Copper", nplayers);
-    addCard(this.piles, "Silver", nplayers);
-    addCard(this.piles, "Gold", nplayers);
-    addCard(this.piles, "Estate", nplayers);
-    addCard(this.piles, "Dutchy", nplayers);
-    addCard(this.piles, "Province", nplayers);
+    addCard(this.piles, Cards.COPPER, nplayers);
+    addCard(this.piles, Cards.SILVER, nplayers);
+    addCard(this.piles, Cards.GOLD, nplayers);
+    addCard(this.piles, Cards.ESTATE, nplayers);
+    addCard(this.piles, Cards.DUTCHY, nplayers);
+    addCard(this.piles, Cards.PROVINCE, nplayers);
 
     // TODO: check that there are exactly 10 optional cards.
     for (DominionCard card : optionalCards) {
-      addCard(this.piles, card.getName(), nplayers);
+      addCard(this.piles, card, nplayers);
     }
-  }
-
-  public static DominionCard getCardByName(String name) {
-    for (DominionCard card : CARDS) {
-      if (card.getName().equals(name)) {
-        return card;
-      }
-    }
-    throw new GameException("Unknown card name: " + name);
   }
 
   @Override
@@ -99,10 +80,9 @@ public final class Dominion implements Game {
   }
 
   private static void addCard(
-      Map<DominionCard, Integer> piles, String cardName, int nplayers) {
-    DominionCard card = getCardByName(cardName);
+      Map<DominionCard, Integer> piles, DominionCard card, int nplayers) {
     if (piles.containsKey(card)) {
-      throw new GameException("Duplicate card in a game: " + cardName);
+      throw new GameException("Duplicate card in a game: " + card.getName());
     }
     piles.put(card, card.startingNumber(nplayers));
   }

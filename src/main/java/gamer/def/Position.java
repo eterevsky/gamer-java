@@ -11,6 +11,7 @@ public interface Position<P extends Position<P, M>, M extends Move>
   /**
    * Get the player number of a player to move. The first player to move in the
    * beginning of the game has number 0.
+   *
    * @return Player number or -1 for the probabilistic move.
    */
   default int getPlayer() {
@@ -20,6 +21,7 @@ public interface Position<P extends Position<P, M>, M extends Move>
   /**
    * True if the current player is player 0.
    * Works for games with two players without chance.
+   *
    * @return true for player 0, false for player 1.
    * @throws UnsupportedOperationException if the number of players ≠ 2.
    */
@@ -29,12 +31,14 @@ public interface Position<P extends Position<P, M>, M extends Move>
 
   /**
    * Check whether the current position is terminal.
+   *
    * @return true if current position is terminal
    */
   boolean isTerminal();
 
   /**
    * Get payoff for a terminal position, for the specified player.
+   *
    * @return The greater the better, 0 means draw.
    * @throws TerminalPositionException if called for a non-terminal position.
    */
@@ -46,16 +50,21 @@ public interface Position<P extends Position<P, M>, M extends Move>
   List<M> getMoves();
 
   /**
-   * Get a single random move in the current position. If the game is with
-   * chanсe and the next move is probabilistic, the result of getRandomMove
-   * conforms the moves distribution.
+   * Plays a single random move in the current position. If getMoves() always
+   * returns a set of moves, the default implementation of this method is
+   * enough.
    */
-  default M getRandomMove(Random rng) {
+  default void playRandomMove(Random rng) {
     if (isTerminal()) {
-      throw new TerminalPositionException("terminal state: " + toString());
+      throw new TerminalPositionException("Terminal state: " + toString());
     }
     List<M> moves = getMoves();
-    return moves.get(rng.nextInt(moves.size()));
+    if (moves == null) {
+      throw new UnsupportedOperationException(
+          "Moves are not listable. Need a dedicated implementation of " +
+          "playRandomMove().");
+    }
+    play(moves.get(rng.nextInt(moves.size())));
   }
 
   /**
