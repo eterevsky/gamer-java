@@ -7,8 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TestBenchmarkGomoku {
   private final static double EXPECTED_WINS = 0.50685;
-  private final static double WINS_ERROR =  0.0001;
-
+  private final static double WINS_ERROR =  0.001;
 
   @Test
   public void gomoku() {

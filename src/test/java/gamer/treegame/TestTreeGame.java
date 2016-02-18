@@ -12,7 +12,7 @@ public class TestTreeGame {
 
   @Test(timeout=50)
   public void simpleGame() {
-    Random random = new Random(1234567890L);
+    Random rng = new Random(1234567890L);
     TreeGame game = TreeGameInstances.GAME1;
 
     TreeGameState state = game.newGame();
@@ -25,7 +25,7 @@ public class TestTreeGame {
     assertFalse(state.getPlayerBool());
     assertEquals(1, state.getMoves().size());
 
-    state.play(state.getRandomMove(random));  // Only 1 move available.
+    state.playRandomMove(rng);
     assertFalse(state.isTerminal());
     assertTrue(state.getPlayerBool());
 

@@ -14,7 +14,7 @@ public class BenchmarkChess {
     for (int i = 0; i < reps; i++) {
       ChessState state = Chess.getInstance().newGame();
       while (!state.isTerminal()) {
-        state.play(state.getRandomMove(random));
+        state.playRandomMove(random);
       }
       payoff += state.getPayoff(0);
     }

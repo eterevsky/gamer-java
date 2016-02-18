@@ -46,7 +46,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     return moves;
   }
 
-  @Override public GomokuMove getRandomMove(Random random) {
+  @Override public void playRandomMove(Random random) {
     if (isTerminal())
       throw new TerminalPositionException();
 
@@ -55,7 +55,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
       i = random.nextInt(size * size);
     } while (board[i] != 0);
 
-    return GomokuMove.of(i);
+    play(GomokuMove.of(i));
   }
 
   @Override public void play(GomokuMove move) {

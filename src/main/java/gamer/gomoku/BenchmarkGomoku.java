@@ -54,7 +54,7 @@ public class BenchmarkGomoku {
         while (counter.getAndIncrement() < reps) {
           GomokuState state = Gomoku.getInstance().newGame();
           while (!state.isTerminal()) {
-            state.play(state.getRandomMove(random));
+            state.playRandomMove(random);
           }
           s += state.getPayoff(0);
         }
@@ -86,7 +86,7 @@ public class BenchmarkGomoku {
           }
           GomokuState state = Gomoku.getInstance().newGame();
           while (!state.isTerminal()) {
-            state.play(state.getRandomMove(random));
+            state.playRandomMove(random);
           }
           s += state.getPayoff(0);
         }
@@ -118,7 +118,7 @@ public class BenchmarkGomoku {
               return;
             GomokuState state = job.state.clone();
             while (!state.isTerminal()) {
-              state.play(state.getRandomMove(random));
+              state.playRandomMove(random);
             }
             job.result = state.getPayoff(0);
             resultsQueue.put(job);
@@ -166,7 +166,7 @@ public class BenchmarkGomoku {
     for (int isamples = 0; isamples < nsamples; isamples++) {
       Position<?, GomokuMove> state = Gomoku.getInstance().newGame();
       while (!state.isTerminal()) {
-        state.play(state.getRandomMove(random));
+        state.playRandomMove(random);
       }
       sum += state.getPayoff(0);
     }

@@ -57,7 +57,7 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
         Solver.Result<M> sResult = null;
         int moves = 0;
         do {
-          position.play(position.getRandomMove(rnd));
+          position.playRandomMove(rnd);
           // sResult = (solver != null) ? solver.solve(position) : null;
           moves += 1;
         } while (!position.isTerminal() && sResult == null);

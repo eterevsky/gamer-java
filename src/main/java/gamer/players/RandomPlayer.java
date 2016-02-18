@@ -5,6 +5,7 @@ import gamer.def.Move;
 import gamer.def.Position;
 import gamer.def.Solver;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -13,26 +14,21 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
   private Random random = null;
 
   @Override
-  public void addSolver(Solver<P, M> solver) {}
-
-  @Override
-  public void setMaxSamples(long maxSamples) {}
-
-  @Override
-  public void setMaxWorkers(int maxWorkers) {}
-
-  @Override
   public void setRandom(Random random) {
     this.random = random;
   }
 
   @Override
+  public void setMaxWorkers(int maxWorkers) {}
+
+  @Override
+  public void setMaxSamples(long maxSamples) {}
+
+  @Override
   public void setTimeout(long timeout) {}
 
   @Override
-  public String getName() {
-    return "RandomPlayer";
-  }
+  public void addSolver(Solver<P, M> solver) {}
 
   @Override
   public String getReport() {
@@ -40,8 +36,15 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
   }
 
   @Override
+  public String getName() {
+    return "RandomPlayer";
+  }
+
+  @Override
   public M selectMove(P position) {
-    return position.getRandomMove(
-        random == null ? ThreadLocalRandom.current() : random);
+    Random rng = random;
+    if (rng == null) { rng = ThreadLocalRandom.current(); }
+    List<M> moves = position.getMoves();
+    return moves.get(rng.nextInt(moves.size()));
   }
 }
