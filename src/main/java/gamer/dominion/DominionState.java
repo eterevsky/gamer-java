@@ -1,5 +1,6 @@
 package gamer.dominion;
 
+import gamer.def.IllegalMoveException;
 import gamer.def.Position;
 import gamer.def.TerminalPositionException;
 import gamer.dominion.cards.Copper;
@@ -132,6 +133,21 @@ public final class DominionState
 
   @Override
   public void play(DominionMove move) {
+		switch (phase) {
+			case ACTION:
+				if (move == DominionMove.BUY_PHASE) {
+					phase = Phase.BUY;
+					return;
+				}
+				throw new IllegalMoveException(this, move);
+
+			case BUY:
+					if (move == DominionMove.CLEANUP) {
+					  cleanup();
+            return;
+					}
+					throw new IllegalMoveException(this, move);
+		}
     throw new UnsupportedOperationException();
   }
 
@@ -187,6 +203,10 @@ public final class DominionState
             discards.get(iplayer).stream()),
         hands.get(iplayer).stream());
   }
+
+	private void cleanup() {
+
+	}
 
   enum Phase {
     START_GAME,         // Dealing cards.
