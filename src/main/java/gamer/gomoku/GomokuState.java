@@ -37,7 +37,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
   @Override public List<GomokuMove> getMoves() {
     List<GomokuMove> moves = new ArrayList<>();
-    for (int i = 0; i < size * size; i++) {
+    for (int i = 0; i < board.length; i++) {
       if (board[i] == 0) {
         moves.add(GomokuMove.of(i));
       }
@@ -52,7 +52,8 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
     int i;
     do {
-      i = random.nextInt(size * size);
+      // This is faster than nextInt(board_len), though slightly biased
+      i = (random.nextInt() & 0x7FFFFFFF) % board.length;
     } while (board[i] != 0);
 
     play(GomokuMove.of(i));
@@ -81,7 +82,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
   @Override public String toString() {
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < size * size; i++) {
+    for (int i = 0; i < board.length; i++) {
       if (board[i] != 0) {
         builder.append((board[i] == 1) ? 'X' : 'O');
       } else {
@@ -128,8 +129,8 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     if (won) {
       status = GameStatusInt.setPayoff(status, player ? 1 : -1);
       return;
-    } 
-    
+    }
+
     for (int i = 0; i < board.length; i++) {
       if (board[i] == 0)
         return;

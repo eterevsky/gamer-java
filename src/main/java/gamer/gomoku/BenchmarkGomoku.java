@@ -19,8 +19,8 @@ public class BenchmarkGomoku {
   static final private int CORES = Runtime.getRuntime().availableProcessors();
 
   @Benchmark
-  public static int gomoku(int reps) {
-    return batch(ThreadLocalRandom.current(), reps);
+  public static int gomokuSingle(int reps) {
+    return batch(reps);
   }
 
   @Benchmark
@@ -32,8 +32,7 @@ public class BenchmarkGomoku {
     for (int ithread = 0; ithread < CORES; ithread++) {
       int samplesToThread = samplesLeft / (CORES - ithread);
       samplesLeft -= samplesToThread;
-      futures.add(executor.submit(() ->
-          batch(ThreadLocalRandom.current(), samplesToThread)));
+      futures.add(executor.submit(() -> batch(samplesToThread)));
     }
 
     executor.shutdown();
@@ -161,8 +160,9 @@ public class BenchmarkGomoku {
     return sum;
   }
 
-  private static int batch(Random random, int nsamples) {
+  private static int batch(int nsamples) {
     int sum = 0;
+    Random random = ThreadLocalRandom.current();
     for (int isamples = 0; isamples < nsamples; isamples++) {
       Position<?, GomokuMove> state = Gomoku.getInstance().newGame();
       while (!state.isTerminal()) {
