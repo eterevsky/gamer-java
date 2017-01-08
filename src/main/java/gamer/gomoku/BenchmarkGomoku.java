@@ -45,6 +45,8 @@ public class BenchmarkGomoku {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();
     final AtomicInteger counter = new AtomicInteger();
+    final GomokuState.RandomSelector selector =
+        Gomoku.getInstance().getRandomMoveSelector();
 
     for (int ithread = 0; ithread < CORES; ithread++) {
       futures.add(executor.submit(() -> {
@@ -54,7 +56,7 @@ public class BenchmarkGomoku {
         while (counter.getAndIncrement() < reps) {
           GomokuState state = Gomoku.getInstance().newGame();
           while (!state.isTerminal()) {
-            state.playRandomMove(random);
+            state.play(selector.select(state));
           }
           s += state.getPayoff(0);
         }
@@ -72,6 +74,8 @@ public class BenchmarkGomoku {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();
     final WrappedInt counter = new WrappedInt();
+    final GomokuState.RandomSelector selector =
+        Gomoku.getInstance().getRandomMoveSelector();
 
     for (int ithread = 0; ithread < CORES; ithread++) {
       futures.add(executor.submit(() -> {
@@ -86,7 +90,7 @@ public class BenchmarkGomoku {
           }
           GomokuState state = Gomoku.getInstance().newGame();
           while (!state.isTerminal()) {
-            state.playRandomMove(random);
+            state.play(selector.select(state));
           }
           s += state.getPayoff(0);
         }
@@ -104,6 +108,8 @@ public class BenchmarkGomoku {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     GomokuState initialState = Gomoku.getInstance().newGame();
     int queueLen = CORES * 2;
+    final GomokuState.RandomSelector selector =
+        Gomoku.getInstance().getRandomMoveSelector();
 
     BlockingQueue<Job> jobsQueue = new LinkedBlockingQueue<>();
     BlockingQueue<Job> resultsQueue = new LinkedBlockingQueue<>();
@@ -118,7 +124,7 @@ public class BenchmarkGomoku {
               return;
             GomokuState state = job.state.clone();
             while (!state.isTerminal()) {
-              state.playRandomMove(random);
+              state.play(selector.select(state));
             }
             job.result = state.getPayoff(0);
             resultsQueue.put(job);

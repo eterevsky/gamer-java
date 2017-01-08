@@ -1,6 +1,7 @@
 package gamer.gomoku;
 
 import gamer.def.IllegalMoveException;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
@@ -15,6 +16,29 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
   private byte[] board;
 
   private int status;
+
+  static class RandomSelector implements MoveSelector<GomokuState, GomokuMove> {
+    Random random = new Random();
+
+    @Override
+    public RandomSelector clone() {
+      return new RandomSelector();
+    }
+
+    @Override
+    public GomokuMove select(GomokuState state) {
+      if (state.isTerminal())
+        throw new TerminalPositionException();
+
+      int i;
+      do {
+        // This is faster than nextInt(board_len), though slightly biased
+        i = (random.nextInt() & 0x7FFFFFFF) % state.board.length;
+      } while (state.board[i] != 0);
+
+      return GomokuMove.of(i);
+    }
+  };
 
   GomokuState(int size, Limits limits) {
     this.size = size;
@@ -44,19 +68,6 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     }
 
     return moves;
-  }
-
-  /* package */ void playRandomMove(Random random) {
-    if (isTerminal())
-      throw new TerminalPositionException();
-
-    int i;
-    do {
-      // This is faster than nextInt(board_len), though slightly biased
-      i = (random.nextInt() & 0x7FFFFFFF) % board.length;
-    } while (board[i] != 0);
-
-    play(GomokuMove.of(i));
   }
 
   @Override public void play(GomokuMove move) {

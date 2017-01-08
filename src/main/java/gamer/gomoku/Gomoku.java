@@ -37,6 +37,11 @@ public final class Gomoku implements Game<GomokuState, GomokuMove> {
     return new GomokuState(size, limits);
   }
 
+  @Override
+  public GomokuState.RandomSelector getRandomMoveSelector() {
+    return new GomokuState.RandomSelector();
+  }
+
   int getSize() {
     return size;
   }
