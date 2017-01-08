@@ -22,6 +22,7 @@ public final class TestMonteCarloUcb {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME0.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
@@ -36,6 +37,7 @@ public final class TestMonteCarloUcb {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME1.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
@@ -54,7 +56,7 @@ public final class TestMonteCarloUcb {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
-    player.setRandom(new Random(1234567890L));
+    player.setSelector(TreeGameInstances.GAME3.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());

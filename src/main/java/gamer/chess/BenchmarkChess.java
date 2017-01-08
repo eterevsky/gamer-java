@@ -1,6 +1,7 @@
 package gamer.chess;
 
 import gamer.benchmark.Benchmark;
+import gamer.def.MoveSelector;
 
 import java.util.List;
 import java.util.Random;
@@ -9,12 +10,14 @@ public class BenchmarkChess {
   @Benchmark
   public static int chess1(int reps) {
     int payoff = 0;
+    MoveSelector<ChessState, ChessMove> selector = Chess.getInstance().getRandomMoveSelector();
     Random random = new Random();
 
     for (int i = 0; i < reps; i++) {
       ChessState state = Chess.getInstance().newGame();
       while (!state.isTerminal()) {
-        state.playRandomMove(random);
+        ChessMove move = selector.select(state);
+        state.play(move);
       }
       payoff += state.getPayoff(0);
     }

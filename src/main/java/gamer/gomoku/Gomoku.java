@@ -6,7 +6,7 @@ import gamer.def.Position;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Gomoku implements Game {
+public final class Gomoku implements Game<GomokuState, GomokuMove> {
   private static final int DEFAULT_SIZE = 19;
   private static final Map<Integer, Gomoku> INSTANCES = new HashMap<>();
   private final int size;

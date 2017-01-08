@@ -1,7 +1,11 @@
 package gamer.def;
 
-public interface Game {
-  Position<?, ?> newGame();
+public interface Game<P extends Position<P, M>, M extends Move> {
+  P newGame();
+
+  default MoveSelector<P, M> getRandomMoveSelector() {
+    return new GenericRandomMoveSelector<P, M>();
+  }
 
   default int getPlayersCount() {
     return 2;

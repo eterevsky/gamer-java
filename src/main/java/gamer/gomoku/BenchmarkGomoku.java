@@ -1,6 +1,7 @@
 package gamer.gomoku;
 
 import gamer.benchmark.Benchmark;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 
 import java.util.ArrayList;
@@ -162,11 +163,12 @@ public class BenchmarkGomoku {
 
   private static int batch(int nsamples) {
     int sum = 0;
-    Random random = ThreadLocalRandom.current();
+    MoveSelector<GomokuState, GomokuMove> selector =
+        Gomoku.getInstance().getRandomMoveSelector();
     for (int isamples = 0; isamples < nsamples; isamples++) {
-      Position<?, GomokuMove> state = Gomoku.getInstance().newGame();
+      GomokuState state = Gomoku.getInstance().newGame();
       while (!state.isTerminal()) {
-        state.playRandomMove(random);
+        state.play(selector.select(state));
       }
       sum += state.getPayoff(0);
     }

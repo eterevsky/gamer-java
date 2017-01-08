@@ -50,24 +50,6 @@ public interface Position<P extends Position<P, M>, M extends Move>
   List<M> getMoves();
 
   /**
-   * Plays a single random move in the current position. If getMoves() always
-   * returns a set of moves, the default implementation of this method is
-   * enough.
-   */
-  default void playRandomMove(Random rng) {
-    if (isTerminal()) {
-      throw new TerminalPositionException("Terminal state: " + toString());
-    }
-    List<M> moves = getMoves();
-    if (moves == null) {
-      throw new UnsupportedOperationException(
-          "Moves are not listable. Need a dedicated implementation of " +
-          "playRandomMove().");
-    }
-    play(moves.get(rng.nextInt(moves.size())));
-  }
-
-  /**
    * Apply a move to the current position.
    */
   void play(M move);

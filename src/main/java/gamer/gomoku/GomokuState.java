@@ -46,7 +46,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     return moves;
   }
 
-  @Override public void playRandomMove(Random random) {
+  /* package */ void playRandomMove(Random random) {
     if (isTerminal())
       throw new TerminalPositionException();
 

@@ -8,7 +8,7 @@ public interface ComputerPlayer<P extends Position<P, M>, M extends Move>
     return false;
   }
 
-  void setRandom(Random random);
+  // void setRandom(Random random);
 
   void setMaxWorkers(int maxWorkers);
 
