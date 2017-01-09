@@ -7,8 +7,12 @@ import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class GomokuState implements Position<GomokuState, GomokuMove> {
   private final int size;
@@ -18,11 +22,10 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
   private int status;
 
   static class RandomSelector implements MoveSelector<GomokuState, GomokuMove> {
-    Random random = new Random();
+    private final int board_len;
 
-    @Override
-    public RandomSelector clone() {
-      return new RandomSelector();
+    RandomSelector(int size) {
+      board_len = size * size;
     }
 
     @Override
@@ -31,19 +34,113 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
         throw new TerminalPositionException();
 
       int i;
+      ThreadLocalRandom random = ThreadLocalRandom.current();
       do {
-        // This is faster than nextInt(board_len), though slightly biased
-        i = (random.nextInt() & 0x7FFFFFFF) % state.board.length;
+        i = random.nextInt(board_len);
       } while (state.board[i] != 0);
 
       return GomokuMove.of(i);
     }
   };
 
+  static class RandomNeighborSelector
+      implements MoveSelector<GomokuState, GomokuMove> {
+    final int size;
+    final int board_len;
+    final List<int[]> neighbors = new ArrayList<>();
+
+    RandomNeighborSelector(int size) {
+      this.size = size;
+      this.board_len = size * size;
+
+      List<Integer> p_neighbors = new ArrayList<>();
+      for (int p = 0; p < board_len; p++) {
+        p_neighbors.clear();
+        int x = p / size;
+        int y = p % size;
+        if (y > 0) {
+          p_neighbors.add(p - 1);
+        }
+        if (y < size - 1) {
+          p_neighbors.add(p + 1);
+        }
+        if (x > 0) {
+          p_neighbors.add(p - size);
+          if (y > 0) {
+            p_neighbors.add(p - size - 1);
+          }
+          if (y < size - 1) {
+            p_neighbors.add(p - size + 1);
+          }
+        }
+        if (x < size - 1) {
+          p_neighbors.add(p + size);
+          if (y > 0) {
+            p_neighbors.add(p + size - 1);
+          }
+          if (y < size - 1) {
+            p_neighbors.add(p + size + 1);
+          }
+        }
+
+        int[] neighbors_arr = new int[p_neighbors.size()];
+        for (int i = 0; i < p_neighbors.size(); i++) {
+          neighbors_arr[i] = p_neighbors.get(i);
+        }
+
+        neighbors.add(neighbors_arr);
+      }
+    }
+
+    @Override
+    public GomokuMove select(GomokuState state) {
+      if (state.isTerminal())
+        throw new TerminalPositionException();
+
+      ThreadLocalRandom random = ThreadLocalRandom.current();
+      int p;
+      // boolean found_neighbor = false;
+      // do {
+      //   i = random.nextInt(board_len);
+      //   if (state.board[i] != 0) {
+      //     continue;
+      //   }
+      //   found_neighbor = false;
+      //   for (int ni : neighbors.get(i)) {
+      //     if (state.board[ni] != 0) {
+      //       found_neighbor = true;
+      //       break;
+      //     }
+      //   }
+      // } while (!found_neighbor);
+
+      do {
+        p = random.nextInt(board_len);
+      } while (state.board[p] != 0 ||
+               !(p % size > 0 && state.get(p - 1) > 0 ||
+                 p % size < size - 1 && state.get(p + 1) > 0 ||
+                 p >= size && (state.get(p - size) > 0 ||
+                         p % size > 0 && state.get(p - size - 1) > 0 ||
+                         p % size < size - 1 && state.get(p - size + 1) > 0) ||
+                 p < size*(size - 1) && (state.get(p + size) > 0 ||
+                                   p % size > 0 && state.get(p + size - 1) > 0 ||
+                                   p % size < size - 1 && state.get(p + size + 1) > 0)));
+
+
+
+      return GomokuMove.of(p);
+    }
+  }
+
   GomokuState(int size, Limits limits) {
     this.size = size;
     this.limits = limits;
     board = new byte[size * size];
+    status = GameStatusInt.init();
+  }
+
+  void reset() {
+    Arrays.fill(board, (byte)0);
     status = GameStatusInt.init();
   }
 
@@ -124,6 +221,10 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
   public int get(String point) {
     GomokuMove move = GomokuMove.of(point, size);
     return board[move.point];
+  }
+
+  int get(int point) {
+    return board[point];
   }
 
   private void updateStatus(boolean player, int point) {

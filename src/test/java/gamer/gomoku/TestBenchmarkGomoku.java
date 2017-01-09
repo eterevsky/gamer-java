@@ -17,7 +17,7 @@ public class TestBenchmarkGomoku {
     ConfidenceInterval.Interval interval = ConfidenceInterval.binomialWilson(
         win, total - win);
     assertTrue(
-        Math.abs(interval.center - EXPECTED_WINS) < interval.err + WINS_ERROR);
+        Math.abs(interval.center - EXPECTED_WINS) < 2 * interval.err + WINS_ERROR);
   }
 
   @Test

@@ -25,6 +25,38 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
+  public static int gomokuSingleSame(int nsamples) {
+    int sum = 0;
+    MoveSelector<GomokuState, GomokuMove> selector =
+        Gomoku.getInstance().getRandomMoveSelector();
+    GomokuState state = Gomoku.getInstance().newGame();
+    for (int isamples = 0; isamples < nsamples; isamples++) {
+      state.reset();
+      while (!state.isTerminal()) {
+        state.play(selector.select(state));
+      }
+      sum += state.getPayoff(0);
+    }
+    return sum;
+  }
+
+  @Benchmark
+  public static int gomokuNeighbors(int nsamples) {
+    int sum = 0;
+    MoveSelector<GomokuState, GomokuMove> selector =
+        Gomoku.getInstance().getRandomNeighborSelector();
+    for (int isamples = 0; isamples < nsamples; isamples++) {
+      GomokuState state = Gomoku.getInstance().newGame();
+      state.play(GomokuMove.of(19 * 19 / 2));
+      while (!state.isTerminal()) {
+        state.play(selector.select(state));
+      }
+      sum += state.getPayoff(0);
+    }
+    return sum;
+  }
+
+  @Benchmark
   public static double gomokuBatches(int reps) {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();

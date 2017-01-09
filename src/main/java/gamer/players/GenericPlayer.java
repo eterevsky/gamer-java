@@ -61,7 +61,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
       for (int i = 0; i < workers; i++) {
         tasks.add(executor.submit(
             newSampler(root, finishTime, samplesLimit, samplesBatch,
-                       selector.clone())));
+                       selector)));
       }
 
       for (Future<?> task : tasks) {

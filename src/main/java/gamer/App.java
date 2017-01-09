@@ -3,7 +3,9 @@ package gamer;
 import gamer.benchmark.BenchmarkSuite;
 import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
+import gamer.def.Game;
 import gamer.def.Move;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
@@ -76,18 +78,21 @@ class App {
     tournament.play();
   }
 
-  private static <P extends Position<P, M>, M extends Move> void
-      runGameFromPosition(P startPosition, long moveTime) {
+  private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move>
+      void runGame(G game, long moveTime, MoveSelector<P, M> firstSelector) {
     int cores = Runtime.getRuntime().availableProcessors();
+    P startPosition = game.newGame();
 
     MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
-    player1.setSamplesBatch(16);
+    player1.setSamplesBatch(8);
+    player1.setSelector(firstSelector);
     MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
     player2.setTimeout(moveTime * 1000);
     player2.setMaxWorkers(cores);
     player2.setSamplesBatch(8);
+    player2.setSelector(game.getRandomMoveSelector());
     Match<P, M> match = new Match<>(startPosition, player1, player2);
 
     System.out.println(match);
@@ -101,11 +106,13 @@ class App {
 
     switch (gameStr) {
       case "gomoku":
-        runGameFromPosition(Gomoku.getInstance().newGame(), moveTime);
+        Gomoku gomoku = Gomoku.getInstance();
+        runGame(gomoku, moveTime, gomoku.getRandomNeighborSelector());
         break;
 
       case "chess":
-        runGameFromPosition(Chess.getInstance().newGame(), moveTime);
+        Chess chess = Chess.getInstance();
+        runGame(chess, moveTime, chess.getRandomMoveSelector());
         break;
 
       default:
