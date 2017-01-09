@@ -3,7 +3,7 @@ package gamer.chess;
 import gamer.def.Game;
 import gamer.def.Position;
 
-public final class Chess implements Game {
+public final class Chess implements Game<ChessState, ChessMove> {
   private static final Chess INSTANCE = new Chess();
   private static final ChessState INITIAL = ChessState.fromFen(
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");

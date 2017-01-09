@@ -1,6 +1,7 @@
 package gamer.players;
 
 import gamer.def.Move;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 import gamer.def.Solver;
 
@@ -14,19 +15,19 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
   private final long finishTime;
   private final long maxSamples;
   private final int samplesBatch;
-  private final Random random;
+  private final MoveSelector<P, M> selector;
   private Solver<P, M> solver = null;
 
   Sampler(Node<P, M> root,
           long finishTime,
           long maxSamples,
           int samplesBatch,
-          Random random) {
+          MoveSelector<P, M> selector) {
     this.root = root;
     this.finishTime = finishTime;
     this.maxSamples = maxSamples;
     this.samplesBatch = samplesBatch;
-    this.random = random;
+    this.selector = selector;
   }
 
   void setSolver(Solver<P, M> solver) {
@@ -35,8 +36,6 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
 
   @Override
   public void run() {
-    Random rnd = random == null ? ThreadLocalRandom.current() : random;
-
     while (!root.knowExact() &&
         (maxSamples <= 0 || root.getSamples() < maxSamples) &&
         (finishTime <= 0 || System.currentTimeMillis() < finishTime)) {
@@ -53,11 +52,11 @@ class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
 
       double value = 0;
       for (int i = 0; i < samplesBatch; i++) {
-        Position<?, M> position = node.getState().clone();
+        P position = node.getState().clone();
         Solver.Result<M> sResult = null;
         int moves = 0;
         do {
-          position.playRandomMove(rnd);
+          position.play(selector.select(position));
           // sResult = (solver != null) ? solver.solve(position) : null;
           moves += 1;
         } while (!position.isTerminal() && sResult == null);

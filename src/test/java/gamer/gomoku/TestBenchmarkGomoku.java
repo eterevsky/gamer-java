@@ -10,14 +10,14 @@ public class TestBenchmarkGomoku {
   private final static double WINS_ERROR =  0.001;
 
   @Test
-  public void gomoku() {
+  public void gomokuSingle() {
     int total = 1000;
-    int payoff = BenchmarkGomoku.gomoku(total);
+    int payoff = BenchmarkGomoku.gomokuSingle(total);
     int win = (payoff + total) / 2;
     ConfidenceInterval.Interval interval = ConfidenceInterval.binomialWilson(
         win, total - win);
     assertTrue(
-        Math.abs(interval.center - EXPECTED_WINS) < interval.err + WINS_ERROR);
+        Math.abs(interval.center - EXPECTED_WINS) < 2 * interval.err + WINS_ERROR);
   }
 
   @Test

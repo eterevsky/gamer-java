@@ -5,7 +5,7 @@ import gamer.def.GameException;
 
 import java.util.*;
 
-public final class Dominion implements Game {
+public final class Dominion implements Game<DominionState, DominionMove> {
   public static class Builder {
     int nplayers;
     private List<DominionCard> optionalCards;

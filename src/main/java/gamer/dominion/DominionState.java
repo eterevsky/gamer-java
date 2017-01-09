@@ -34,7 +34,7 @@ public final class DominionState
 
   DominionState(Dominion game) {
     this.game = game;
-    supply = new HashMap<>(game.getSupply());
+    supply = new HashMap<DominionCard, Integer>(game.getSupply());
     for (int i = 0; i < game.getPlayersCount(); i++) {
       Deck deck = new Deck();
       for (int j = 0; j < 7; j++) {
@@ -88,6 +88,8 @@ public final class DominionState
   @Override
   public List<DominionMove> getMoves() {
     List<DominionMove> moves = null;
+
+    System.err.format("phase: %s\n", phase);
 
     switch (phase) {
       case ACTION:
@@ -153,11 +155,6 @@ public final class DominionState
 
   @Override
   public DominionMove parseMove(String moveStr) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void playRandomMove(Random rng) {
     throw new UnsupportedOperationException();
   }
 

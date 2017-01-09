@@ -2,12 +2,12 @@ package gamer.players;
 
 import gamer.def.ComputerPlayer;
 import gamer.def.Move;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 import gamer.def.Solver;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -20,7 +20,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   private long samplesLimit = -1;
   private long timeout = 1000;
   private int workers = 0;
-  private Random random = null;
+  private MoveSelector<P, M> selector = null;
   private Solver<P, M> solver = null;
   private String report;
 
@@ -43,6 +43,8 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
 
   @Override
   public M selectMove(P state) {
+    assert(selector != null);
+
     if (solver != null) {
       Solver.Result<M> result = solver.solve(state);
       if (result != null)
@@ -58,7 +60,8 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
       List<Future<?>> tasks = new ArrayList<>();
       for (int i = 0; i < workers; i++) {
         tasks.add(executor.submit(
-            newSampler(root, finishTime, samplesLimit, samplesBatch, random)));
+            newSampler(root, finishTime, samplesLimit, samplesBatch,
+                       selector)));
       }
 
       for (Future<?> task : tasks) {
@@ -70,7 +73,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
       }
       executor.shutdown();
     } else {
-      newSampler(root, finishTime, samplesLimit, samplesBatch, random).run();
+      newSampler(root, finishTime, samplesLimit, samplesBatch, selector).run();
     }
 
     boolean player = state.getPlayerBool();
@@ -94,11 +97,6 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   }
 
   @Override
-  public void setRandom(Random random) {
-    this.random = random;
-  }
-
-  @Override
   public final void setMaxWorkers(int workers) {
     this.workers = workers;
   }
@@ -119,6 +117,10 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     this.nodeContext.solver = solver;
   }
 
+  public void setSelector(MoveSelector<P, M> selector) {
+    this.selector = selector;
+  }
+
   public void setSamplesBatch(int samplesBatch) {
     this.samplesBatch = samplesBatch;
   }
@@ -136,9 +138,9 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
 
   protected Sampler<P, M> newSampler(
       Node<P, M> root, long finishTime, long samplesLimit, int samplesBatch,
-      Random random) {
+      MoveSelector<P, M> selector) {
     Sampler<P, M> sampler = new Sampler<>(
-        root, finishTime, samplesLimit, samplesBatch, random);
+        root, finishTime, samplesLimit, samplesBatch, selector);
     if (solver != null)
       sampler.setSolver(solver);
     return sampler;

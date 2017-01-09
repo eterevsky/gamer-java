@@ -18,6 +18,7 @@ public final class TestMonteCarloUct {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME0.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
@@ -30,6 +31,7 @@ public final class TestMonteCarloUct {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME1.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
@@ -46,6 +48,7 @@ public final class TestMonteCarloUct {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME2.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(1, move.getNodeId());
@@ -65,6 +68,7 @@ public final class TestMonteCarloUct {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME2.getRandomMoveSelector());
 
     state.play(state.getMoveToNode(2));
     TreeGameMove move = player.selectMove(state);
@@ -78,6 +82,7 @@ public final class TestMonteCarloUct {
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME3.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());
@@ -92,8 +97,9 @@ public final class TestMonteCarloUct {
     TreeGameState state = TreeGameInstances.GAME4.newGame();
     MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
     player.setTimeout(-1);
-    player.setMaxSamples(50L);
+    player.setMaxSamples(100L);
     player.setSamplesBatch(1);
+    player.setSelector(TreeGameInstances.GAME4.getRandomMoveSelector());
 
     TreeGameMove move = player.selectMove(state);
     assertEquals(2, move.getNodeId());
