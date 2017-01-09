@@ -48,6 +48,7 @@ public final class BenchmarkSuite {
         Runtime.getRuntime().availableProcessors(),
         System.getProperty("java.vm.name"), System.getProperty("java.version"),
         timeLimitSeconds);
+    System.out.println();
     for (Class<?> c : classes) {
       for (Method m : c.getDeclaredMethods()) {
         if (m.getAnnotation(Benchmark.class) != null) {
@@ -149,7 +150,7 @@ public final class BenchmarkSuite {
       unit = "ns";
     } else if (stats.mean < 0.002) {
       scale = 1E6;
-      unit = "µs";
+      unit = "us";
     } else if (stats.mean < 2.0) {
       scale = 1000.0;
       unit = "ms";
@@ -159,7 +160,7 @@ public final class BenchmarkSuite {
       System.out.format("%-50s %.1f±?\n", fullName, stats.mean * scale);
     } else {
       System.out.format(
-          "%-50s %.1f±%.1f %s (%.1f%%)\n",
+          "%-50s %6.1f +- %5.1f %s (%4.1f%%)\n",
           fullName,
           stats.mean * scale,
           stats.interval * scale,
