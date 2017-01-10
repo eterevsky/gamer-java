@@ -81,7 +81,7 @@ class App {
   }
 
   private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move>
-      void runGame(G game, long moveTime, MoveSelector<P, M> firstSelector) {
+      void runGame(G game, long moveTime) {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
 
@@ -108,13 +108,13 @@ class App {
 
     switch (gameStr) {
       case "gomoku":
-        Gomoku gomoku = Gomoku.getInstance();
-        runGame(gomoku, moveTime, gomoku.getRandomNeighborSelector());
+        Gomoku gomoku = Gomoku.getInstance(13);
+        runGame(gomoku, moveTime);
         break;
 
       case "chess":
         Chess chess = Chess.getInstance();
-        runGame(chess, moveTime, chess.getRandomMoveSelector());
+        runGame(chess, moveTime);
         break;
 
       default:

@@ -98,6 +98,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
         throw new TerminalPositionException();
 
       ThreadLocalRandom random = ThreadLocalRandom.current();
+
       int i;
       boolean found_neighbor = false;
       do {
