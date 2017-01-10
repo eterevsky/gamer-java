@@ -48,31 +48,27 @@ class App {
 
   private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void addPlayers(
       Tournament<P, M> tournament, G game) {
-    addUctPlayer(game, tournament, 1, 1, "neighbor");
-    addUctPlayer(game, tournament, 2, 1, "neighbor");
     addUctPlayer(game, tournament, 4, 1, "neighbor");
-    addUctPlayer(game, tournament, 2, 2, "neighbor");
-    addUctPlayer(game, tournament, 4, 2, "neighbor");
     addUctPlayer(game, tournament, 4, 4, "neighbor");
     addUctPlayer(game, tournament, 8, 4, "neighbor");
+    addUctPlayer(game, tournament, 8, 8, "neighbor");
+    addUctPlayer(game, tournament, 16, 8, "neighbor");
+    addUctPlayer(game, tournament, 16, 16, "neighbor");
+    addUctPlayer(game, tournament, 32, 16, "neighbor");
 
-    addUctPlayer(game, tournament, 2, 2, "random");
-    addUctPlayer(game, tournament, 4, 2, "random");
     addUctPlayer(game, tournament, 4, 4, "random");
     addUctPlayer(game, tournament, 8, 4, "random");
     addUctPlayer(game, tournament, 8, 8, "random");
     addUctPlayer(game, tournament, 16, 8, "random");
     addUctPlayer(game, tournament, 16, 16, "random");
     addUctPlayer(game, tournament, 32, 16, "random");
-
-    tournament.addPlayer(new RandomPlayer<P, M>());
   }
 
   static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void runTournament(G game) {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
 
-    Tournament<P, M> tournament = new Tournament<>(game.newGame(), true);
+    Tournament<P, M> tournament = new Tournament<>(game.newGame(), false);
 
     tournament.setTimeout(1000);
     tournament.setGameThreads(1);
@@ -93,12 +89,12 @@ class App {
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(8);
-    player1.setSelector(firstSelector);
+    player1.setSelector(game.getMoveSelector("neighbor"));
     MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
     player2.setTimeout(moveTime * 1000);
     player2.setMaxWorkers(cores);
-    player2.setSamplesBatch(8);
-    player2.setSelector(game.getRandomMoveSelector());
+    player2.setSamplesBatch(4);
+    player2.setSelector(game.getMoveSelector("neighbor"));
     Match<P, M> match = new Match<>(startPosition, player1, player2);
 
     System.out.println(match);
