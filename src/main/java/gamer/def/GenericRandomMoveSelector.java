@@ -9,11 +9,6 @@ class GenericRandomMoveSelector<P extends Position<P, M>, M extends Move>
   private Random random = new Random();
 
   @Override
-  public String getName() {
-    return "generic-random-selector";
-  }
-
-  @Override
   public M select(P position) {
     List<M> moves = position.getMoves();
     if (moves == null) {

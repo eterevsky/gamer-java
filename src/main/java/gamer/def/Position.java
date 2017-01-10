@@ -1,7 +1,6 @@
 package gamer.def;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * The class describing a game position.

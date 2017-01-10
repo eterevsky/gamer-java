@@ -29,11 +29,6 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
     }
 
     @Override
-    public String getName() {
-      return "gomoku-random-selector";
-    }
-
-    @Override
     public GomokuMove select(GomokuState state) {
       if (state.isTerminal())
         throw new TerminalPositionException();
@@ -95,11 +90,6 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
         neighbors.add(neighbors_arr);
       }
-    }
-
-    @Override
-    public String getName() {
-      return "gomoku-neighbor-selector";
     }
 
     @Override
