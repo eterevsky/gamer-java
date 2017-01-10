@@ -65,7 +65,10 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
       throw new RuntimeException("Not enough players for the tournament.");
     }
 
+    System.out.format("Starting a tournament with %d players:\n", players.size());
+
     for (ComputerPlayer<P, M> p : players) {
+      System.out.println(p.getName());
       initPlayer(p);
     }
 
@@ -77,7 +80,7 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
       for (ComputerPlayer<P, M> p2 : players) {
         if (p1 != p2) {
           for (int i = 0; i < rounds; i++)
-            games.add(new Match<>(startPosition, p1, p2));
+            games.add(new Match<>(startPosition.clone(), p1, p2));
         }
       }
     }

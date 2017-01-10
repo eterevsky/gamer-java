@@ -7,6 +7,14 @@ public interface Game<P extends Position<P, M>, M extends Move> {
     return new GenericRandomMoveSelector<P, M>();
   }
 
+  default MoveSelector<P, M> getMoveSelector(String selectorType) {
+    if (selectorType == "random") {
+      return getRandomMoveSelector();
+    } else {
+      throw new IllegalArgumentException();
+    }
+  }
+
   default int getPlayersCount() {
     return 2;
   }

@@ -1,6 +1,7 @@
 package gamer.gomoku;
 
 import gamer.def.Game;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 
 import java.util.HashMap;
@@ -40,6 +41,16 @@ public final class Gomoku implements Game<GomokuState, GomokuMove> {
   @Override
   public GomokuState newGame() {
     return new GomokuState(size, limits);
+  }
+
+  @Override
+  public MoveSelector<GomokuState, GomokuMove> getMoveSelector(String selector) {
+    switch (selector) {
+      case "random": return random_selector;
+      case "neighbor": return random_neighbor_selector;
+      default:
+        throw new IllegalArgumentException();
+    }
   }
 
   @Override

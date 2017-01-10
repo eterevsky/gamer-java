@@ -35,6 +35,8 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     if (this.nodeContext.propagateExact)
       s += " +exact";
 
+    s += " " + this.selector.getClass().getSimpleName();
+
     if (this.solver != null)
       s += " " + this.solver.getClass().getSimpleName();
 
@@ -43,7 +45,9 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
 
   @Override
   public M selectMove(P state) {
-    assert(selector != null);
+    if (selector == null) {
+      throw new IllegalStateException("Need to assign selector.");
+    }
 
     if (solver != null) {
       Solver.Result<M> result = solver.solve(state);

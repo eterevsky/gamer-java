@@ -34,46 +34,52 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 class App {
-  private static <P extends Position<P, M>, M extends Move> void addUctPlayer(
-      Tournament<P, M> tournament, int chThres, int samples) {
+  private static <G extends Game<P, M>, P extends Position<P, M>,
+                  M extends Move>
+  void addUctPlayer(G game, Tournament<P, M> tournament, int chThres,
+                    int samples, String selector) {
     MonteCarloUct<P, M> player = new MonteCarloUct<>();
     player.setChildrenThreshold(chThres);
-    player.setChildrenThreshold(samples);
+    player.setSamplesBatch(samples);
+    player.setSelector(game.getMoveSelector(selector));
+
     tournament.addPlayer(player);
   }
 
-  private static <P extends Position<P, M>, M extends Move> void addPlayers(
-      Tournament<P, M> tournament) {
-    addUctPlayer(tournament, 1, 1);
-    addUctPlayer(tournament, 2, 1);
-    addUctPlayer(tournament, 4, 1);
-    addUctPlayer(tournament, 2, 2);
-    addUctPlayer(tournament, 4, 2);
-    addUctPlayer(tournament, 4, 4);
-    addUctPlayer(tournament, 8, 4);
-    addUctPlayer(tournament, 8, 8);
-    addUctPlayer(tournament, 16, 8);
-    addUctPlayer(tournament, 16, 16);
-    addUctPlayer(tournament, 32, 16);
+  private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void addPlayers(
+      Tournament<P, M> tournament, G game) {
+    addUctPlayer(game, tournament, 1, 1, "neighbor");
+    addUctPlayer(game, tournament, 2, 1, "neighbor");
+    addUctPlayer(game, tournament, 4, 1, "neighbor");
+    addUctPlayer(game, tournament, 2, 2, "neighbor");
+    addUctPlayer(game, tournament, 4, 2, "neighbor");
+    addUctPlayer(game, tournament, 4, 4, "neighbor");
+    addUctPlayer(game, tournament, 8, 4, "neighbor");
 
-    tournament.addPlayer(new MonteCarloUcb<P, M>());
-    tournament.addPlayer(new NaiveMonteCarlo<P, M>());
+    addUctPlayer(game, tournament, 2, 2, "random");
+    addUctPlayer(game, tournament, 4, 2, "random");
+    addUctPlayer(game, tournament, 4, 4, "random");
+    addUctPlayer(game, tournament, 8, 4, "random");
+    addUctPlayer(game, tournament, 8, 8, "random");
+    addUctPlayer(game, tournament, 16, 8, "random");
+    addUctPlayer(game, tournament, 16, 16, "random");
+    addUctPlayer(game, tournament, 32, 16, "random");
+
     tournament.addPlayer(new RandomPlayer<P, M>());
   }
 
-  static <P extends Position<P, M>, M extends Move> void runTournament(
-      P startPosition) {
+  static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void runTournament(G game) {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
 
-    Tournament<P, M> tournament = new Tournament<>(startPosition, true);
+    Tournament<P, M> tournament = new Tournament<>(game.newGame(), true);
 
-    tournament.setTimeout(2000);
+    tournament.setTimeout(1000);
     tournament.setGameThreads(1);
     tournament.setThreadsPerPlayer(cores);
     tournament.setRounds(1);
 
-    addPlayers(tournament);
+    addPlayers(tournament, game);
 
     tournament.play();
   }
@@ -205,7 +211,7 @@ class App {
     } else if (cl.hasOption("single_game")) {
       runSingleGame(cl);
     } else if (cl.hasOption("tournament")) {
-      runTournament(Gomoku.getInstance().newGame());
+      runTournament(Gomoku.getInstance());
     } else {
       throw new RuntimeException("Internal error.");
     }
