@@ -98,37 +98,27 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
         throw new TerminalPositionException();
 
       ThreadLocalRandom random = ThreadLocalRandom.current();
-      int p;
-      // boolean found_neighbor = false;
-      // do {
-      //   i = random.nextInt(board_len);
-      //   if (state.board[i] != 0) {
-      //     continue;
-      //   }
-      //   found_neighbor = false;
-      //   for (int ni : neighbors.get(i)) {
-      //     if (state.board[ni] != 0) {
-      //       found_neighbor = true;
-      //       break;
-      //     }
-      //   }
-      // } while (!found_neighbor);
 
+      int i;
+      boolean found_neighbor = false;
       do {
-        p = random.nextInt(board_len);
-      } while (state.board[p] != 0 ||
-               !(p % size > 0 && state.get(p - 1) > 0 ||
-                 p % size < size - 1 && state.get(p + 1) > 0 ||
-                 p >= size && (state.get(p - size) > 0 ||
-                         p % size > 0 && state.get(p - size - 1) > 0 ||
-                         p % size < size - 1 && state.get(p - size + 1) > 0) ||
-                 p < size*(size - 1) && (state.get(p + size) > 0 ||
-                                   p % size > 0 && state.get(p + size - 1) > 0 ||
-                                   p % size < size - 1 && state.get(p + size + 1) > 0)));
+        i = random.nextInt(board_len);
+        if (state.board[i] != 0) {
+          continue;
+        }
+        if (i == board_len / 2) {
+          break;
+        }
+        found_neighbor = false;
+        for (int ni : neighbors.get(i)) {
+          if (state.board[ni] != 0) {
+            found_neighbor = true;
+            break;
+          }
+        }
+      } while (!found_neighbor);
 
-
-
-      return GomokuMove.of(p);
+      return GomokuMove.of(i);
     }
   }
 

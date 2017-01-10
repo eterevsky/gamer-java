@@ -92,7 +92,7 @@ class App {
     player2.setTimeout(moveTime * 1000);
     player2.setMaxWorkers(cores);
     player2.setSamplesBatch(8);
-    player2.setSelector(game.getRandomMoveSelector());
+    player2.setSelector(firstSelector);
     Match<P, M> match = new Match<>(startPosition, player1, player2);
 
     System.out.println(match);
@@ -106,7 +106,7 @@ class App {
 
     switch (gameStr) {
       case "gomoku":
-        Gomoku gomoku = Gomoku.getInstance();
+        Gomoku gomoku = Gomoku.getInstance(13);
         runGame(gomoku, moveTime, gomoku.getRandomNeighborSelector());
         break;
 
