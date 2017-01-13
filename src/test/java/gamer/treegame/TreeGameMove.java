@@ -25,4 +25,9 @@ public final class TreeGameMove implements Move {
     TreeGameMove oMove = (TreeGameMove) o;
     return node.equals(oMove.node);
   }
+
+  @Override
+  public int hashCode() {
+    return node.id;
+  }
 }
