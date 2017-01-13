@@ -41,7 +41,7 @@ public final class GomokuState implements Position<GomokuState, GomokuMove> {
 
       return GomokuMove.of(i);
     }
-  };
+  }
 
   static class RandomNeighborSelector
       implements MoveSelector<GomokuState, GomokuMove> {

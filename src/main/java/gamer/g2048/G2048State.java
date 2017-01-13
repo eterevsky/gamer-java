@@ -17,7 +17,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
     RANDOM,
     PLAYER,
     FINISHED
-  };
+  }
 
   private int[] board = new int[16];
   private int score = 0;
