@@ -9,20 +9,21 @@ import java.util.List;
 public class G2048Move implements Move {
   static private final List<G2048Move> RANDOM2 = genRandom(2);
   static private final List<G2048Move> RANDOM4 = genRandom(4);
-  static final List<G2048Move> PLAYER_MOVES = Arrays.asList(
-      new G2048Move(Direction.RIGHT),
-      new G2048Move(Direction.UP),
-      new G2048Move(Direction.LEFT),
-      new G2048Move(Direction.DOWN));
-
-  enum Direction {
-    RIGHT, UP, LEFT, DOWN
-  };
+  static final G2048Move RIGHT = new G2048Move("right");
+  static final G2048Move UP = new G2048Move("up");
+  static final G2048Move LEFT = new G2048Move("left");
+  static final G2048Move DOWN = new G2048Move("down");
+  static final List<G2048Move> PLAYER_MOVES =
+      Arrays.asList(RIGHT, UP, LEFT, DOWN);
 
   boolean random;
   int tile;
   int value;
-  Direction direction;
+  String directionStr;
+
+  static G2048Move parse(String str) {
+    throw new UnsupportedOperationException();
+  }
 
   private G2048Move(int tile, int value) {
     this.random = true;
@@ -30,9 +31,8 @@ public class G2048Move implements Move {
     this.value = value;
   }
 
-  private G2048Move(Direction direction) {
-    this.random = false;
-    this.direction = direction;
+  private G2048Move(String directionStr) {
+    this.directionStr = directionStr;
   }
 
   boolean isRandom() {

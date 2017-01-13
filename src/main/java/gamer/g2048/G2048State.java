@@ -123,18 +123,46 @@ public final class G2048State implements Position<G2048State, G2048Move> {
           throw new IllegalMoveException(this, move, "Expecting player move.");
         }
 
-        // TODO
+        shiftTiles(move);
 
         break;
 
-      case FINISHED:
+      default:
         throw new TerminalPositionException();
     }
   }
 
+  private void shiftTiles(G2048Move move) {
+    throw new UnsupportedOperationException();
+    // int startTile = move.startRow;
+    // for (int i = 0; i < 4; i++) {
+    //   int toTile = startTile;
+    //   int fromTile = startTile;
+    //   int lastTileValue = 0;
+    //
+    //   for (int j = 0; j < 4; j++) {
+    //     int value = board[fromTile];
+    //     if (value != 0) {
+    //       board[fromTile] = 0;
+    //       if (value == lastTileValue) {
+    //         board[toTile] = 2 * value;
+    //         lastTileValue = 0;
+    //       } else {
+    //         board[toTile] = value;
+    //         lastTileValue = value;
+    //       }
+    //       toTile += move.deltaTile;
+    //     }
+    //
+    //     fromTile += move.deltaTile;
+    //   }
+    //
+    //   startTile += move.deltaRow;
+    // }
+  }
+
   public G2048Move parseMove(String moveStr) {
-    // TODO
-    return G2048Move.of(0, 2);
+    return G2048Move.parse(moveStr);
   }
 
   public G2048State clone() {
