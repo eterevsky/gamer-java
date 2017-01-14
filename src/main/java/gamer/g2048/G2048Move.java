@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class G2048Move implements Move {
-  static private final List<G2048Move> RANDOM2 = genRandom(2);
-  static private final List<G2048Move> RANDOM4 = genRandom(4);
+  static private final List<G2048Move> RANDOM2 = genRandom(1);
+  static private final List<G2048Move> RANDOM4 = genRandom(2);
 
   static final G2048Move RIGHT = new G2048Move("right", 3, 4, -1);
   static final G2048Move UP = new G2048Move("up", 12, 1, -4);
@@ -31,7 +31,34 @@ public class G2048Move implements Move {
   int deltaTile;
 
   static G2048Move parse(String str) {
-    throw new UnsupportedOperationException();
+    if (str == "right") {
+      return RIGHT;
+    }
+    if (str == "left") {
+      return LEFT;
+    }
+    if (str == "up") {
+      return UP;
+    }
+    if (str == "down") {
+      return DOWN;
+    }
+
+    String[] parts = str.split("\\s+");
+    if (parts.length != 2) {
+      throw new RuntimeException("Wrong move string: `" + str + "`");
+    }
+
+    int tile = G2048.BOARD.parseTile(parts[0]);
+    int value;
+
+    switch (parts[1]) {
+      case "2": value = 1; break;
+      case "4": value = 2; break;
+      default: throw new RuntimeException("Wrong move string: `" + str + "`");
+    }
+
+    return G2048Move.of(tile, value);
   }
 
   private G2048Move(int tile, int value) {
@@ -61,9 +88,9 @@ public class G2048Move implements Move {
   }
 
   static G2048Move of(int tile, int value) {
-    if (value == 2) {
+    if (value == 1) {
       return RANDOM2.get(tile);
-    } else if (value == 4) {
+    } else if (value == 2) {
       return RANDOM4.get(tile);
     } else {
       throw new IllegalArgumentException(

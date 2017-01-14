@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestBoard {
   @Test
-  board() {
+  public void board() {
     Board board = new Board(3, 2, Arrays.asList(".", "x", "o"));
     assertEquals(-3, board.down());
     assertEquals(3, board.up());
@@ -23,5 +23,16 @@ public class TestBoard {
     assertEquals("B1", board.tileToString(1));
     assertEquals(3, board.parseTile("a2"));
     assertEquals(1, board.parseTile("B1"));
+
+    byte[] b = new byte[6];
+    b[0] = 1;
+    b[4] = 2;
+    b[3] = 1;
+
+    assertEquals(" x o .\n x . .\n",
+                 board.boardToString(b, false));
+
+    assertEquals(" 2 x o .\n 1 x . .\n   A B C\n",
+                 board.boardToString(b, true));
   }
 }

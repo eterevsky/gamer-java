@@ -67,7 +67,7 @@ public class Board {
     char colChar = tileStr.charAt(0);
     int x = COL_LETTER.indexOf(colChar);
     int y = Integer.parseInt(tileStr.substring(1));
-    return tile(x, y);
+    return tile(x, y - 1);
   }
 
   public String boardToString(byte[] board, boolean printCoordinates) {
@@ -79,10 +79,46 @@ public class Board {
     }
 
     tileLen += 1;
-    StringBuilder builder;
+    StringBuilder builder = new StringBuilder();
 
     for (int y = height - 1; y >= 0; y--) {
+      if (printCoordinates) {
+        builder.append(String.format("%2d", y + 1));
+      }
 
+      for (int x = 0; x < width; x++) {
+        int t = tile(x, y);
+        String c = tileContents.get(board[t]);
+        for (int sp = 0; sp < (tileLen - c.length() + 1) / 2; sp++) {
+          builder.append(' ');
+        }
+
+        builder.append(c);
+
+        for (int sp = 0; sp < (tileLen - c.length()) / 2; sp++) {
+          builder.append(' ');
+        }
+      }
+
+      builder.append('\n');
     }
+
+    if (printCoordinates) {
+      builder.append("  ");
+      for (int x = 0; x < width; x++) {
+        for (int sp = 0; sp < (tileLen - 1 + 1) / 2; sp++) {
+          builder.append(' ');
+        }
+
+        builder.append(COL_LETTER.charAt(x));
+
+        for (int sp = 0; sp < (tileLen - 1) / 2; sp++) {
+          builder.append(' ');
+        }
+      }
+      builder.append('\n');
+    }
+
+    return builder.toString();
   }
 }

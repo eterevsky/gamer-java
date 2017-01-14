@@ -91,7 +91,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
       case NEW_GAME: case RANDOM:
         int rand = random.nextInt(10 * emptyTiles());
         int tile = rand / 10;
-        int value = rand % 10 == 0 ? 4 : 2;
+        int value = rand % 10 == 0 ? 2 : 1;
         return G2048Move.of(tile, value);
       case PLAYER:
         return G2048Move.PLAYER_MOVES.get(random.nextInt(4));
@@ -144,7 +144,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
          if (value != 0) {
            board[fromTile] = 0;
            if (value == lastTileValue) {
-             board[toTile] = 2 * value;
+             board[toTile] = value + 1;
              lastTileValue = 0;
            } else {
              board[toTile] = value;
@@ -165,7 +165,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
   }
 
   int get(String tileStr) {
-    return board[G2048.getInstance().board.parseTile(tileStr)]
+    return board[G2048.BOARD.parseTile(tileStr)];
   }
 
   public G2048Move parseMove(String moveStr) {
