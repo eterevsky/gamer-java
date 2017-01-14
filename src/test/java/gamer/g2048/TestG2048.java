@@ -13,7 +13,11 @@ public class TestG2048 {
     assertEquals(-1, state.getPlayer());
     state.play("B2 4");
 
+    assertEquals(2, state.get("A1"));
+    assertEquals(0, state.get("A2"));
+    assertEquals(0, state.get("B1"));
     assertEquals(4, state.get("B2"));
+    assertEquals(4, state.get("C3"));
     assertEquals(0, state.getPlayer());
 
     state.play("right");

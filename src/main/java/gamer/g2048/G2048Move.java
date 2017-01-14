@@ -9,17 +9,26 @@ import java.util.List;
 public class G2048Move implements Move {
   static private final List<G2048Move> RANDOM2 = genRandom(2);
   static private final List<G2048Move> RANDOM4 = genRandom(4);
-  static final G2048Move RIGHT = new G2048Move("right");
-  static final G2048Move UP = new G2048Move("up");
-  static final G2048Move LEFT = new G2048Move("left");
-  static final G2048Move DOWN = new G2048Move("down");
+
+  static final G2048Move RIGHT = new G2048Move("right", 3, 4, -1);
+  static final G2048Move UP = new G2048Move("up", 12, 1, -4);
+  static final G2048Move LEFT = new G2048Move("left", 0, 4, 1);
+  static final G2048Move DOWN = new G2048Move("down", 0, 1, 4);
+
   static final List<G2048Move> PLAYER_MOVES =
       Arrays.asList(RIGHT, UP, LEFT, DOWN);
 
   boolean random;
+
+  // For random moves.
   int tile;
   int value;
+
+  // For player moves.
   String directionStr;
+  int startRow;
+  int deltaRow;
+  int deltaTile;
 
   static G2048Move parse(String str) {
     throw new UnsupportedOperationException();
@@ -31,8 +40,12 @@ public class G2048Move implements Move {
     this.value = value;
   }
 
-  private G2048Move(String directionStr) {
+  private G2048Move(String directionStr, int startRow, int deltaRow, int
+      deltaTile) {
     this.directionStr = directionStr;
+    this.startRow = startRow;
+    this.deltaRow = deltaRow;
+    this.deltaTile = deltaTile;
   }
 
   boolean isRandom() {

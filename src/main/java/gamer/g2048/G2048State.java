@@ -21,7 +21,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
 
   private int[] board = new int[16];
   private int score = 0;
-  private State state;
+  private State state = State.NEW_GAME;
 
   static class RandomSelector implements MoveSelector<G2048State, G2048Move> {
     @Override
@@ -53,6 +53,15 @@ public final class G2048State implements Position<G2048State, G2048Move> {
     return score;
   }
 
+  @Override
+  public List<G2048Move> getMoves() {
+    switch (state) {
+      case NEW_GAME: case RANDOM: return generateRandomMoves();
+      case PLAYER: return G2048Move.PLAYER_MOVES;
+      default: throw new TerminalPositionException();
+    }
+  }
+
   private List<G2048Move> generateRandomMoves() {
     List<G2048Move> moves = new ArrayList<>();
     for (int i = 0; i < 16; i++) {
@@ -65,15 +74,6 @@ public final class G2048State implements Position<G2048State, G2048Move> {
     return moves;
   }
 
-  @Override
-  public List<G2048Move> getMoves() {
-    switch (state) {
-      case NEW_GAME: case RANDOM: return generateRandomMoves();
-      case PLAYER: return G2048Move.PLAYER_MOVES;
-      default: throw new TerminalPositionException();
-    }
-  }
-
   private int emptyTiles() {
     int count = 0;
     for (int i = 0; i < 16; i++) {
@@ -84,8 +84,8 @@ public final class G2048State implements Position<G2048State, G2048Move> {
     return count;
   }
 
-//  @Override
-  G2048Move getRandomMove() {
+  @Override
+  public G2048Move getRandomMove() {
     Random random = ThreadLocalRandom.current();
     switch (state) {
       case NEW_GAME: case RANDOM:
@@ -133,32 +133,39 @@ public final class G2048State implements Position<G2048State, G2048Move> {
   }
 
   private void shiftTiles(G2048Move move) {
-    throw new UnsupportedOperationException();
-    // int startTile = move.startRow;
-    // for (int i = 0; i < 4; i++) {
-    //   int toTile = startTile;
-    //   int fromTile = startTile;
-    //   int lastTileValue = 0;
-    //
-    //   for (int j = 0; j < 4; j++) {
-    //     int value = board[fromTile];
-    //     if (value != 0) {
-    //       board[fromTile] = 0;
-    //       if (value == lastTileValue) {
-    //         board[toTile] = 2 * value;
-    //         lastTileValue = 0;
-    //       } else {
-    //         board[toTile] = value;
-    //         lastTileValue = value;
-    //       }
-    //       toTile += move.deltaTile;
-    //     }
-    //
-    //     fromTile += move.deltaTile;
-    //   }
-    //
-    //   startTile += move.deltaRow;
-    // }
+     int startTile = move.startRow;
+     for (int i = 0; i < 4; i++) {
+       int toTile = startTile;
+       int fromTile = startTile;
+       int lastTileValue = 0;
+
+       for (int j = 0; j < 4; j++) {
+         int value = board[fromTile];
+         if (value != 0) {
+           board[fromTile] = 0;
+           if (value == lastTileValue) {
+             board[toTile] = 2 * value;
+             lastTileValue = 0;
+           } else {
+             board[toTile] = value;
+             lastTileValue = value;
+           }
+           toTile += move.deltaTile;
+         }
+
+         fromTile += move.deltaTile;
+       }
+
+       startTile += move.deltaRow;
+     }
+  }
+
+  int get(int tile) {
+    return board[tile];
+  }
+
+  int get(String tileStr) {
+    return board[G2048.getInstance().board.parseTile(tileStr)]
   }
 
   public G2048Move parseMove(String moveStr) {
