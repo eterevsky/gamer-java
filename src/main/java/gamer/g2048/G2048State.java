@@ -20,7 +20,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
   }
 
   private int[] board = new int[16];
-  private int score = 0;
+  int score = 0;
   private State state = State.NEW_GAME;
 
   static class RandomSelector implements MoveSelector<G2048State, G2048Move> {
@@ -124,7 +124,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
         }
 
         shiftTiles(move);
-
+        state = State.RANDOM;
         break;
 
       default:
@@ -144,13 +144,14 @@ public final class G2048State implements Position<G2048State, G2048Move> {
          if (value != 0) {
            board[fromTile] = 0;
            if (value == lastTileValue) {
-             board[toTile] = value + 1;
+             board[toTile - move.deltaTile] = value + 1;
+             score += 1 << (value + 1);
              lastTileValue = 0;
            } else {
              board[toTile] = value;
              lastTileValue = value;
+             toTile += move.deltaTile;
            }
-           toTile += move.deltaTile;
          }
 
          fromTile += move.deltaTile;
