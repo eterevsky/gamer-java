@@ -10,9 +10,7 @@ import gamer.g2048.G2048;
 import gamer.g2048.Benchmark2048;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
-import gamer.players.BenchmarkUct;
-import gamer.players.MonteCarloUct;
-import gamer.players.RandomPlayer;
+import gamer.players.*;
 import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
 import gamer.tournament.Tournament;
@@ -87,9 +85,13 @@ class App {
 //    player2.setMaxWorkers(cores);
 //    player2.setSamplesBatch(4);
 //    player2.setSelector(game.getMoveSelector("neighbor"));
-    RandomPlayer<P, M> player1 = new RandomPlayer<>();
-    RandomPlayer<P, M> player2 = new RandomPlayer<>();
-    Match<P, M> match = new Match<>(startPosition, player1, player2);
+//    RandomPlayer<P, M> player1 = new RandomPlayer<>();
+//    RandomPlayer<P, M> player2 = new RandomPlayer<>();
+    NaiveMonteCarlo<P, M> player = new NaiveMonteCarlo<>();
+    player.setTimeout(moveTime * 1000);
+    player.setMaxWorkers(cores);
+    player.setSelector(game.getMoveSelector("random"));
+    Match<P, M> match = new Match<>(startPosition, player);
 
     System.out.println(match);
     GameRunner.playSingleGame(match, true);

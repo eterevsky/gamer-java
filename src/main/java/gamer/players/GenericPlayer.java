@@ -80,9 +80,13 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
       newSampler(root, finishTime, samplesLimit, samplesBatch, selector).run();
     }
 
-    boolean player = state.getPlayerBool();
+    int playerNum = state.getPlayer();
+    if (playerNum < 0 || playerNum > 1) {
+      throw new RuntimeException("Player called on random move.");
+    }
+    boolean player = (playerNum == 0);
     Node<P, M> bestNode = null;
-    double bestValue = player ? -2 : 2;
+    double bestValue = player ? -1000 : 1000;
     for (Node<P, M> node : root.getChildren()) {
       if (bestNode == null ||
           (player ? (node.getPayoff() > bestValue)

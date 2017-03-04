@@ -57,6 +57,10 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
 
   abstract protected boolean maybeInitChildren();
 
+  protected Node<P, M> getRandomChild() {
+    throw new RuntimeException("getRandomChild not implemented");
+  }
+
   final Node<P, M> getParent() {
     return parent;
   }
