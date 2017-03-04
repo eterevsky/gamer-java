@@ -19,3 +19,4 @@ build
 *.iws
 
 .zedstate
+.DS_Store

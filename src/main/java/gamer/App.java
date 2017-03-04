@@ -3,7 +3,9 @@ package gamer;
 import gamer.benchmark.BenchmarkSuite;
 import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
+import gamer.def.Game;
 import gamer.def.Move;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
@@ -32,62 +34,67 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 class App {
-  private static <P extends Position<P, M>, M extends Move> void addUctPlayer(
-      Tournament<P, M> tournament, int chThres, int samples) {
+  private static <G extends Game<P, M>, P extends Position<P, M>,
+                  M extends Move>
+  void addUctPlayer(G game, Tournament<P, M> tournament, int chThres,
+                    int samples, String selector) {
     MonteCarloUct<P, M> player = new MonteCarloUct<>();
     player.setChildrenThreshold(chThres);
-    player.setChildrenThreshold(samples);
+    player.setSamplesBatch(samples);
+    player.setSelector(game.getMoveSelector(selector));
+
     tournament.addPlayer(player);
   }
 
-  private static <P extends Position<P, M>, M extends Move> void addPlayers(
-      Tournament<P, M> tournament) {
-    addUctPlayer(tournament, 1, 1);
-    addUctPlayer(tournament, 2, 1);
-    addUctPlayer(tournament, 4, 1);
-    addUctPlayer(tournament, 2, 2);
-    addUctPlayer(tournament, 4, 2);
-    addUctPlayer(tournament, 4, 4);
-    addUctPlayer(tournament, 8, 4);
-    addUctPlayer(tournament, 8, 8);
-    addUctPlayer(tournament, 16, 8);
-    addUctPlayer(tournament, 16, 16);
-    addUctPlayer(tournament, 32, 16);
+  private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void addPlayers(
+      Tournament<P, M> tournament, G game) {
+    addUctPlayer(game, tournament, 4, 1, "neighbor");
+    addUctPlayer(game, tournament, 4, 4, "neighbor");
+    addUctPlayer(game, tournament, 8, 4, "neighbor");
+    addUctPlayer(game, tournament, 8, 8, "neighbor");
+    addUctPlayer(game, tournament, 16, 8, "neighbor");
+    addUctPlayer(game, tournament, 16, 16, "neighbor");
+    addUctPlayer(game, tournament, 32, 16, "neighbor");
 
-    tournament.addPlayer(new MonteCarloUcb<>());
-    tournament.addPlayer(new NaiveMonteCarlo<>());
-    tournament.addPlayer(new RandomPlayer<>());
+    addUctPlayer(game, tournament, 4, 4, "random");
+    addUctPlayer(game, tournament, 8, 4, "random");
+    addUctPlayer(game, tournament, 8, 8, "random");
+    addUctPlayer(game, tournament, 16, 8, "random");
+    addUctPlayer(game, tournament, 16, 16, "random");
+    addUctPlayer(game, tournament, 32, 16, "random");
   }
 
-  static <P extends Position<P, M>, M extends Move> void runTournament(
-      P startPosition) {
+  static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void runTournament(G game) {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
 
-    Tournament<P, M> tournament = new Tournament<>(startPosition, true);
+    Tournament<P, M> tournament = new Tournament<>(game.newGame(), false);
 
-    tournament.setTimeout(2000);
+    tournament.setTimeout(1000);
     tournament.setGameThreads(1);
     tournament.setThreadsPerPlayer(cores);
     tournament.setRounds(1);
 
-    addPlayers(tournament);
+    addPlayers(tournament, game);
 
     tournament.play();
   }
 
-  private static <P extends Position<P, M>, M extends Move> void
-      runGameFromPosition(P startPosition, long moveTime) {
+  private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move>
+      void runGame(G game, long moveTime) {
     int cores = Runtime.getRuntime().availableProcessors();
+    P startPosition = game.newGame();
 
     MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
-    player1.setSamplesBatch(16);
+    player1.setSamplesBatch(8);
+    player1.setSelector(game.getMoveSelector("neighbor"));
     MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
     player2.setTimeout(moveTime * 1000);
     player2.setMaxWorkers(cores);
-    player2.setSamplesBatch(8);
+    player2.setSamplesBatch(4);
+    player2.setSelector(game.getMoveSelector("neighbor"));
     Match<P, M> match = new Match<>(startPosition, player1, player2);
 
     System.out.println(match);
@@ -101,11 +108,13 @@ class App {
 
     switch (gameStr) {
       case "gomoku":
-        runGameFromPosition(Gomoku.getInstance().newGame(), moveTime);
+        Gomoku gomoku = Gomoku.getInstance(13);
+        runGame(gomoku, moveTime);
         break;
 
       case "chess":
-        runGameFromPosition(Chess.getInstance().newGame(), moveTime);
+        Chess chess = Chess.getInstance();
+        runGame(chess, moveTime);
         break;
 
       default:
@@ -198,7 +207,7 @@ class App {
     } else if (cl.hasOption("single_game")) {
       runSingleGame(cl);
     } else if (cl.hasOption("tournament")) {
-      runTournament(Gomoku.getInstance().newGame());
+      runTournament(Gomoku.getInstance());
     } else {
       throw new RuntimeException("Internal error.");
     }

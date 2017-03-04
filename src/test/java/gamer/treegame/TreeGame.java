@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Used mainly for unit tests which require games with very simple game trees.
  */
-public final class TreeGame implements Game {
+public final class TreeGame implements Game<TreeGameState, TreeGameMove> {
   final Node root;
 
   private TreeGame(Node root) {

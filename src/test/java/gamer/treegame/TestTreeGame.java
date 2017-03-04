@@ -25,7 +25,7 @@ public class TestTreeGame {
     assertFalse(state.getPlayerBool());
     assertEquals(1, state.getMoves().size());
 
-    state.playRandomMove(rng);
+    state.play(game.getRandomMoveSelector().select(state));
     assertFalse(state.isTerminal());
     assertTrue(state.getPlayerBool());
 

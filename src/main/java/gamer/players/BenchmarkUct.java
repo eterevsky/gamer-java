@@ -20,6 +20,7 @@ public class BenchmarkUct {
     player.setSamplesBatch(1);
     player.setFindExact(true);
     player.setMaxWorkers(cores);
+    player.setSelector(Chess.getInstance().getRandomMoveSelector());
 
     ChessMove move = null;
     for (int i = 0; i < reps; i++) {
@@ -37,6 +38,7 @@ public class BenchmarkUct {
     player.setTimeout(-1);
     player.setSamplesBatch(1);
     player.setFindExact(true);
+    player.setSelector(Chess.getInstance().getRandomMoveSelector());
 
     ChessMove move = null;
     for (int i = 0; i < reps; i++) {
@@ -57,6 +59,7 @@ public class BenchmarkUct {
     player.setSamplesBatch(1);
     player.setFindExact(true);
     player.setMaxWorkers(cores);
+    player.setSelector(Gomoku.getInstance().getRandomMoveSelector());
 
     GomokuMove move = null;
     for (int i = 0; i < reps; i++) {
@@ -74,6 +77,7 @@ public class BenchmarkUct {
     player.setTimeout(-1);
     player.setSamplesBatch(1);
     player.setFindExact(true);
+    player.setSelector(Gomoku.getInstance().getRandomMoveSelector());
 
     GomokuMove move = null;
     for (int i = 0; i < reps; i++) {

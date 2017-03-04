@@ -5,7 +5,7 @@ package gamer.def;
  * positions.
  */
 public interface Solver<P extends Position<P, M>, M extends Move> {
-  public static class Result<M extends Move> {
+  class Result<M extends Move> {
     public int payoff;
     public int moves;
     public M move;

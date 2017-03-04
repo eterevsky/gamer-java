@@ -1,7 +1,6 @@
 package gamer.gomoku;
 
 import gamer.def.GameException;
-import gamer.util.ConfidenceInterval;
 import org.junit.Test;
 
 import java.util.Random;
@@ -106,43 +105,6 @@ public class TestGomokuState {
     assertEquals(0, state.getPayoff(0));
   }
 
-  @Test(timeout = 100)
-  public void playRandomMoves() {
-    Gomoku gomoku = Gomoku.getInstance();
-    GomokuState state = gomoku.newGame();
-    Random random = new Random(1234567890L);
-
-    assertTrue(state.getPlayerBool());
-    int moves = 0;
-
-    while (!state.isTerminal()) {
-      state.playRandomMove(random);
-      moves++;
-    }
-
-    assertTrue(moves >= 9);
-    assertTrue(moves <= gomoku.getSize() * gomoku.getSize());
-  }
-
-  @Test(timeout = 50)
-  public void playRandomOnSmallBoard() {
-    Gomoku gomoku = Gomoku.getInstance(4);
-
-    Random random = new Random(1234567890L);
-    for (int igame = 0; igame < 10; igame++) {
-      GomokuState state = gomoku.newGame();
-      int moves = 0;
-      while (!state.isTerminal()) {
-        state.playRandomMove(random);
-        moves++;
-      }
-
-      assertEquals(16, moves);
-      assertTrue(state.isTerminal());
-      assertEquals(0, state.getPayoff(0));
-    }
-  }
-
   @Test
   public void cloneIndependent() {
     GomokuState state = Gomoku.getInstance(19).newGame();
@@ -159,33 +121,5 @@ public class TestGomokuState {
     stateClone.play("a3");
     assertEquals(2, state.get("a3"));
     assertEquals(1, stateClone.get("a3"));
-  }
-
-  // 11x11 win: 0.515376 ± 0.000112, loss: 0.484595 ± 0.000112
-  // 19x19 win: 0.50685 ± 0.00009
-  @Test
-  public void resultStatistics() {
-    int win = 0;
-    int total = 10000;
-
-    Random rng = new Random(1234567890L);
-
-    for (int i = 0; i < total; i++) {
-      GomokuState state = Gomoku.getInstance(19).newGame();
-      while (!state.isTerminal()) {
-        state.playRandomMove(rng);
-      }
-
-      int payoff = state.getPayoff(0);
-
-      if (payoff == 1) {
-        win++;
-      }
-    }
-
-    ConfidenceInterval.Interval interval = ConfidenceInterval.binomialWilson(
-        win, total - win);
-
-    assertTrue(Math.abs(interval.center - 0.50685) < 2 * interval.err + 0.0001);
   }
 }

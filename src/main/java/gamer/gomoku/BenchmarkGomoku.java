@@ -1,6 +1,7 @@
 package gamer.gomoku;
 
 import gamer.benchmark.Benchmark;
+import gamer.def.MoveSelector;
 import gamer.def.Position;
 
 import java.util.ArrayList;
@@ -19,8 +20,40 @@ public class BenchmarkGomoku {
   static final private int CORES = Runtime.getRuntime().availableProcessors();
 
   @Benchmark
-  public static int gomoku(int reps) {
-    return batch(ThreadLocalRandom.current(), reps);
+  public static int gomokuSingle(int reps) {
+    return batch(reps);
+  }
+
+  @Benchmark
+  public static int gomokuSingleSame(int nsamples) {
+    int sum = 0;
+    MoveSelector<GomokuState, GomokuMove> selector =
+        Gomoku.getInstance().getRandomMoveSelector();
+    GomokuState state = Gomoku.getInstance().newGame();
+    for (int isamples = 0; isamples < nsamples; isamples++) {
+      state.reset();
+      while (!state.isTerminal()) {
+        state.play(selector.select(state));
+      }
+      sum += state.getPayoff(0);
+    }
+    return sum;
+  }
+
+  @Benchmark
+  public static int gomokuNeighbors(int nsamples) {
+    int sum = 0;
+    MoveSelector<GomokuState, GomokuMove> selector =
+        Gomoku.getInstance().getRandomNeighborSelector();
+    for (int isamples = 0; isamples < nsamples; isamples++) {
+      GomokuState state = Gomoku.getInstance().newGame();
+      state.play(GomokuMove.of(19 * 19 / 2));
+      while (!state.isTerminal()) {
+        state.play(selector.select(state));
+      }
+      sum += state.getPayoff(0);
+    }
+    return sum;
   }
 
   @Benchmark
@@ -32,8 +65,7 @@ public class BenchmarkGomoku {
     for (int ithread = 0; ithread < CORES; ithread++) {
       int samplesToThread = samplesLeft / (CORES - ithread);
       samplesLeft -= samplesToThread;
-      futures.add(executor.submit(() ->
-          batch(ThreadLocalRandom.current(), samplesToThread)));
+      futures.add(executor.submit(() -> batch(samplesToThread)));
     }
 
     executor.shutdown();
@@ -45,6 +77,8 @@ public class BenchmarkGomoku {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();
     final AtomicInteger counter = new AtomicInteger();
+    final GomokuState.RandomSelector selector =
+        Gomoku.getInstance().getRandomMoveSelector();
 
     for (int ithread = 0; ithread < CORES; ithread++) {
       futures.add(executor.submit(() -> {
@@ -54,7 +88,7 @@ public class BenchmarkGomoku {
         while (counter.getAndIncrement() < reps) {
           GomokuState state = Gomoku.getInstance().newGame();
           while (!state.isTerminal()) {
-            state.playRandomMove(random);
+            state.play(selector.select(state));
           }
           s += state.getPayoff(0);
         }
@@ -72,6 +106,8 @@ public class BenchmarkGomoku {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();
     final WrappedInt counter = new WrappedInt();
+    final GomokuState.RandomSelector selector =
+        Gomoku.getInstance().getRandomMoveSelector();
 
     for (int ithread = 0; ithread < CORES; ithread++) {
       futures.add(executor.submit(() -> {
@@ -86,7 +122,7 @@ public class BenchmarkGomoku {
           }
           GomokuState state = Gomoku.getInstance().newGame();
           while (!state.isTerminal()) {
-            state.playRandomMove(random);
+            state.play(selector.select(state));
           }
           s += state.getPayoff(0);
         }
@@ -104,6 +140,8 @@ public class BenchmarkGomoku {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     GomokuState initialState = Gomoku.getInstance().newGame();
     int queueLen = CORES * 2;
+    final GomokuState.RandomSelector selector =
+        Gomoku.getInstance().getRandomMoveSelector();
 
     BlockingQueue<Job> jobsQueue = new LinkedBlockingQueue<>();
     BlockingQueue<Job> resultsQueue = new LinkedBlockingQueue<>();
@@ -118,7 +156,7 @@ public class BenchmarkGomoku {
               return;
             GomokuState state = job.state.clone();
             while (!state.isTerminal()) {
-              state.playRandomMove(random);
+              state.play(selector.select(state));
             }
             job.result = state.getPayoff(0);
             resultsQueue.put(job);
@@ -161,12 +199,14 @@ public class BenchmarkGomoku {
     return sum;
   }
 
-  private static int batch(Random random, int nsamples) {
+  private static int batch(int nsamples) {
     int sum = 0;
+    MoveSelector<GomokuState, GomokuMove> selector =
+        Gomoku.getInstance().getRandomMoveSelector();
     for (int isamples = 0; isamples < nsamples; isamples++) {
-      Position<?, GomokuMove> state = Gomoku.getInstance().newGame();
+      GomokuState state = Gomoku.getInstance().newGame();
       while (!state.isTerminal()) {
-        state.playRandomMove(random);
+        state.play(selector.select(state));
       }
       sum += state.getPayoff(0);
     }

@@ -1,7 +1,7 @@
 package gamer.def;
 
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The class describing a game position.
@@ -45,26 +45,19 @@ public interface Position<P extends Position<P, M>, M extends Move>
   int getPayoff(int player);
 
   /**
-   * Get the list of legal moves in the current position.
+   * Get the list of legal moves in the current position. Can be not implemented
+   * for some games, where the space of all moves is too large.
    */
   List<M> getMoves();
 
   /**
-   * Plays a single random move in the current position. If getMoves() always
-   * returns a set of moves, the default implementation of this method is
-   * enough.
+   * Get a random move.
+   *
+   * The default implementation is inefficient and relies on getMoves().
    */
-  default void playRandomMove(Random rng) {
-    if (isTerminal()) {
-      throw new TerminalPositionException("Terminal state: " + toString());
-    }
-    List<M> moves = getMoves();
-    if (moves == null) {
-      throw new UnsupportedOperationException(
-          "Moves are not listable. Need a dedicated implementation of " +
-          "playRandomMove().");
-    }
-    play(moves.get(rng.nextInt(moves.size())));
+  default M getRandomMove() {
+    List<M> all_moves = getMoves();
+    return all_moves.get(ThreadLocalRandom.current().nextInt(all_moves.size()));
   }
 
   /**

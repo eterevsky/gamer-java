@@ -85,4 +85,9 @@ public final class TreeGameState
     TreeGameState oState = (TreeGameState) o;
     return node.equals(oState.node);
   }
+
+  @Override
+  public int hashCode() {
+    return System.identityHashCode(game) ^ (239 * node.id);
+  }
 }

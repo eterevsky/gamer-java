@@ -3,8 +3,10 @@ package gamer.dominion;
 import gamer.def.Move;
 
 public final class DominionMove implements Move {
-  public static final DominionMove BUY_PHASE = new DominionMove("Start buy phase.");
-  public static final DominionMove CLEANUP = new DominionMove("Cleanup and end the turn.");
+  public static final DominionMove BUY_PHASE =
+			new DominionMove("Start buy phase.");
+  public static final DominionMove CLEANUP =
+			new DominionMove("Cleanup and end the turn.");
 
   private final String name;
   private final DominionCard card;

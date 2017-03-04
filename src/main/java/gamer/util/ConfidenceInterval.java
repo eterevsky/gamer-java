@@ -8,13 +8,12 @@ public class ConfidenceInterval {
    * http://en.wikipedia.org/wiki/Normal_distribution#Quantile_function
    */
   public static Interval binomialWilson(int success, int failure) {
-    double z = 3.891;
+    double z = 3.891;  // for 99.99%
 
     double n = success + failure;
-    double p = success / n;
-    double c = 1 / (1 + z*z / n);
-    double center = c * (p + z*z / (2*n));
-    double err = c * sqrt(p * (1 - p) / n + z * z / (4 * n * n));
+    double c = 1 / (n + z*z);
+    double center = c * (success + z*z / 2);
+    double err = c * z * sqrt((double)success * failure / n + z * z / 4);
 
     return new Interval(center, err);
   }

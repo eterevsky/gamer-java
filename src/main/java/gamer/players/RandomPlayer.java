@@ -14,11 +14,6 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
   private Random random = null;
 
   @Override
-  public void setRandom(Random random) {
-    this.random = random;
-  }
-
-  @Override
   public void setMaxWorkers(int maxWorkers) {}
 
   @Override
