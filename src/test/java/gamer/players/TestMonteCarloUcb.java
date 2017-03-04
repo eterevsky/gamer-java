@@ -54,7 +54,7 @@ public final class TestMonteCarloUcb {
     TreeGameState state = game.newGame();
     MonteCarloUcb<TreeGameState, TreeGameMove> player = new MonteCarloUcb<>();
     player.setTimeout(-1);
-    player.setMaxSamples(50L);
+    player.setMaxSamples(100L);
     player.setSamplesBatch(1);
     player.setSelector(TreeGameInstances.GAME3.getRandomMoveSelector());
 

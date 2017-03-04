@@ -27,7 +27,7 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
 
   @Override
   public String getReport() {
-    return "";
+    return "random move";
   }
 
   @Override

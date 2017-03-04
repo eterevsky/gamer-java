@@ -5,27 +5,17 @@ import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
 import gamer.def.Game;
 import gamer.def.Move;
-import gamer.def.MoveSelector;
 import gamer.def.Position;
+import gamer.g2048.G2048;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
 import gamer.players.BenchmarkUct;
-import gamer.players.MonteCarloUcb;
 import gamer.players.MonteCarloUct;
-import gamer.players.NaiveMonteCarlo;
 import gamer.players.RandomPlayer;
 import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
 import gamer.tournament.Tournament;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -64,7 +54,8 @@ class App {
     addUctPlayer(game, tournament, 32, 16, "random");
   }
 
-  static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void runTournament(G game) {
+  static <G extends Game<P, M>, P extends Position<P, M>, M extends Move>
+  void runTournament(G game) {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
 
@@ -85,16 +76,18 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
 
-    MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
-    player1.setTimeout(moveTime * 1000);
-    player1.setMaxWorkers(cores);
-    player1.setSamplesBatch(8);
-    player1.setSelector(game.getMoveSelector("neighbor"));
-    MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
-    player2.setTimeout(moveTime * 1000);
-    player2.setMaxWorkers(cores);
-    player2.setSamplesBatch(4);
-    player2.setSelector(game.getMoveSelector("neighbor"));
+//    MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
+//    player1.setTimeout(moveTime * 1000);
+//    player1.setMaxWorkers(cores);
+//    player1.setSamplesBatch(8);
+//    player1.setSelector(game.getMoveSelector("neighbor"));
+//    MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
+//    player2.setTimeout(moveTime * 1000);
+//    player2.setMaxWorkers(cores);
+//    player2.setSamplesBatch(4);
+//    player2.setSelector(game.getMoveSelector("neighbor"));
+    RandomPlayer<P, M> player1 = new RandomPlayer<>();
+    RandomPlayer<P, M> player2 = new RandomPlayer<>();
     Match<P, M> match = new Match<>(startPosition, player1, player2);
 
     System.out.println(match);
@@ -115,6 +108,11 @@ class App {
       case "chess":
         Chess chess = Chess.getInstance();
         runGame(chess, moveTime);
+        break;
+
+      case "2048":
+        G2048 g2048 = G2048.getInstance();
+        runGame(g2048, moveTime);
         break;
 
       default:

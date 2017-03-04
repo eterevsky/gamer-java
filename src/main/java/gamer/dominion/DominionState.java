@@ -89,8 +89,6 @@ public final class DominionState
   public List<DominionMove> getMoves() {
     List<DominionMove> moves = null;
 
-    System.err.format("phase: %s\n", phase);
-
     switch (phase) {
       case ACTION:
         moves = new ArrayList<>();

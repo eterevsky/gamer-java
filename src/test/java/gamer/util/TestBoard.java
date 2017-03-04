@@ -29,10 +29,10 @@ public class TestBoard {
     b[4] = 2;
     b[3] = 1;
 
-    assertEquals(" x o .\n x . .\n",
+    assertEquals(String.format(" x o .%n x . .%n"),
                  board.boardToString(b, false));
 
-    assertEquals(" 2 x o .\n 1 x . .\n   A B C\n",
+    assertEquals(String.format(" 2 x o .%n 1 x . .%n   A B C%n"),
                  board.boardToString(b, true));
   }
 }

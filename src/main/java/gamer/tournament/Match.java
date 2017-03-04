@@ -5,16 +5,23 @@ import gamer.def.Move;
 import gamer.def.Player;
 import gamer.def.Position;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class Match<P extends Position<P, M>, M extends Move> {
   public final P startPosition;
-  public final Player<P, M> player1;
-  public final Player<P, M> player2;
+  public final List<Player<P, M>> players = new ArrayList<>();
   public Integer result = null;
+
+  public Match(P position, Player<P, M> player) {
+    this.startPosition = position;
+    this.players.add(player);
+  }
 
   public Match(P position, Player<P, M> player1, Player<P, M> player2) {
     this.startPosition = position;
-    this.player1 = player1;
-    this.player2 = player2;
+    this.players.add(player1);
+    this.players.add(player2);
   }
 
   public void setPayoff(int payoff) {
@@ -23,23 +30,22 @@ public final class Match<P extends Position<P, M>, M extends Move> {
 
   @Override
   public String toString() {
+    List<String> names = new ArrayList<>();
+    for (Player<P, M> player : players) {
+      names.add(player.getName());
+    }
     if (result == null) {
-      return String.format("%s  v  %s",
-                           player1.getName(),
-                           player2.getName());
+      return String.join("  v  ", names);
     }
 
-    char result1, result2;
-    switch (result) {
-      case 1: result1 = '1'; result2 = '0'; break;
-      case -1: result1 = '0'; result2 = '1'; break;
-      case 0: result1 = '½'; result2 = '½'; break;
+    switch (players.size()) {
+      case 1:
+        return String.format("%s (%d)", players.get(0).getName(), result);
+      case 2:
+        return String.format("%s (%d)  v  %s (%d)", players.get(0).getName(),
+            result, players.get(1).getName(), -result);
       default:
-        throw new RuntimeException("shouldn't happen");
+        throw new RuntimeException("Can't handle this number of players.");
     }
-
-    return String.format("%s (%c)  v  %s (%c)",
-                         player1.getName(), result1,
-                         player2.getName(), result2);
   }
 }

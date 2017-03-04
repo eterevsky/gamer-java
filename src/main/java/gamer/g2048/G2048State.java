@@ -19,7 +19,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
     FINISHED
   }
 
-  private int[] board = new int[16];
+  private byte[] board = new byte[16];
   int score = 0;
   private State state = State.NEW_GAME;
 
@@ -66,8 +66,8 @@ public final class G2048State implements Position<G2048State, G2048Move> {
     List<G2048Move> moves = new ArrayList<>();
     for (int i = 0; i < 16; i++) {
       if (board[i] == 0) {
+        moves.add(G2048Move.of(i, 1));
         moves.add(G2048Move.of(i, 2));
-        moves.add(G2048Move.of(i, 4));
       }
     }
 
@@ -89,9 +89,12 @@ public final class G2048State implements Position<G2048State, G2048Move> {
     Random random = ThreadLocalRandom.current();
     switch (state) {
       case NEW_GAME: case RANDOM:
-        int rand = random.nextInt(10 * emptyTiles());
-        int tile = rand / 10;
-        int value = rand % 10 == 0 ? 2 : 1;
+        int tile, value;
+        do {
+          int rand = random.nextInt(32);
+          tile = rand / 2;
+          value = rand % 2 + 1;
+        } while (board[tile] != 0);
         return G2048Move.of(tile, value);
       case PLAYER:
         return G2048Move.PLAYER_MOVES.get(random.nextInt(4));
@@ -114,6 +117,10 @@ public final class G2048State implements Position<G2048State, G2048Move> {
         if (!move.isRandom()) {
           throw new IllegalMoveException(this, move, "Expecting random move.");
         }
+        if (board[move.tile] != 0) {
+          throw new IllegalMoveException(
+              this, move, "Random move on non-empty tile.");
+        }
         board[move.tile] = move.value;
         state = State.PLAYER;
         break;
@@ -124,7 +131,13 @@ public final class G2048State implements Position<G2048State, G2048Move> {
         }
 
         shiftTiles(move);
-        state = State.RANDOM;
+        state = State.FINISHED;
+        for (int i = 0; i < 16; i++) {
+          if (board[i] == 0) {
+            state = State.RANDOM;
+            break;
+          }
+        }
         break;
 
       default:
@@ -140,11 +153,11 @@ public final class G2048State implements Position<G2048State, G2048Move> {
        int lastTileValue = 0;
 
        for (int j = 0; j < 4; j++) {
-         int value = board[fromTile];
+         byte value = board[fromTile];
          if (value != 0) {
            board[fromTile] = 0;
            if (value == lastTileValue) {
-             board[toTile - move.deltaTile] = value + 1;
+             board[toTile - move.deltaTile] = (byte)(value + 1);
              score += 1 << (value + 1);
              lastTileValue = 0;
            } else {
@@ -184,6 +197,6 @@ public final class G2048State implements Position<G2048State, G2048Move> {
 
   @Override
   public String toString() {
-    return "";
+    return G2048.BOARD.boardToString(board, true);
   }
 }

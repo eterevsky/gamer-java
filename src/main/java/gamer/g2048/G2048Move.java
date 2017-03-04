@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class G2048Move implements Move {
-  static private final List<G2048Move> RANDOM2 = genRandom(1);
-  static private final List<G2048Move> RANDOM4 = genRandom(2);
+  static private final List<G2048Move> RANDOM2 = genRandom((byte)1);
+  static private final List<G2048Move> RANDOM4 = genRandom((byte)2);
 
   static final G2048Move RIGHT = new G2048Move("right", 3, 4, -1);
   static final G2048Move UP = new G2048Move("up", 12, 1, -4);
@@ -22,7 +22,7 @@ public class G2048Move implements Move {
 
   // For random moves.
   int tile;
-  int value;
+  byte value;
 
   // For player moves.
   String directionStr;
@@ -61,7 +61,7 @@ public class G2048Move implements Move {
     return G2048Move.of(tile, value);
   }
 
-  private G2048Move(int tile, int value) {
+  private G2048Move(int tile, byte value) {
     this.random = true;
     this.tile = tile;
     this.value = value;
@@ -79,7 +79,7 @@ public class G2048Move implements Move {
     return random;
   }
 
-  static List<G2048Move> genRandom(int value) {
+  static List<G2048Move> genRandom(byte value) {
     ArrayList<G2048Move> moves = new ArrayList<>();
     for (int i = 0; i < 16; i++) {
       moves.add(new G2048Move(i, value));
@@ -96,6 +96,15 @@ public class G2048Move implements Move {
       throw new IllegalArgumentException(
           "Only random moves with value = 2 or 4 are allowed.");
 
+    }
+  }
+
+  @Override
+  public String toString() {
+    if (random) {
+      return String.format("%s = %d", G2048.BOARD.tileToString(tile), 1 << value);
+    } else {
+      return directionStr;
     }
   }
 }

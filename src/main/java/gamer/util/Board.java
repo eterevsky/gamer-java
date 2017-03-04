@@ -100,7 +100,7 @@ public class Board {
         }
       }
 
-      builder.append('\n');
+      builder.append(System.lineSeparator());
     }
 
     if (printCoordinates) {
@@ -116,7 +116,7 @@ public class Board {
           builder.append(' ');
         }
       }
-      builder.append('\n');
+      builder.append(System.lineSeparator());
     }
 
     return builder.toString();

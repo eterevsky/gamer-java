@@ -113,8 +113,8 @@ public final class Tournament<P extends Position<P, M>, M extends Move> {
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
-      ComputerPlayer<P, M> p1 = (ComputerPlayer<P, M>)match.player1;
-      ComputerPlayer<P, M> p2 = (ComputerPlayer<P, M>)match.player2;
+      ComputerPlayer<P, M> p1 = (ComputerPlayer<P, M>)match.players.get(0);
+      ComputerPlayer<P, M> p2 = (ComputerPlayer<P, M>)match.players.get(1);
       System.out.format("%s  (%d/%d)\n", match, nresults, ngames);
       results.get(p1).put(p2, results.get(p1).get(p2) + match.result);
       results.get(p2).put(p1, results.get(p2).get(p1) - match.result);
