@@ -54,9 +54,9 @@ class App {
     addUctPlayer(tournament, 16, 16);
     addUctPlayer(tournament, 32, 16);
 
-    tournament.addPlayer(new MonteCarloUcb<P, M>());
-    tournament.addPlayer(new NaiveMonteCarlo<P, M>());
-    tournament.addPlayer(new RandomPlayer<P, M>());
+    tournament.addPlayer(new MonteCarloUcb<>());
+    tournament.addPlayer(new NaiveMonteCarlo<>());
+    tournament.addPlayer(new RandomPlayer<>());
   }
 
   static <P extends Position<P, M>, M extends Move> void runTournament(

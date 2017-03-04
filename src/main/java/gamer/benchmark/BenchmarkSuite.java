@@ -43,11 +43,14 @@ public final class BenchmarkSuite {
   }
 
   public void run() {
-    System.out.format(
-        "Running benchmarks.\nCores: %d\nJVM: %s %s\nTime limit: %d s\n",
-        Runtime.getRuntime().availableProcessors(),
-        System.getProperty("java.vm.name"), System.getProperty("java.version"),
-        timeLimitSeconds);
+    System.out.println("Running benchmarks.");
+    System.out.format("Cores: %d", Runtime.getRuntime().availableProcessors());
+    System.out.println();
+    System.out.format("JVM: %s %s", System.getProperty("java.vm.name"), System.getProperty("java" +
+        ".version"));
+    System.out.println();
+    System.out.format("Time limit: %d s", timeLimitSeconds);
+    System.out.println();
     for (Class<?> c : classes) {
       for (Method m : c.getDeclaredMethods()) {
         if (m.getAnnotation(Benchmark.class) != null) {
@@ -156,15 +159,17 @@ public final class BenchmarkSuite {
     }
 
     if (stats.interval == stats.mean) {
-      System.out.format("%-50s %.1f±?\n", fullName, stats.mean * scale);
+      System.out.format("%-50s %.1f±?", fullName, stats.mean * scale);
+      System.out.println();
     } else {
       System.out.format(
-          "%-50s %.1f±%.1f %s (%.1f%%)\n",
+          "%-50s %.1f±%.1f %s (%.1f%%)",
           fullName,
           stats.mean * scale,
           stats.interval * scale,
           unit,
           stats.interval / stats.mean * 100);
+      System.out.println();
     }
   }
 }
