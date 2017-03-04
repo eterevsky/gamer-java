@@ -7,6 +7,7 @@ import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 import gamer.g2048.G2048;
+import gamer.g2048.Benchmark2048;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
 import gamer.players.BenchmarkUct;
@@ -130,6 +131,7 @@ class App {
           Double.parseDouble(cl.getOptionValue("benchmark_precision")));
     }
     suite.add(BenchmarkSuite.class);
+    suite.add(Benchmark2048.class);
     suite.add(BenchmarkChess.class);
     suite.add(BenchmarkGomoku.class);
     suite.add(BenchmarkUct.class);
