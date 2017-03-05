@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class NaiveMonteCarlo<P extends Position<P, M>, M extends Move>
+public class PureMonteCarlo<P extends Position<P, M>, M extends Move>
     extends GenericPlayer<P, M> {
 
   private static class NaiveNode<P extends Position<P, M>, M extends Move>

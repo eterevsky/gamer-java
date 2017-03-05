@@ -87,7 +87,7 @@ class App {
 //    player2.setSelector(game.getMoveSelector("neighbor"));
 //    RandomPlayer<P, M> player1 = new RandomPlayer<>();
 //    RandomPlayer<P, M> player2 = new RandomPlayer<>();
-    NaiveMonteCarlo<P, M> player = new NaiveMonteCarlo<>();
+    PureMonteCarlo<P, M> player = new PureMonteCarlo<>();
     player.setTimeout(moveTime * 1000);
     player.setMaxWorkers(cores);
     player.setSelector(game.getMoveSelector("random"));
