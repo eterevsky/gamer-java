@@ -16,7 +16,7 @@ final class LeafNode<P extends Position<P, M>, M extends Move>
   }
 
   @Override
-  public boolean maybeInitChildren() {
+  public boolean maybeInitChildren(P state) {
     return false;
   }
 }

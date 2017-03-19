@@ -54,7 +54,11 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
 
   abstract protected Node<P, M> selectChild();
 
-  abstract protected boolean maybeInitChildren();
+  abstract protected boolean maybeInitChildren(P state);
+
+  protected int getPlayer() {
+    return player;
+  }
 
   protected Node<P, M> getRandomChild() {
     throw new RuntimeException("getRandomChild not implemented");
@@ -93,7 +97,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return totalSamples;
   }
 
-  final Node<P, M> selectChildOrAddPending(int nsamples) {
+  final Node<P, M> selectChildOrAddPending(P state, int nsamples) {
     boolean learnedExact = false;
     boolean knowExactLocal = false;
 
@@ -101,7 +105,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       if (!knowExact) {
         pendingSamples += nsamples;
         learnedExact = children == null &&
-                       maybeInitChildren() &&
+                       maybeInitChildren(state) &&
                        context.propagateExact &&
                        checkChildrenForExact();
       }
@@ -144,24 +148,12 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return payoff + Math.sqrt(parentSamplesLog / totalSamples);
   }
 
-  final Node<P, M> getChildByMoveForTest(M move) {
-    if (children == null) {
-      throw new RuntimeException(
-          "Requested children from a node without children.");
-    }
-    for (Node<P, M> child : children) {
-      if (child.move.equals(move))
-        return child;
-    }
-    return null;
-  }
-
   @Override
   public final String toString() {
     return toString(0);
   }
 
-  private String toString(int indent) {
+  synchronized private String toString(int indent) {
     StringBuilder builder = new StringBuilder();
     builder.append('\n');
     for (int i = 0; i < indent; i++) {
@@ -210,7 +202,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   }
 
   private boolean checkChildrenForExact() {
-    if (player == -1) {
+    if (player < 0) {
       return false;
     }
 
@@ -240,7 +232,8 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     }
 
     @Override
-    protected boolean maybeInitChildren() {
+    @SuppressWarnings("rawtypes")
+    protected boolean maybeInitChildren(Position state) {
       throw new RuntimeException("shouldn't be called");
     }
   }

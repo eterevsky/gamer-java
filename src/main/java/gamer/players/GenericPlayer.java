@@ -64,7 +64,7 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
       List<Future<?>> tasks = new ArrayList<>();
       for (int i = 0; i < workers; i++) {
         tasks.add(executor.submit(
-            newSampler(root, finishTime, samplesLimit, samplesBatch,
+            newSampler(root, state, finishTime, samplesLimit, samplesBatch,
                        selector)));
       }
 
@@ -77,7 +77,8 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
       }
       executor.shutdown();
     } else {
-      newSampler(root, finishTime, samplesLimit, samplesBatch, selector).run();
+      newSampler(root, state, finishTime, samplesLimit, samplesBatch, selector)
+          .run();
     }
 
     int playerNum = state.getPlayer();
@@ -145,10 +146,11 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
   abstract protected Node<P, M> getRoot(P state);
 
   protected Sampler<P, M> newSampler(
-      Node<P, M> root, long finishTime, long samplesLimit, int samplesBatch,
+      Node<P, M> root, P state, long finishTime, long samplesLimit, int
+      samplesBatch,
       MoveSelector<P, M> selector) {
     Sampler<P, M> sampler = new Sampler<>(
-        root, finishTime, samplesLimit, samplesBatch, selector);
+        root, state, finishTime, samplesLimit, samplesBatch, selector);
     if (solver != null)
       sampler.setSolver(solver);
     return sampler;

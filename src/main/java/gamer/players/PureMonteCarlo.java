@@ -28,11 +28,11 @@ public class PureMonteCarlo<P extends Position<P, M>, M extends Move>
     }
 
     @Override
-    public boolean maybeInitChildren() {
-      List<M> moves = getState().getMoves();
+    public boolean maybeInitChildren(P state) {
+      List<M> moves = state.getMoves();
       children = new ArrayList<>(moves.size());
       for (M move : moves) {
-        P newState = getState().clone();
+        P newState = state.clone();
         newState.play(move);
         children.add(new LeafNode<>(this, newState, move, context));
       }
