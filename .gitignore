@@ -1,6 +1,3 @@
-*.class
-*.jar
-.sconsign.dblite
 java.hprof.txt
 target
 
