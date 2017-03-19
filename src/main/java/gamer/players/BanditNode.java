@@ -17,9 +17,8 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
 
     Node<P, M> bestChild = null;
     double bestChildPrio = 0;
-    int player = getState().getPlayer();
 
-    if (player < 0) {
+    if (getPlayer() < 0) {
       return getRandomChild();
     }
 
@@ -27,7 +26,8 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
       if (child.getTotalSamples() == 0) {
         return child;
       }
-      double priority = child.getUcbPriority(totalSamplesLog, player == 0);
+      double priority = child.getUcbPriority(totalSamplesLog,
+                                             getPlayer() == 0);
 
       if (bestChild == null || priority > bestChildPrio) {
         bestChild = child;

@@ -15,7 +15,6 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   static final DummyNode NO_CHILDREN = new DummyNode();
 
   protected final NodeContext<P, M> context;
-  private final P state;
   private final M move;
   private final Node<P, M> parent;
   protected List<Node<P, M>> children = null;
@@ -24,9 +23,9 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   private double payoff;
   private int totalSamples = 0;
   private int pendingSamples = 0;
+  private int player = 0;
 
   private Node() {
-    state = null;
     move = null;
     parent = null;
     context = null;
@@ -35,8 +34,8 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   Node(Node<P, M> parent, P state, M move, NodeContext<P, M> context) {
     this.context = context;
     this.parent = parent;
-    this.state = state;
     this.move = move;
+    this.player = state.getPlayer();
 
     if (state != null) {
       if (state.isTerminal()) {
@@ -55,7 +54,11 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
 
   abstract protected Node<P, M> selectChild();
 
-  abstract protected boolean maybeInitChildren();
+  abstract protected boolean maybeInitChildren(P state);
+
+  protected int getPlayer() {
+    return player;
+  }
 
   protected Node<P, M> getRandomChild() {
     throw new RuntimeException("getRandomChild not implemented");
@@ -63,10 +66,6 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
 
   final Node<P, M> getParent() {
     return parent;
-  }
-
-  final P getState() {
-    return state;
   }
 
   final M getMove() {
@@ -98,7 +97,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return totalSamples;
   }
 
-  final Node<P, M> selectChildOrAddPending(int nsamples) {
+  final Node<P, M> selectChildOrAddPending(P state, int nsamples) {
     boolean learnedExact = false;
     boolean knowExactLocal = false;
 
@@ -106,7 +105,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       if (!knowExact) {
         pendingSamples += nsamples;
         learnedExact = children == null &&
-                       maybeInitChildren() &&
+                       maybeInitChildren(state) &&
                        context.propagateExact &&
                        checkChildrenForExact();
       }
@@ -149,24 +148,12 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return payoff + Math.sqrt(parentSamplesLog / totalSamples);
   }
 
-  final Node<P, M> getChildByPositionForTest(P position) {
-    if (children == null) {
-      throw new RuntimeException(
-          "Requested children from a node without children.");
-    }
-    for (Node<P, M> child : children) {
-      if (child.state.equals(position))
-        return child;
-    }
-    return null;
-  }
-
   @Override
   public final String toString() {
     return toString(0);
   }
 
-  private String toString(int indent) {
+  synchronized private String toString(int indent) {
     StringBuilder builder = new StringBuilder();
     builder.append('\n');
     for (int i = 0; i < indent; i++) {
@@ -215,6 +202,10 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   }
 
   private boolean checkChildrenForExact() {
+    if (player < 0) {
+      return false;
+    }
+
     double lo = 1E10;
     double hi = -1E10;
 
@@ -228,7 +219,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
         hi = v;
     }
 
-    payoff = PAYOFF_SCALE_FACTOR * (state.getPlayerBool() ? hi : lo);
+    payoff = PAYOFF_SCALE_FACTOR * (player == 0 ? hi : lo);
     knowExact = true;
     return true;
   }
@@ -241,7 +232,8 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     }
 
     @Override
-    protected boolean maybeInitChildren() {
+    @SuppressWarnings("rawtypes")
+    protected boolean maybeInitChildren(Position state) {
       throw new RuntimeException("shouldn't be called");
     }
   }

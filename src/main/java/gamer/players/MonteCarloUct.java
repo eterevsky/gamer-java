@@ -17,14 +17,14 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
     }
 
     @Override
-    public boolean maybeInitChildren() {
+    public boolean maybeInitChildren(P state) {
       if (getTotalSamples() < context.childrenThreshold)
         return false;
 
-      List<M> moves = getState().getMoves();
+      List<M> moves = state.getMoves();
       children = new ArrayList<>(moves.size());
       for (M move : moves) {
-        P newState = getState().clone();
+        P newState = state.clone();
         newState.play(move);
         children.add(new UctNode<>(this, newState, move, context));
       }
