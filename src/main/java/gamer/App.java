@@ -75,23 +75,24 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
 
-//    MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
-//    player1.setTimeout(moveTime * 1000);
-//    player1.setMaxWorkers(cores);
-//    player1.setSamplesBatch(8);
-//    player1.setSelector(game.getMoveSelector("neighbor"));
-//    MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
-//    player2.setTimeout(moveTime * 1000);
-//    player2.setMaxWorkers(cores);
-//    player2.setSamplesBatch(4);
-//    player2.setSelector(game.getMoveSelector("neighbor"));
-//    RandomPlayer<P, M> player1 = new RandomPlayer<>();
-//    RandomPlayer<P, M> player2 = new RandomPlayer<>();
-    PureMonteCarlo<P, M> player = new PureMonteCarlo<>();
-    player.setTimeout(moveTime * 1000);
-    player.setMaxWorkers(cores);
-    player.setSelector(game.getMoveSelector("random"));
-    Match<P, M> match = new Match<>(startPosition, player);
+    MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
+    player1.setTimeout(moveTime * 1000);
+    player1.setMaxWorkers(cores);
+    player1.setSamplesBatch(8);
+    player1.setSelector(game.getMoveSelector("random"));
+
+    Match<P, M> match;
+
+    if (game.getPlayersCount() == 1) {
+      match = new Match<>(startPosition, player1);
+    } else {
+      MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
+      player2.setTimeout(moveTime * 1000);
+      player2.setMaxWorkers(cores);
+      player2.setSamplesBatch(4);
+      player2.setSelector(game.getMoveSelector("random"));
+      match = new Match<>(startPosition, player1, player2);
+    }
 
     System.out.println(match);
     GameRunner.playSingleGame(match, true);
@@ -104,7 +105,7 @@ class App {
 
     switch (gameStr) {
       case "gomoku":
-        Gomoku gomoku = Gomoku.getInstance(13);
+        Gomoku gomoku = Gomoku.getInstance(19);
         runGame(gomoku, moveTime);
         break;
 
@@ -155,7 +156,7 @@ class App {
     options.addOption(
         "benchmark_time_limit", true,
         "Time limit in seconds for a single benchmark. (Default: 30)");
-    options.addOption("game", true, "Game to played. (Default: gomoku)");
+    options.addOption("game", true, "Game to be played. (Default: gomoku)");
     options.addOption(
         "move_time", true, "Time per move in seconds. (Default: 15)");
     options.addOption(

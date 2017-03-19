@@ -200,3 +200,23 @@ BenchmarkGomoku.gomoku100kBatches                  145.6±7.3 ms (5.0%)
 BenchmarkGomoku.gomoku100kSyncCounter              134.4±6.7 ms (5.0%)
 BenchmarkUct.uctGomoku100kSamplesSingle            1672.3±109.9 ms (6.6%)
 BenchmarkUct.uctGomoku100kSamplesMulti             717.7±111.0 ms (15.5%)
+
+
+gamer 0.1-85-ga1a28e0
+Running benchmarks.
+Cores: 8
+JVM: Java HotSpot(TM) 64-Bit Server VM 1.8.0_112
+Time limit: 30 s
+BenchmarkSuite.testBenchmark                          2.7±  0.1 us ( 2.5%)
+Benchmark2048.g2048                                   6.0±  0.2  us ( 3.0%)
+BenchmarkChess.chess1                               690.4± 32.8  us ( 4.8%)
+BenchmarkChess.perftInitial3                        410.9± 13.6 us ( 3.3%)
+BenchmarkGomoku.gomokuBlockingQueue                1979.2± 98.0 ns ( 5.0%)
+BenchmarkGomoku.gomokuAtomicCounter                1348.7± 66.1  ns ( 4.9%)
+BenchmarkGomoku.gomokuSyncCounter                  1363.4± 62.6 ns ( 4.6%)
+BenchmarkGomoku.gomokuBatches                      1404.8± 92.2 ns ( 6.6%)
+BenchmarkGomoku.gomokuNeighbors                      12.0±   0.4 us ( 3.0%)
+BenchmarkGomoku.gomokuSingleSame                      7.1±  0.3  us ( 4.6%)
+BenchmarkGomoku.gomokuSingle                          7.2±  0.1 us ( 1.5%)
+BenchmarkUct.uctGomoku100kSamplesMulti              258.4± 16.8 ms ( 6.5%)
+BenchmarkUct.uctGomoku100kSamplesSingle            1376.5±  64.8 ms ( 4.7%)
