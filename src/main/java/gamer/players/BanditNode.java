@@ -19,6 +19,7 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
     double bestChildPrio = 0;
 
     if (getPlayer() < 0) {
+      assert !knowExact();
       return getRandomChild();
     }
 

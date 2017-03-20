@@ -1,20 +1,20 @@
 package gamer.players;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
 import gamer.treegame.TreeGameInstances;
 import gamer.treegame.TreeGameMove;
 import gamer.treegame.TreeGameState;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public final class TestMonteCarloUct {
 
   @Test(timeout=100)
   public void play0() {
     TreeGameState state = TreeGameInstances.GAME0.newGame();
-    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    MonteCarloUct<TreeGameState, TreeGameMove> player =
+        new MonteCarloUct<>(TreeGameInstances.GAME0);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -27,7 +27,7 @@ public final class TestMonteCarloUct {
   @Test(timeout=100)
   public void play1() {
     TreeGameState state = TreeGameInstances.GAME1.newGame();
-    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>(TreeGameInstances.GAME1);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -44,7 +44,7 @@ public final class TestMonteCarloUct {
   @Test(timeout=500)
   public void play2() {
     TreeGameState state = TreeGameInstances.GAME2.newGame();
-    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>(TreeGameInstances.GAME2);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -64,7 +64,7 @@ public final class TestMonteCarloUct {
   @Test(timeout=100)
   public void play2player2() {
     TreeGameState state = TreeGameInstances.GAME2.newGame();
-    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>(TreeGameInstances.GAME2);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -78,7 +78,7 @@ public final class TestMonteCarloUct {
   @Test(timeout=100)
   public void play3() {
     TreeGameState state = TreeGameInstances.GAME3.newGame();
-    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>(TreeGameInstances.GAME3);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -95,9 +95,9 @@ public final class TestMonteCarloUct {
   @Test(timeout=500)
   public void play4() {
     TreeGameState state = TreeGameInstances.GAME4.newGame();
-    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>();
+    MonteCarloUct<TreeGameState, TreeGameMove> player = new MonteCarloUct<>(TreeGameInstances.GAME4);
     player.setTimeout(-1);
-    player.setMaxSamples(100L);
+    player.setMaxSamples(1000L);
     player.setSamplesBatch(1);
     player.setSelector(TreeGameInstances.GAME4.getRandomMoveSelector());
 

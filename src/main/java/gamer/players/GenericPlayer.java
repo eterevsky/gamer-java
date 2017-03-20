@@ -103,10 +103,9 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     }
 
     report = String.format(
-        "%s : %f over %d (%d)%n%s%n",
+        "%s%n%n%s%n",
         state.moveToString(bestNode.getMove()),
-        bestNode.getPayoff(), bestNode.getSamples(), root.getSamples(),
-        root.toString());
+        root.toStringNested(state, 10));
 
     return bestNode.getMove();
   }

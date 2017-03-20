@@ -79,7 +79,7 @@ class App {
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(1);
-    player1.setSelector(game.getMoveSelector("random"));
+    player1.setSelector(game.getMoveSelector("neighbor"));
 
     Match<P, M> match;
 
@@ -90,7 +90,7 @@ class App {
       player2.setTimeout(moveTime * 1000);
       player2.setMaxWorkers(cores);
       player2.setSamplesBatch(4);
-      player2.setSelector(game.getMoveSelector("random"));
+      player2.setSelector(game.getMoveSelector("neighbor"));
       match = new Match<>(startPosition, player1, player2);
     }
 

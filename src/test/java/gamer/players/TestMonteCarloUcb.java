@@ -18,7 +18,8 @@ public final class TestMonteCarloUcb {
     TreeGame game = TreeGameInstances.GAME0;
 
     TreeGameState state = game.newGame();
-    MonteCarloUcb<TreeGameState, TreeGameMove> player = new MonteCarloUcb<>();
+    MonteCarloUcb<TreeGameState, TreeGameMove> player =
+        new MonteCarloUcb<>(game);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -33,7 +34,8 @@ public final class TestMonteCarloUcb {
     TreeGame game = TreeGameInstances.GAME1;
 
     TreeGameState state = game.newGame();
-    MonteCarloUcb<TreeGameState, TreeGameMove> player = new MonteCarloUcb<>();
+    MonteCarloUcb<TreeGameState, TreeGameMove> player =
+        new MonteCarloUcb<>(game);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -52,7 +54,8 @@ public final class TestMonteCarloUcb {
     TreeGame game = TreeGameInstances.GAME3;
 
     TreeGameState state = game.newGame();
-    MonteCarloUcb<TreeGameState, TreeGameMove> player = new MonteCarloUcb<>();
+    MonteCarloUcb<TreeGameState, TreeGameMove> player =
+        new MonteCarloUcb<>(game);
     player.setTimeout(-1);
     player.setMaxSamples(100L);
     player.setSamplesBatch(1);

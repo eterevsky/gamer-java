@@ -1,12 +1,17 @@
 package gamer.players;
 
-import static gamer.players.Sampler.PAYOFF_SCALE_FACTOR;
 import gamer.def.Move;
 import gamer.def.Position;
 import gamer.def.Solver;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
+
+import static gamer.players.Sampler.PAYOFF_SCALE_FACTOR;
 
 abstract class Node<P extends Position<P, M>, M extends Move> {
   @SuppressWarnings("rawtypes")
@@ -23,7 +28,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   private double payoff;
   private int totalSamples = 0;
   private int pendingSamples = 0;
-  private int player = 0;
+  private int player = -1;
 
   private Node() {
     move = null;
@@ -36,19 +41,22 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     this.parent = parent;
     this.move = move;
 
-    if (state != null) {
-      if (state.isTerminal()) {
-        this.player = -1;
-        this.payoff = state.getPayoff(0);
+    assert state != null;
+
+    if (state.isTerminal()) {
+      this.player = -1;
+      this.payoff = state.getPayoff(0);
+      this.knowExact = true;
+    } else {
+      this.player = state.getPlayer();
+    }
+
+    if (!knowExact && context.solver != null) {
+      Solver.Result<M> result = context.solver.solve(state);
+      if (result != null) {
+        this.payoff =
+            result.payoff * Math.pow(PAYOFF_SCALE_FACTOR, result.moves);
         this.knowExact = true;
-      } else if (context.solver != null) {
-        this.player = state.getPlayer();
-        Solver.Result<M> result = context.solver.solve(state);
-        if (result != null) {
-          this.payoff =
-              result.payoff * Math.pow(PAYOFF_SCALE_FACTOR, result.moves);
-          this.knowExact = true;
-        }
       }
     }
   }
@@ -152,27 +160,79 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
 
   @Override
   public final String toString() {
-    return toString(0);
+    return toString(null, 0, context.game.getMinPayoff());
   }
 
-  synchronized private String toString(int indent) {
+  synchronized final String toStringNested(P state, int nnodes) {
+    int samplesLo = 0;
+    int samplesHi = getTotalSamples();
+
+    while (samplesHi - samplesLo > 1) {
+      int samplesMid = (samplesHi + samplesLo) / 2;
+      int nodesAboveThreshold = 0;
+
+      Queue<Node<P, M>> queue = new ArrayDeque<>();
+      queue.add(this);
+
+      while (nodesAboveThreshold <= nnodes) {
+        Node<P, M> node = queue.poll();
+        if (node == null) {
+          break;
+        }
+        if (node.getTotalSamples() < samplesMid) {
+          continue;
+        }
+        nodesAboveThreshold++;
+        if (node.children != null) {
+          for (Node<P, M> child : node.children) {
+            queue.add(child);
+          }
+        }
+      }
+
+      if (nodesAboveThreshold >= nnodes) {
+        samplesLo = samplesMid;
+      }
+      if (nodesAboveThreshold <= nnodes) {
+        samplesHi = samplesMid;
+      }
+    }
+
+    return toString(state, 0, samplesHi);
+  }
+
+  synchronized private String toString(P state, int indent, double minSamples) {
     StringBuilder builder = new StringBuilder();
     builder.append('\n');
     for (int i = 0; i < indent; i++) {
       builder.append(' ');
     }
-    if (move != null) {
-      builder.append(move.toString());
+    if (move != null && state != null) {
+      builder.append(state.moveToString(move));
     } else {
       builder.append("root");
     }
     builder.append(String.format(
-        " %s%.3f %d+%d samples",
-        knowExact() ? "=" : "", getPayoff(),
-        totalSamples - pendingSamples, pendingSamples));
+        " %s%.3f %d", knowExact() ? "=" : "", getPayoff(),
+        totalSamples - pendingSamples));
+    if (pendingSamples > 0) {
+      builder.append(String.format(" + %d", pendingSamples));
+    }
     if (children != null) {
+      List<Node<P, M>> childrenAboveThreshold = new ArrayList<>();
       for (Node<P, M> child : children) {
-        builder.append(child.toString(indent + 2));
+        if (child.getTotalSamples() >= minSamples) {
+          childrenAboveThreshold.add(child);
+        }
+      }
+
+      Collections.sort(childrenAboveThreshold, (Node<P, M> n1, Node<P, M> n2)
+          -> (n2.getTotalSamples() - n1.getTotalSamples()));
+
+      for (Node<P, M> child : childrenAboveThreshold) {
+        P nextState = state.clone();
+        nextState.play(child.getMove());
+        builder.append(child.toString(nextState, indent + 2, minSamples));
       }
     }
 

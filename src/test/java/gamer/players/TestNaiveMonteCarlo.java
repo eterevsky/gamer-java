@@ -18,7 +18,7 @@ public final class TestNaiveMonteCarlo {
 
     TreeGameState state = game.newGame();
     PureMonteCarlo<TreeGameState, TreeGameMove> player =
-        new PureMonteCarlo<>();
+        new PureMonteCarlo<>(game);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -34,7 +34,7 @@ public final class TestNaiveMonteCarlo {
 
     TreeGameState state = game.newGame();
     PureMonteCarlo<TreeGameState, TreeGameMove> player =
-        new PureMonteCarlo<>();
+        new PureMonteCarlo<>(game);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -52,7 +52,7 @@ public final class TestNaiveMonteCarlo {
   public void play2() {
     TreeGameState state = TreeGameInstances.GAME2.newGame();
     PureMonteCarlo<TreeGameState, TreeGameMove> player =
-        new PureMonteCarlo<>();
+        new PureMonteCarlo<>(TreeGameInstances.GAME2);
     player.setTimeout(-1);
     player.setMaxSamples(50L);
     player.setSamplesBatch(1);
@@ -76,9 +76,9 @@ public final class TestNaiveMonteCarlo {
 
     TreeGameState state = game.newGame();
     PureMonteCarlo<TreeGameState, TreeGameMove> player =
-        new PureMonteCarlo<>();
+        new PureMonteCarlo<>(game);
     player.setTimeout(-1);
-    player.setMaxSamples(50L);
+    player.setMaxSamples(200L);
     player.setSamplesBatch(1);
     player.setSelector(TreeGameInstances.GAME3.getRandomMoveSelector());
 
