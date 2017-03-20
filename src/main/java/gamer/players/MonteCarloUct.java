@@ -3,6 +3,7 @@ package gamer.players;
 import java.util.ArrayList;
 import java.util.List;
 
+import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 
@@ -32,6 +33,10 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
     }
   }
 
+  public MonteCarloUct(Game<P, M> game) {
+    super(game);
+  }
+
   @Override
   protected Node<P, M> getRoot(P position) {
     return new UctNode<>(null, position, null, nodeContext);
@@ -39,7 +44,7 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
 
   @Override
   public void setSamplesBatch(int samplesBatch) {
-    this.samplesBatch = samplesBatch;
+    super.setSamplesBatch(samplesBatch);
     if (nodeContext.childrenThreshold < samplesBatch) {
       nodeContext.childrenThreshold = samplesBatch;
     }

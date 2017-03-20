@@ -63,7 +63,7 @@ public final class TestNode {
     pos2.play(pos0.getMoveToNode(2));
 
     TestingNode root = new TestingNode(
-        null, pos0, null, new NodeContext<>(false, null));
+        null, pos0, null, new NodeContext<>(false, null, TreeGameInstances.GAME0));
 
     assertEquals(NO_CHILDREN, root.selectChildOrAddPending(pos0, 1));
     assertEquals(1, root.getTotalSamples());
@@ -111,7 +111,7 @@ public final class TestNode {
     pos2.play(pos0.getMoveToNode(2));
 
     TestingNode root = new TestingNode(
-        null, pos0, null, new NodeContext<>(true, null));
+        null, pos0, null, new NodeContext<>(true, null, TreeGameInstances.GAME0));
 
     root.willInitChildren = true;
     root.nextSelectResult = pos0.getMoveToNode(2);

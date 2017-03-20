@@ -14,7 +14,7 @@ public class BenchmarkUct {
   public static ChessMove uctChess20kSamplesMulti(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
 
-    MonteCarloUct<ChessState, ChessMove> player = new MonteCarloUct<>();
+    MonteCarloUct<ChessState, ChessMove> player = new MonteCarloUct<>(Chess.getInstance());
     player.setMaxSamples(20000);
     player.setTimeout(-1);
     player.setSamplesBatch(1);
@@ -33,7 +33,7 @@ public class BenchmarkUct {
 
   // @Benchmark
   public static ChessMove uctChess20kSamplesSingle(int reps) {
-    MonteCarloUct<ChessState, ChessMove> player = new MonteCarloUct<>();
+    MonteCarloUct<ChessState, ChessMove> player = new MonteCarloUct<>(Chess.getInstance());
     player.setMaxSamples(20000);
     player.setTimeout(-1);
     player.setSamplesBatch(1);
@@ -53,7 +53,7 @@ public class BenchmarkUct {
   public static GomokuMove uctGomoku100kSamplesMulti(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
 
-    MonteCarloUct<GomokuState, GomokuMove> player = new MonteCarloUct<>();
+    MonteCarloUct<GomokuState, GomokuMove> player = new MonteCarloUct<>(Gomoku.getInstance());
     player.setMaxSamples(100000);
     player.setTimeout(-1);
     player.setSamplesBatch(1);
@@ -72,7 +72,7 @@ public class BenchmarkUct {
 
   @Benchmark
   public static GomokuMove uctGomoku100kSamplesSingle(int reps) {
-    MonteCarloUct<GomokuState, GomokuMove> player = new MonteCarloUct<>();
+    MonteCarloUct<GomokuState, GomokuMove> player = new MonteCarloUct<>(Gomoku.getInstance());
     player.setMaxSamples(100000);
     player.setTimeout(-1);
     player.setSamplesBatch(1);

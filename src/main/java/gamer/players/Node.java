@@ -34,14 +34,15 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   Node(Node<P, M> parent, P state, M move, NodeContext<P, M> context) {
     this.context = context;
     this.parent = parent;
-    this.player = state.getPlayer();
     this.move = move;
 
     if (state != null) {
       if (state.isTerminal()) {
+        this.player = -1;
         this.payoff = state.getPayoff(0);
         this.knowExact = true;
       } else if (context.solver != null) {
+        this.player = state.getPlayer();
         Solver.Result<M> result = context.solver.solve(state);
         if (result != null) {
           this.payoff =
@@ -141,11 +142,12 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
 
   final double getUcbPriority(double parentSamplesLog, boolean player) {
     if (totalSamples == 0) {
-      return 2 * (1 + Math.sqrt(parentSamplesLog));
+      return context.game.getMaxPayoff() + parentSamplesLog;  //
     }
 
     double payoff = player ? getPayoff() : -getPayoff();
-    return payoff + Math.sqrt(parentSamplesLog / totalSamples);
+    return payoff + context.payoffSpread *
+        Math.sqrt(1.2 * parentSamplesLog / totalSamples);
   }
 
   @Override

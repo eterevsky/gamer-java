@@ -3,6 +3,7 @@ package gamer.players;
 import java.util.ArrayList;
 import java.util.List;
 
+import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 
@@ -28,6 +29,10 @@ public class MonteCarloUcb<P extends Position<P, M>, M extends Move>
 
       return true;
     }
+  }
+
+  public MonteCarloUcb(Game<P, M> game) {
+    super(game);
   }
 
   @Override

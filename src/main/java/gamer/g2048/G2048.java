@@ -47,4 +47,12 @@ public final class G2048 implements Game<G2048State, G2048Move> {
   public boolean isRandom() {
     return true;
   }
+
+  public int getMaxPayoff() {
+    return 65536;
+  }
+
+  public int getMinPayoff() {
+    return 0;
+  }
 }

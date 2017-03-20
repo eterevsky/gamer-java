@@ -27,7 +27,7 @@ class App {
                   M extends Move>
   void addUctPlayer(G game, Tournament<P, M> tournament, int chThres,
                     int samples, String selector) {
-    MonteCarloUct<P, M> player = new MonteCarloUct<>();
+    MonteCarloUct<P, M> player = new MonteCarloUct<>(game);
     player.setChildrenThreshold(chThres);
     player.setSamplesBatch(samples);
     player.setSelector(game.getMoveSelector(selector));
@@ -75,10 +75,10 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
 
-    MonteCarloUct<P, M> player1 = new MonteCarloUct<>();
+    MonteCarloUcb<P, M> player1 = new MonteCarloUcb<>(game);
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
-    player1.setSamplesBatch(8);
+    player1.setSamplesBatch(1);
     player1.setSelector(game.getMoveSelector("random"));
 
     Match<P, M> match;
@@ -86,7 +86,7 @@ class App {
     if (game.getPlayersCount() == 1) {
       match = new Match<>(startPosition, player1);
     } else {
-      MonteCarloUct<P, M> player2 = new MonteCarloUct<>();
+      MonteCarloUct<P, M> player2 = new MonteCarloUct<>(game);
       player2.setTimeout(moveTime * 1000);
       player2.setMaxWorkers(cores);
       player2.setSamplesBatch(4);

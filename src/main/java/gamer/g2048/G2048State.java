@@ -91,9 +91,9 @@ public final class G2048State implements Position<G2048State, G2048Move> {
       case NEW_GAME: case RANDOM:
         int tile, value;
         do {
-          int rand = random.nextInt(32);
-          tile = rand / 2;
-          value = rand % 2 + 1;
+          int rand = random.nextInt(160);
+          tile = rand / 10;
+          value = (rand % 10 == 0) ? 2 : 1;
         } while (board[tile] != 0);
         return G2048Move.of(tile, value);
       case PLAYER:

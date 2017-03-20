@@ -59,7 +59,6 @@ public final class GameRunner<P extends Position<P, M>, M extends Move>
         if (player instanceof ComputerPlayer) {
           System.out.println(((ComputerPlayer<P, M>)player).getReport());
         }
-        System.out.println(move);
         System.out.println(position);
         System.out.println();
       }

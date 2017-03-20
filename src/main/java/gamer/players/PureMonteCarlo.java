@@ -1,5 +1,6 @@
 package gamer.players;
 
+import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.Position;
 
@@ -39,6 +40,10 @@ public class PureMonteCarlo<P extends Position<P, M>, M extends Move>
 
       return true;
     }
+  }
+
+  public PureMonteCarlo(Game<P, M> game) {
+    super(game);
   }
 
   @Override

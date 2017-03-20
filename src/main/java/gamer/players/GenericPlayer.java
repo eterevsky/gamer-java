@@ -1,6 +1,7 @@
 package gamer.players;
 
 import gamer.def.ComputerPlayer;
+import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.MoveSelector;
 import gamer.def.Position;
@@ -16,13 +17,17 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     implements ComputerPlayer<P, M> {
   protected int samplesBatch = 1;
   protected String name = null;
-  protected NodeContext<P, M> nodeContext = new NodeContext<>();
+  protected NodeContext<P, M> nodeContext = null;
   private long samplesLimit = -1;
   private long timeout = 1000;
   private int workers = 0;
   private MoveSelector<P, M> selector = null;
   private Solver<P, M> solver = null;
   private String report;
+
+  GenericPlayer(Game<P, M> game) {
+    nodeContext = new NodeContext<>(true, null, game);
+  }
 
   @Override
   public String getName() {
@@ -98,9 +103,10 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     }
 
     report = String.format(
-        "%s : %f over %d (%d)",
+        "%s : %f over %d (%d)%n%s%n",
         state.moveToString(bestNode.getMove()),
-        bestNode.getPayoff(), bestNode.getSamples(), root.getSamples());
+        bestNode.getPayoff(), bestNode.getSamples(), root.getSamples(),
+        root.toString());
 
     return bestNode.getMove();
   }

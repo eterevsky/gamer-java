@@ -25,4 +25,12 @@ public interface Game<P extends Position<P, M>, M extends Move> {
   default boolean isRandom() {
     return false;
   }
+
+  default int getMaxPayoff() {
+    return 1;
+  }
+
+  default int getMinPayoff() {
+    return -1;
+  }
 }
