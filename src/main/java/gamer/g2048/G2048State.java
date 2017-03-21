@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * The class describing a game position.
  */
-public final class G2048State implements Position<G2048State, G2048Move> {
+public final class G2048State implements State<G2048State, G2048Move> {
   private enum State {
     NEW_GAME,
     RANDOM,

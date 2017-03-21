@@ -1,6 +1,6 @@
 package gamer.def;
 
-public interface Game<P extends Position<P, M>, M extends Move> {
+public interface Game<P extends State<P, M>, M extends Move> {
   P newGame();
 
   default MoveSelector<P, M> getRandomMoveSelector() {

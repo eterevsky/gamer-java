@@ -2,16 +2,16 @@ package gamer.players;
 
 import gamer.def.Game;
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PureMonteCarlo<P extends Position<P, M>, M extends Move>
+public class PureMonteCarlo<P extends State<P, M>, M extends Move>
     extends GenericPlayer<P, M> {
 
-  private static class NaiveNode<P extends Position<P, M>, M extends Move>
+  private static class NaiveNode<P extends State<P, M>, M extends Move>
       extends Node<P, M> {
 
     Iterator<Node<P, M>> childrenIt = null;

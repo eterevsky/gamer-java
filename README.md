@@ -8,6 +8,6 @@ I'm starting with testing the engines on [Gomoku](http://en.wikipedia.org/wiki/G
 What's already working
 ----------------------
 
-All the main interfaces are defined in `gamer/def`. A new game can be added by implementing the interfaces `gamer.def.Game`, `gamer.def.Position` and/or `gamer.def.PositionMut` (first is immutable, second is mutable) and `gamer.der.Move`. To add a new playing engine, the `ComputerPlayer` interface should be implemented.
+All the main interfaces are defined in `gamer/def`. A new game can be added by implementing the interfaces `gamer.def.Game`, `gamer.def.State` and/or `gamer.def.PositionMut` (first is immutable, second is mutable) and `gamer.der.Move`. To add a new playing engine, the `ComputerPlayer` interface should be implemented.
 
 There are working implentations of Gomoku and Chess. On the side of the engines, the most advanced one is `MonteCarloUct`.

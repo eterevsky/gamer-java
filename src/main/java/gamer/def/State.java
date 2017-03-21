@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * The class describing a game position.
  */
-public interface Position<P extends Position<P, M>, M extends Move>
+public interface State<P extends State<P, M>, M extends Move>
     extends Cloneable {
   /**
    * Get the player number of a player to move. The first player to move in the

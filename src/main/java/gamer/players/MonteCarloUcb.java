@@ -1,16 +1,16 @@
 package gamer.players;
 
+import gamer.def.Game;
+import gamer.def.Move;
+import gamer.def.State;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import gamer.def.Game;
-import gamer.def.Move;
-import gamer.def.Position;
+public class MonteCarloUcb<S extends State<S, M>, M extends Move>
+    extends GenericPlayer<S, M> {
 
-public class MonteCarloUcb<P extends Position<P, M>, M extends Move>
-    extends GenericPlayer<P, M> {
-
-  private static class UcbNode<P extends Position<P, M>, M extends Move>
+  private static class UcbNode<P extends State<P, M>, M extends Move>
       extends BanditNode<P, M> {
 
     UcbNode(P position, NodeContext<P, M> context) {
@@ -31,12 +31,12 @@ public class MonteCarloUcb<P extends Position<P, M>, M extends Move>
     }
   }
 
-  public MonteCarloUcb(Game<P, M> game) {
+  public MonteCarloUcb(Game<S, M> game) {
     super(game);
   }
 
   @Override
-  protected Node<P, M> getRoot(P position) {
+  protected Node<S, M> getRoot(S position) {
     return new UcbNode<>(position, nodeContext);
   }
 }

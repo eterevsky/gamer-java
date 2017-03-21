@@ -120,11 +120,11 @@ public final class TestNode {
     node2.willInitChildren = true;
     assertEquals(KNOW_EXACT, node2.selectChildOrAddPending(pos2, 1));
     assertTrue(node2.knowExact());
-    assertEquals(-0.999, node2.getPayoff(), 1E-8);
+    assertEquals(-1 + 1E-9 , node2.getPayoff(), 1E-8);
 
     assertEquals(KNOW_EXACT, root.selectChildOrAddPending(pos0, 1));
     assertTrue(root.knowExact());
-    assertEquals(0.999, root.getPayoff(), 1E-8);
+    assertEquals(1 - 1E-9, root.getPayoff(), 1E-8);
   }
 
   private final class TestingNode

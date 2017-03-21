@@ -1,21 +1,21 @@
 package gamer.players;
 
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 
-abstract class BanditNode<P extends Position<P, M>, M extends Move>
-    extends Node<P, M> {
+abstract class BanditNode<S extends State<S, M>, M extends Move>
+    extends Node<S, M> {
 
-  BanditNode(Node<P, M> parent, P position, M move, NodeContext<P, M> context) {
+  BanditNode(Node<S, M> parent, S position, M move, NodeContext<S, M> context) {
     super(parent, position, move, context);
   }
 
   @Override
-  public Node<P, M> selectChild(P state) {
+  public Node<S, M> selectChild(S state) {
     double totalSamplesLog = Math.log(getTotalSamples());
     assert totalSamplesLog >= 0;
 
-    Node<P, M> bestChild = null;
+    Node<S, M> bestChild = null;
     double bestChildPrio = 0;
 
     if (getPlayer() < 0) {
@@ -23,7 +23,7 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
       return selectRandomChild(state);
     }
 
-    for (Node<P, M> child : children) {
+    for (Node<S, M> child : children) {
       if (child.getTotalSamples() == 0) {
         return child;
       }

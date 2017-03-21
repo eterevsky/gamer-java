@@ -4,7 +4,6 @@ import gamer.benchmark.Benchmark;
 import gamer.chess.Chess;
 import gamer.chess.ChessMove;
 import gamer.chess.ChessState;
-import gamer.def.Position;
 import gamer.gomoku.Gomoku;
 import gamer.gomoku.GomokuMove;
 import gamer.gomoku.GomokuState;

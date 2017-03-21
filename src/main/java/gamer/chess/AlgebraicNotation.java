@@ -1,7 +1,7 @@
 package gamer.chess;
 
 class AlgebraicNotation {
-  static ChessMove parse(State<?> state, String moveStr) {
+  static ChessMove parse(ChessState state, String moveStr) {
     MoveComponents components = new MoveComponents(moveStr);
     ChessMove move = null;
 
@@ -29,7 +29,7 @@ class AlgebraicNotation {
     return move;
   }
 
-  static String moveToString(State<?> state, ChessMove move) {
+  static String moveToString(ChessState state, ChessMove move) {
     byte piece = Pieces.piece(state.get(move.from));
     if (piece == Pieces.KING) {
       if (move.to == move.from + 16) {

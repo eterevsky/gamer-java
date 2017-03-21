@@ -2,7 +2,7 @@ package gamer.tournament;
 
 import gamer.def.ComputerPlayer;
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public final class Tournament<P extends Position<P, M>, M extends Move> {
+public final class Tournament<P extends State<P, M>, M extends Move> {
   private final P startPosition;
   private final List<ComputerPlayer<P, M>> players = new ArrayList<>();
   private final boolean verbose;

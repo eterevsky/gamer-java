@@ -1,7 +1,6 @@
 package gamer.chess;
 
 import gamer.def.Game;
-import gamer.def.Position;
 
 public final class Chess implements Game<ChessState, ChessMove> {
   private static final Chess INSTANCE = new Chess();

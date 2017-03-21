@@ -2,19 +2,17 @@ package gamer.gomoku;
 
 import gamer.def.IllegalMoveException;
 import gamer.def.MoveSelector;
-import gamer.def.Position;
+import gamer.def.State;
 import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class GomokuState implements Position<GomokuState, GomokuMove> {
+public final class GomokuState implements State<GomokuState, GomokuMove> {
   private final int size;
   private final Limits limits;
   private byte[] board;

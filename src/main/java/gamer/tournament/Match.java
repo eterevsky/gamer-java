@@ -3,12 +3,12 @@ package gamer.tournament;
 import gamer.def.Move;
 
 import gamer.def.Player;
-import gamer.def.Position;
+import gamer.def.State;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Match<P extends Position<P, M>, M extends Move> {
+public final class Match<P extends State<P, M>, M extends Move> {
   public final P startPosition;
   public final List<Player<P, M>> players = new ArrayList<>();
   public Integer result = null;

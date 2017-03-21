@@ -1,7 +1,7 @@
 package gamer.dominion;
 
 import gamer.def.IllegalMoveException;
-import gamer.def.Position;
+import gamer.def.State;
 import gamer.def.TerminalPositionException;
 import gamer.dominion.cards.Copper;
 import gamer.dominion.cards.Estate;
@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public final class DominionState
-    implements Position<DominionState, DominionMove> {
+    implements State<DominionState, DominionMove> {
   private Dominion game;
   private int player = -1;
   private Map<DominionCard, Integer> supply;
@@ -60,7 +60,7 @@ public final class DominionState
     }
   }
 
-  // Position<> implementation.
+  // State<> implementation.
 
   @Override
   public boolean isTerminal() {

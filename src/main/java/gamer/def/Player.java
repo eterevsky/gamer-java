@@ -1,6 +1,6 @@
 package gamer.def;
 
-public interface Player<P extends Position<P, M>, M extends Move> {
+public interface Player<P extends State<P, M>, M extends Move> {
   String getName();
 
   boolean isExternal();

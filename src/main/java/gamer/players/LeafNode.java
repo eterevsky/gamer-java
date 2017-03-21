@@ -1,9 +1,9 @@
 package gamer.players;
 
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 
-final class LeafNode<P extends Position<P, M>, M extends Move>
+final class LeafNode<P extends State<P, M>, M extends Move>
     extends Node<P, M> {
 
   LeafNode(Node<P, M> parent, P position, M move, NodeContext<P, M> context) {

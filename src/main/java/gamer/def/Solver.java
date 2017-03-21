@@ -4,7 +4,7 @@ package gamer.def;
  * Provide exact solutions (optimal moves) for a subset of possible game
  * positions.
  */
-public interface Solver<P extends Position<P, M>, M extends Move> {
+public interface Solver<P extends State<P, M>, M extends Move> {
   class Result<M extends Move> {
     public int payoff;
     public int moves;

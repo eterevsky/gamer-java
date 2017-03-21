@@ -1,17 +1,15 @@
 package gamer.treegame;
 
 import gamer.def.GameException;
-import gamer.def.Position;
-import gamer.def.TerminalPositionException;
+import gamer.def.State;
 import gamer.util.GameStatusInt;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 public final class TreeGameState
-    implements Position<TreeGameState, TreeGameMove> {
+    implements State<TreeGameState, TreeGameMove> {
   private Node node;
 	private TreeGame game;
 

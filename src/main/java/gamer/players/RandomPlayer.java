@@ -2,15 +2,15 @@ package gamer.players;
 
 import gamer.def.ComputerPlayer;
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 import gamer.def.Solver;
 
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class RandomPlayer<P extends Position<P, M>, M extends Move>
-    implements ComputerPlayer<P, M> {
+public final class RandomPlayer<S extends State<S, M>, M extends Move>
+    implements ComputerPlayer<S, M> {
   private Random random = null;
 
   @Override
@@ -23,7 +23,7 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
   public void setTimeout(long timeout) {}
 
   @Override
-  public void addSolver(Solver<P, M> solver) {}
+  public void addSolver(Solver<S, M> solver) {}
 
   @Override
   public String getReport() {
@@ -36,7 +36,7 @@ public final class RandomPlayer<P extends Position<P, M>, M extends Move>
   }
 
   @Override
-  public M selectMove(P position) {
+  public M selectMove(S position) {
     Random rng = random;
     if (rng == null) { rng = ThreadLocalRandom.current(); }
     List<M> moves = position.getMoves();

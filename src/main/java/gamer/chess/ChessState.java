@@ -1,6 +1,7 @@
 package gamer.chess;
 
 import gamer.def.GameException;
+import gamer.def.State;
 import gamer.def.TerminalPositionException;
 
 import java.util.ArrayList;
@@ -8,10 +9,27 @@ import java.util.List;
 
 import static gamer.chess.Board.i2col;
 import static gamer.chess.Board.i2row;
-import static gamer.chess.Pieces.*;
+import static gamer.chess.Pieces.BISHOP;
+import static gamer.chess.Pieces.BLACK;
+import static gamer.chess.Pieces.EMPTY;
+import static gamer.chess.Pieces.KING;
+import static gamer.chess.Pieces.KNIGHT;
+import static gamer.chess.Pieces.PAWN;
+import static gamer.chess.Pieces.QUEEN;
+import static gamer.chess.Pieces.ROOK;
+import static gamer.chess.Pieces.WHITE;
+import static gamer.chess.Pieces.black;
+import static gamer.chess.Pieces.white;
 
 @SuppressWarnings("PointlessBitwiseExpression")
-public final class ChessState implements State<ChessState> {
+public final class ChessState implements State<ChessState, ChessMove> {
+  static byte WHITE_SHORT_CASTLING = 1;
+  static byte WHITE_LONG_CASTLING = 2;
+  static byte BLACK_SHORT_CASTLING = 4;
+  static byte BLACK_LONG_CASTLING = 8;
+
+  static int MOVES_WITHOUT_CAPTURE = 100;
+
   private static final int[] ROOK_DELTA_COL = {0, 1, 0, -1};
   private static final int[] ROOK_DELTA_ROW = {1, 0, -1, 0};
   private static final int[] KNIGHT_DELTA_COL = {1, 2, 2, 1, -1, -2, -2, -1};
@@ -24,8 +42,8 @@ public final class ChessState implements State<ChessState> {
   private static final int[] KING_DELTA_ROW = {1, 1, 0, -1, -1, -1, 0, 1};
   private Board board;
   private boolean player = true;
-  private byte castlings = WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
-                           BLACK_LONG_CASTLING | BLACK_SHORT_CASTLING;
+  private byte castlings = (byte) (WHITE_LONG_CASTLING | WHITE_SHORT_CASTLING |
+                                   BLACK_LONG_CASTLING | BLACK_SHORT_CASTLING);
   /** -1 if no en passant pawn, otherwise the passed empty square */
   private int enPassant = -1;
   private int movesSinceCapture = 0;
@@ -44,7 +62,7 @@ public final class ChessState implements State<ChessState> {
     return Fen.parse(fen);
   }
 
-  // Position implementation
+  // State implementation
 
   @Override
   public boolean getPlayerBool() {
@@ -156,21 +174,19 @@ public final class ChessState implements State<ChessState> {
     return builder.toString();
   }
 
-  // Implement State
-
-  @Override public byte get(int square) {
+  public byte get(int square) {
     return board.get(square);
   }
 
-  @Override public byte get(String square) {
+  public byte get(String square) {
     return board.get(square);
   }
 
-  @Override public byte get(int col, int row) {
+  public byte get(int col, int row) {
     return board.get(col + 1, row + 1);
   }
 
-  @Override public byte getCastlings() {
+  public byte getCastlings() {
     return castlings;
   }
 
@@ -178,7 +194,7 @@ public final class ChessState implements State<ChessState> {
     this.castlings = castlings;
   }
 
-  @Override public int getEnPassant() {
+  public int getEnPassant() {
     return enPassant;
   }
 
@@ -186,7 +202,7 @@ public final class ChessState implements State<ChessState> {
     enPassant = square;
   }
 
-  @Override public int getMovesSinceCapture() {
+  public int getMovesSinceCapture() {
     return movesSinceCapture;
   }
 
@@ -194,7 +210,7 @@ public final class ChessState implements State<ChessState> {
     movesSinceCapture = moves;
   }
 
-  @Override public int getMovesCount() {
+  public int getMovesCount() {
     return movesCount;
   }
 

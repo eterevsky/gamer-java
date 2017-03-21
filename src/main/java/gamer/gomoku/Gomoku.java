@@ -2,7 +2,6 @@ package gamer.gomoku;
 
 import gamer.def.Game;
 import gamer.def.MoveSelector;
-import gamer.def.Position;
 
 import java.util.HashMap;
 import java.util.Map;

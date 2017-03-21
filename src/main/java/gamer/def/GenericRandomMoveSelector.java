@@ -2,9 +2,8 @@ package gamer.def;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
-class GenericRandomMoveSelector<P extends Position<P, M>, M extends Move>
+class GenericRandomMoveSelector<P extends State<P, M>, M extends Move>
   implements MoveSelector<P, M> {
   private Random random = new Random();
 

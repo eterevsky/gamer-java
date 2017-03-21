@@ -9,7 +9,7 @@ class Fen {
   }
 
   @SuppressWarnings("PointlessBitwiseExpression")
-  static String toFen(State<?> state) {
+  static String toFen(ChessState state) {
     StringBuilder builder = new StringBuilder();
     int nempty = 0;
 
@@ -54,13 +54,13 @@ class Fen {
     if (castlings == 0) {
       builder.append('-');
     } else {
-      if ((castlings & State.WHITE_SHORT_CASTLING) != 0)
+      if ((castlings & ChessState.WHITE_SHORT_CASTLING) != 0)
         builder.append('K');
-      if ((castlings & State.WHITE_LONG_CASTLING) != 0)
+      if ((castlings & ChessState.WHITE_LONG_CASTLING) != 0)
         builder.append('Q');
-      if ((castlings & State.BLACK_SHORT_CASTLING) != 0)
+      if ((castlings & ChessState.BLACK_SHORT_CASTLING) != 0)
         builder.append('k');
-      if ((castlings & State.BLACK_LONG_CASTLING) != 0)
+      if ((castlings & ChessState.BLACK_LONG_CASTLING) != 0)
         builder.append('q');
     }
 
@@ -140,10 +140,10 @@ class Fen {
       byte castlings = 0;
       for (char c : getComponent().toCharArray()) {
         switch (c) {
-          case 'K': castlings |= State.WHITE_SHORT_CASTLING; break;
-          case 'Q': castlings |= State.WHITE_LONG_CASTLING; break;
-          case 'k': castlings |= State.BLACK_SHORT_CASTLING; break;
-          case 'q': castlings |= State.BLACK_LONG_CASTLING; break;
+          case 'K': castlings |= ChessState.WHITE_SHORT_CASTLING; break;
+          case 'Q': castlings |= ChessState.WHITE_LONG_CASTLING; break;
+          case 'k': castlings |= ChessState.BLACK_SHORT_CASTLING; break;
+          case 'q': castlings |= ChessState.BLACK_LONG_CASTLING; break;
 
           case '-': assert castlings == 0; break;
 

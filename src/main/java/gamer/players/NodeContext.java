@@ -2,20 +2,20 @@ package gamer.players;
 
 import gamer.def.Game;
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 import gamer.def.Solver;
 
-final class NodeContext<P extends Position<P, M>, M extends Move> {
+final class NodeContext<S extends State<S, M>, M extends Move> {
   boolean propagateExact = true;
-  Solver<P, M> solver = null;
+  Solver<S, M> solver = null;
   int childrenThreshold = 1;
   // max_payoff - min_payoff
   int payoffSpread = 2;
-  Game<P, M> game = null;
+  Game<S, M> game = null;
 
   NodeContext() {}
 
-  NodeContext(boolean propagateExact, Solver<P, M> solver, Game<P, M> game) {
+  NodeContext(boolean propagateExact, Solver<S, M> solver, Game<S, M> game) {
     this.propagateExact = propagateExact;
     this.solver = solver;
     this.game = game;

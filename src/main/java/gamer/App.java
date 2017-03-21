@@ -5,7 +5,7 @@ import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
 import gamer.def.Game;
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 import gamer.g2048.G2048;
 import gamer.g2048.Benchmark2048;
 import gamer.gomoku.BenchmarkGomoku;
@@ -23,7 +23,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 class App {
-  private static <G extends Game<P, M>, P extends Position<P, M>,
+  private static <G extends Game<P, M>, P extends State<P, M>,
                   M extends Move>
   void addUctPlayer(G game, Tournament<P, M> tournament, int chThres,
                     int samples, String selector) {
@@ -35,7 +35,7 @@ class App {
     tournament.addPlayer(player);
   }
 
-  private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move> void addPlayers(
+  private static <G extends Game<P, M>, P extends State<P, M>, M extends Move> void addPlayers(
       Tournament<P, M> tournament, G game) {
     addUctPlayer(game, tournament, 4, 1, "neighbor");
     addUctPlayer(game, tournament, 4, 4, "neighbor");
@@ -53,7 +53,7 @@ class App {
     addUctPlayer(game, tournament, 32, 16, "random");
   }
 
-  static <G extends Game<P, M>, P extends Position<P, M>, M extends Move>
+  static <G extends Game<P, M>, P extends State<P, M>, M extends Move>
   void runTournament(G game) {
     int cores = Runtime.getRuntime().availableProcessors();
     System.out.format("Found %d cores.\n", cores);
@@ -70,7 +70,7 @@ class App {
     tournament.play();
   }
 
-  private static <G extends Game<P, M>, P extends Position<P, M>, M extends Move>
+  private static <G extends Game<P, M>, P extends State<P, M>, M extends Move>
       void runGame(G game, long moveTime) {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();

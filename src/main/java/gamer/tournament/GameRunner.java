@@ -3,12 +3,12 @@ package gamer.tournament;
 import gamer.def.ComputerPlayer;
 import gamer.def.Move;
 import gamer.def.Player;
-import gamer.def.Position;
+import gamer.def.State;
 
 import java.util.List;
 import java.util.Queue;
 
-public final class GameRunner<P extends Position<P, M>, M extends Move>
+public final class GameRunner<P extends State<P, M>, M extends Move>
     implements Runnable {
   private final Queue<Match<P, M>> games;
   private final Queue<Match<P, M>> results;
@@ -34,7 +34,7 @@ public final class GameRunner<P extends Position<P, M>, M extends Move>
     }
   }
 
-  public static <P extends Position<P, M>, M extends Move>
+  public static <P extends State<P, M>, M extends Move>
       int playSingleGame(Match<P, M> match, boolean verbose) {
     if (verbose) {
       System.out.println(match);
@@ -42,7 +42,7 @@ public final class GameRunner<P extends Position<P, M>, M extends Move>
     return playSingleGame(match.startPosition, match.players, verbose);
   }
 
-  private static <P extends Position<P, M>, M extends Move> int playSingleGame(
+  private static <P extends State<P, M>, M extends Move> int playSingleGame(
       P position, List<Player<P, M>> ps, boolean verbose) {
     while (!position.isTerminal()) {
       int iplayer = position.getPlayer();

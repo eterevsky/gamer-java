@@ -2,7 +2,6 @@ package gamer.g2048;
 
 import gamer.def.Game;
 import gamer.def.MoveSelector;
-import gamer.def.Position;
 import gamer.util.Board;
 
 import java.util.Arrays;

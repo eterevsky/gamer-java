@@ -1,16 +1,16 @@
 package gamer.players;
 
+import gamer.def.Game;
+import gamer.def.Move;
+import gamer.def.State;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import gamer.def.Game;
-import gamer.def.Move;
-import gamer.def.Position;
+public class MonteCarloUct<S extends State<S, M>, M extends Move>
+    extends GenericPlayer<S, M> {
 
-public class MonteCarloUct<P extends Position<P, M>, M extends Move>
-    extends GenericPlayer<P, M> {
-
-  private static class UctNode<P extends Position<P, M>, M extends Move>
+  private static class UctNode<P extends State<P, M>, M extends Move>
       extends BanditNode<P, M> {
 
     UctNode(Node<P, M> parent, P position, M move, NodeContext<P, M> context) {
@@ -33,12 +33,12 @@ public class MonteCarloUct<P extends Position<P, M>, M extends Move>
     }
   }
 
-  public MonteCarloUct(Game<P, M> game) {
+  public MonteCarloUct(Game<S, M> game) {
     super(game);
   }
 
   @Override
-  protected Node<P, M> getRoot(P position) {
+  protected Node<S, M> getRoot(S position) {
     return new UctNode<>(null, position, null, nodeContext);
   }
 

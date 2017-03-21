@@ -2,13 +2,11 @@ package gamer.gomoku;
 
 import gamer.benchmark.Benchmark;
 import gamer.def.MoveSelector;
-import gamer.def.Position;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;

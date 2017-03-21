@@ -1,7 +1,7 @@
 package gamer.players;
 
 import gamer.def.Move;
-import gamer.def.Position;
+import gamer.def.State;
 import gamer.def.Solver;
 
 import java.util.ArrayDeque;
@@ -13,16 +13,16 @@ import java.util.Queue;
 
 import static gamer.players.Sampler.PAYOFF_SCALE_FACTOR;
 
-abstract class Node<P extends Position<P, M>, M extends Move> {
+abstract class Node<S extends State<S, M>, M extends Move> {
   @SuppressWarnings("rawtypes")
   static final DummyNode KNOW_EXACT = new DummyNode();
   @SuppressWarnings("rawtypes")
   static final DummyNode NO_CHILDREN = new DummyNode();
 
-  protected final NodeContext<P, M> context;
+  protected final NodeContext<S, M> context;
   private final M move;
-  private final Node<P, M> parent;
-  protected List<Node<P, M>> children = null;
+  private final Node<S, M> parent;
+  protected List<Node<S, M>> children = null;
   private boolean knowExact = false;
   /** Payoff for player 0 */
   private double payoff;
@@ -36,7 +36,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     context = null;
   }
 
-  Node(Node<P, M> parent, P state, M move, NodeContext<P, M> context) {
+  Node(Node<S, M> parent, S state, M move, NodeContext<S, M> context) {
     this.context = context;
     this.parent = parent;
     this.move = move;
@@ -61,17 +61,17 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     }
   }
 
-  abstract protected Node<P, M> selectChild(P state);
+  abstract protected Node<S, M> selectChild(S state);
 
-  abstract protected boolean maybeInitChildren(P state);
+  abstract protected boolean maybeInitChildren(S state);
 
   protected int getPlayer() {
     return player;
   }
 
-  protected Node<P, M> selectRandomChild(P state) {
+  protected Node<S, M> selectRandomChild(S state) {
     M move = state.getRandomMove();
-    for (Node<P, M> child : children) {
+    for (Node<S, M> child : children) {
       if (child.move.equals(move)) {
         return child;
       }
@@ -79,7 +79,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     throw new RuntimeException("Couldn't find the correct random child.");
   }
 
-  final Node<P, M> getParent() {
+  final Node<S, M> getParent() {
     return parent;
   }
 
@@ -87,7 +87,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return move;
   }
 
-  final synchronized Collection<Node<P, M>> getChildren() {
+  final synchronized Collection<Node<S, M>> getChildren() {
     if (children == null) {
       throw new RuntimeException(
           "Requested children from a node without children.");
@@ -112,7 +112,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return totalSamples;
   }
 
-  final Node<P, M> selectChildOrAddPending(P state, int nsamples) {
+  final Node<S, M> selectChildOrAddPending(S state, int nsamples) {
     boolean learnedExact = false;
     boolean knowExactLocal = false;
 
@@ -132,7 +132,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
 
       if (!knowExact && children == null) {
         @SuppressWarnings("unchecked")
-        Node<P, M> noChildrenResult = NO_CHILDREN;
+        Node<S, M> noChildrenResult = NO_CHILDREN;
         return noChildrenResult;
       }
       knowExactLocal = knowExact;
@@ -143,7 +143,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
         parent.addSamplesAndUpdate(nsamples, payoff, this, learnedExact);
       }
       @SuppressWarnings("unchecked")
-      Node<P, M> knowExactResult = KNOW_EXACT;
+      Node<S, M> knowExactResult = KNOW_EXACT;
       return knowExactResult;
     }
 
@@ -169,7 +169,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return toString(null, 0, context.game.getMinPayoff());
   }
 
-  synchronized final String toStringNested(P state, int nnodes) {
+  synchronized final String toStringNested(S state, int nnodes) {
     int samplesLo = 0;
     int samplesHi = getTotalSamples();
 
@@ -177,11 +177,11 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       int samplesMid = (samplesHi + samplesLo) / 2;
       int nodesAboveThreshold = 0;
 
-      Queue<Node<P, M>> queue = new ArrayDeque<>();
+      Queue<Node<S, M>> queue = new ArrayDeque<>();
       queue.add(this);
 
       while (nodesAboveThreshold <= nnodes) {
-        Node<P, M> node = queue.poll();
+        Node<S, M> node = queue.poll();
         if (node == null) {
           break;
         }
@@ -190,7 +190,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
         }
         nodesAboveThreshold++;
         if (node.children != null) {
-          for (Node<P, M> child : node.children) {
+          for (Node<S, M> child : node.children) {
             queue.add(child);
           }
         }
@@ -207,7 +207,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return toString(state, 0, samplesHi);
   }
 
-  synchronized private String toString(P state, int indent, double minSamples) {
+  synchronized private String toString(S state, int indent, double minSamples) {
     StringBuilder builder = new StringBuilder();
     builder.append('\n');
     for (int i = 0; i < indent; i++) {
@@ -225,18 +225,18 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       builder.append(String.format(" + %d", pendingSamples));
     }
     if (children != null) {
-      List<Node<P, M>> childrenAboveThreshold = new ArrayList<>();
-      for (Node<P, M> child : children) {
+      List<Node<S, M>> childrenAboveThreshold = new ArrayList<>();
+      for (Node<S, M> child : children) {
         if (child.getTotalSamples() >= minSamples) {
           childrenAboveThreshold.add(child);
         }
       }
 
-      Collections.sort(childrenAboveThreshold, (Node<P, M> n1, Node<P, M> n2)
+      Collections.sort(childrenAboveThreshold, (Node<S, M> n1, Node<S, M> n2)
           -> (n2.getTotalSamples() - n1.getTotalSamples()));
 
-      for (Node<P, M> child : childrenAboveThreshold) {
-        P nextState = state.clone();
+      for (Node<S, M> child : childrenAboveThreshold) {
+        S nextState = state.clone();
         nextState.play(child.getMove());
         builder.append(child.toString(nextState, indent + 2, minSamples));
       }
@@ -246,7 +246,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   }
 
   private void addSamplesAndUpdate(
-      int nsamples, double value, Node<P, M> child,
+      int nsamples, double value, Node<S, M> child,
       boolean childLearnedExactValue) {
     boolean learnedExactValue = false;
 
@@ -277,7 +277,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     double lo = 1E10;
     double hi = -1E10;
 
-    for (Node<P, M> child : children) {
+    for (Node<S, M> child : children) {
       if (!child.knowExact)
         return false;
       double v = child.payoff;
@@ -295,13 +295,13 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   @SuppressWarnings("rawtypes")
   private final static class DummyNode extends Node {
     @Override
-    protected DummyNode selectChild(Position p) {
+    protected DummyNode selectChild(State p) {
       throw new RuntimeException("shouldn't be called");
     }
 
     @Override
     @SuppressWarnings("rawtypes")
-    protected boolean maybeInitChildren(Position state) {
+    protected boolean maybeInitChildren(State state) {
       throw new RuntimeException("shouldn't be called");
     }
   }
