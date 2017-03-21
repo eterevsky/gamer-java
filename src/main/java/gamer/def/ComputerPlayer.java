@@ -6,15 +6,15 @@ public interface ComputerPlayer<P extends State<P, M>, M extends Move>
     return false;
   }
 
-  // void setRandom(Random random);
-
   void setMaxWorkers(int maxWorkers);
 
   void setMaxSamples(long maxSamples);
 
   void setTimeout(long timout);
 
-  void addSolver(Solver<P, M> solver);
+  default void addSolver(Solver<P, M> solver) {
+    throw new UnsupportedOperationException("Solvers are not supported.");
+  }
 
   String getReport();
 }
