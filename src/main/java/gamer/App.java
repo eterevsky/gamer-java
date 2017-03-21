@@ -75,11 +75,11 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
 
-    MonteCarloUcb<P, M> player1 = new MonteCarloUcb<>(game);
+    MonteCarloUct<P, M> player1 = new MonteCarloUct<>(game);
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(1);
-    player1.setSelector(game.getMoveSelector("neighbor"));
+    player1.setSelector(game.getMoveSelector("random"));
 
     Match<P, M> match;
 

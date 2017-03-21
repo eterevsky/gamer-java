@@ -197,6 +197,7 @@ public final class G2048State implements Position<G2048State, G2048Move> {
 
   @Override
   public String toString() {
-    return G2048.BOARD.boardToString(board, true);
+    return String.format("Score: %d%n%s", score,
+                         G2048.BOARD.boardToString(board, true));
   }
 }

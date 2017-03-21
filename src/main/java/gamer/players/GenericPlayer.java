@@ -103,9 +103,9 @@ abstract class GenericPlayer<P extends Position<P, M>, M extends Move>
     }
 
     report = String.format(
-        "%s%n%n%s%n",
+        "Move: %s%n%s%n",
         state.moveToString(bestNode.getMove()),
-        root.toStringNested(state, 10));
+        root.toStringNested(state, 16));
 
     return bestNode.getMove();
   }

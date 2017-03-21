@@ -158,7 +158,7 @@ public final class TestNode {
     }
 
     @Override
-    public TestingNode selectChild() {
+    public TestingNode selectChild(TreeGameState state) {
       if (nextSelectResult != null) {
         for (Node<TreeGameState, TreeGameMove> child : children) {
           if (child.getMove().equals(nextSelectResult)) {
@@ -170,7 +170,7 @@ public final class TestNode {
         throw new RuntimeException();
       }
 
-      return (TestingNode) super.selectChild();
+      return (TestingNode) super.selectChild(state);
     }
   }
 }

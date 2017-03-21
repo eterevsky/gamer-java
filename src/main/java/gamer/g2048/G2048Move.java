@@ -102,7 +102,7 @@ public class G2048Move implements Move {
   @Override
   public String toString() {
     if (random) {
-      return String.format("%s = %d", G2048.BOARD.tileToString(tile), 1 << value);
+      return String.format("%s=%d", G2048.BOARD.tileToString(tile), 1 << value);
     } else {
       return directionStr;
     }

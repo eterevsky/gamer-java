@@ -21,7 +21,7 @@ public class PureMonteCarlo<P extends Position<P, M>, M extends Move>
     }
 
     @Override
-    public synchronized Node<P, M> selectChild() {
+    public synchronized Node<P, M> selectChild(P state) {
       if (childrenIt == null || !childrenIt.hasNext())
         childrenIt = children.iterator();
 

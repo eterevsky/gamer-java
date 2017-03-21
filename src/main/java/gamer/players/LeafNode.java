@@ -11,7 +11,7 @@ final class LeafNode<P extends Position<P, M>, M extends Move>
   }
 
   @Override
-  public Node<P, M> selectChild() {
+  public Node<P, M> selectChild(P state) {
     throw new RuntimeException();
   }
 

@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 class Sampler<P extends Position<P, M>, M extends Move> implements Runnable {
-  static final double PAYOFF_SCALE_FACTOR = 0.999;
+  static final double PAYOFF_SCALE_FACTOR = 1 - 1E-9;
 
   private final Node<P, M> root;
   private final P startingState;

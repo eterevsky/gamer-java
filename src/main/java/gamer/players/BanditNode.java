@@ -11,8 +11,8 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
   }
 
   @Override
-  public Node<P, M> selectChild() {
-    double totalSamplesLog = 2 * Math.log(getTotalSamples());
+  public Node<P, M> selectChild(P state) {
+    double totalSamplesLog = Math.log(getTotalSamples());
     assert totalSamplesLog >= 0;
 
     Node<P, M> bestChild = null;
@@ -20,7 +20,7 @@ abstract class BanditNode<P extends Position<P, M>, M extends Move>
 
     if (getPlayer() < 0) {
       assert !knowExact();
-      return getRandomChild();
+      return selectRandomChild(state);
     }
 
     for (Node<P, M> child : children) {

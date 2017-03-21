@@ -61,7 +61,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     }
   }
 
-  abstract protected Node<P, M> selectChild();
+  abstract protected Node<P, M> selectChild(P state);
 
   abstract protected boolean maybeInitChildren(P state);
 
@@ -69,8 +69,14 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
     return player;
   }
 
-  protected Node<P, M> getRandomChild() {
-    throw new RuntimeException("getRandomChild not implemented");
+  protected Node<P, M> selectRandomChild(P state) {
+    M move = state.getRandomMove();
+    for (Node<P, M> child : children) {
+      if (child.move.equals(move)) {
+        return child;
+      }
+    }
+    throw new RuntimeException("Couldn't find the correct random child.");
   }
 
   final Node<P, M> getParent() {
@@ -141,7 +147,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
       return knowExactResult;
     }
 
-    return selectChild();
+    return selectChild(state);
   }
 
   final void addSamples(int nsamples, double value) {
@@ -289,7 +295,7 @@ abstract class Node<P extends Position<P, M>, M extends Move> {
   @SuppressWarnings("rawtypes")
   private final static class DummyNode extends Node {
     @Override
-    protected DummyNode selectChild() {
+    protected DummyNode selectChild(Position p) {
       throw new RuntimeException("shouldn't be called");
     }
 
