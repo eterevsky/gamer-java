@@ -49,6 +49,11 @@ public final class DominionState
   }
 
   @Override
+  public Dominion getGame() {
+    return game;
+  }
+
+  @Override
   public int getPlayer() {
     switch (phase) {
       case START_GAME:

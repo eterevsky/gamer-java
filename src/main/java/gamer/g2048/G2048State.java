@@ -31,6 +31,11 @@ public final class G2048State implements State<G2048State, G2048Move> {
   }
 
   @Override
+  public G2048 getGame() {
+    return G2048.getInstance();
+  }
+
+  @Override
   public int getPlayer() {
     switch (state) {
       case NEW_GAME: case RANDOM: return -1;

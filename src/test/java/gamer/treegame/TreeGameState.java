@@ -19,6 +19,11 @@ public final class TreeGameState
   }
 
   @Override
+  public TreeGame getGame() {
+    return game;
+  }
+
+  @Override
   public boolean getPlayerBool() {
     return GameStatusInt.getPlayerBool(node.status);
   }

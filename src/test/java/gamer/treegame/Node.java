@@ -2,8 +2,12 @@ package gamer.treegame;
 
 import gamer.util.GameStatusInt;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 final class Node {
   final int id;
@@ -28,13 +32,18 @@ final class Node {
   }
 
   Node getDescendantById(int id) {
-    if (this.id == id)
-      return this;
-    for (Node child : children) {
-      Node found = child.getDescendantById(id);
-      if (found != null)
-        return found;
+    Set<Node> visited = new HashSet<>();
+    Queue<Node> queue = new ArrayDeque<>();
+    queue.add(this);
+
+    while (true) {
+      Node n = queue.poll();
+      if (n == null || n.id == id) return n;
+      if (visited.contains(n)) continue;
+      visited.add(n);
+      for (Node child : n.children) {
+        queue.add(child);
+      }
     }
-    return null;
   }
 }

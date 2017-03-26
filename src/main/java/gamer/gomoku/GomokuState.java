@@ -132,6 +132,10 @@ public final class GomokuState implements State<GomokuState, GomokuMove> {
     status = GameStatusInt.init();
   }
 
+  @Override public Gomoku getGame() {
+    return Gomoku.getInstance(size);
+  }
+
   @Override public boolean getPlayerBool() {
     return GameStatusInt.getPlayerBool(status);
   }

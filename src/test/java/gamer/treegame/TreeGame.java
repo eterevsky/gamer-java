@@ -30,6 +30,10 @@ public final class TreeGame implements Game<TreeGameState, TreeGameMove> {
     return root.getDescendantById(id);
   }
 
+  public TreeGameMove getMove(int nodeId) {
+    return new TreeGameMove(getNode(nodeId));
+  }
+
   public static class Builder {
     Map<Integer, Node> nodes = new HashMap<>();
     int rootId = -1;

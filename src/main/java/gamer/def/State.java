@@ -6,8 +6,10 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * The class describing a game position.
  */
-public interface State<P extends State<P, M>, M extends Move>
+public interface State<S extends State<S, M>, M extends Move>
     extends Cloneable {
+  Game<S, M> getGame();
+
   /**
    * Get the player number of a player to move. The first player to move in the
    * beginning of the game has number 0.
@@ -37,6 +39,15 @@ public interface State<P extends State<P, M>, M extends Move>
   boolean isTerminal();
 
   /**
+   * Check whether the move in this state is random.
+   *
+   * @return true if the next move is random.
+   */
+  default boolean isRandom() {
+    return getPlayer() < 0;
+  }
+
+  /**
    * Get payoff for a terminal position, for the specified player.
    *
    * @return The greater the better, 0 means draw.
@@ -64,7 +75,7 @@ public interface State<P extends State<P, M>, M extends Move>
    * Apply a move to the current position.
    */
   void play(M move);
-
+  
   default void play(String moveStr) {
     this.play(this.parseMove(moveStr));
   }
@@ -75,7 +86,7 @@ public interface State<P extends State<P, M>, M extends Move>
 
   M parseMove(String moveStr);
 
-  P clone();
+  S clone();
 
   String toString();
 }

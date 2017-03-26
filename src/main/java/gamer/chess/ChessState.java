@@ -65,6 +65,11 @@ public final class ChessState implements State<ChessState, ChessMove> {
   // State implementation
 
   @Override
+  public Chess getGame() {
+    return Chess.getInstance();
+  }
+
+  @Override
   public boolean getPlayerBool() {
     return player;
   }
