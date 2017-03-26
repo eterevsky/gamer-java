@@ -16,6 +16,7 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
   private Game<S, M> game;
   private long timeout = 1000;
   private long samplesLimit = 0;
+  private int maxDepth = 0;
   private int samplesBatch = 1;
   private int workers = 1;
   private int childrenThreshold = 1;
@@ -117,46 +118,92 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     return report;
   }
 
+  private Node<S, M> selectChild(Node<S, M> node) {
+    assert node.hasChildren();
+    // TODO
+    return null;
+  }
+
+  private static class TraversalResult<S extends State<S, M>, M extends Move> {
+    Node<S, M> node;
+    S state;
+    int depth;
+
+    TraversalResult(Node<S, M> node, S state, int depth) {
+      this.node = node;
+      this.state = state;
+      this.depth = depth;
+    }
+  }
+
+  private TraversalResult<S, M> traverse(Node<S, M> rootNode, S rootState) {
+    Node<S, M> node = rootNode;
+    S state = rootState.clone();
+    int depth = 0;
+
+    while (node.hasChildren() && !node.hasExactPayoff()) {
+      node = selectChild(node);
+      state.play(node.getMove());
+      depth += 1;
+    }
+
+    if (!state.isTerminal() &&
+        !node.hasExactPayoff() &&
+        node.getTotalSamples() >= childrenThreshold &&
+        (maxDepth <= 0 || depth < maxDepth)) {
+      synchronized (node) {
+        if (!node.hasChildren()) {
+          node.initChildren(state);
+        }
+      }
+      node = selectChild(node);
+      state.play(node.getMove());
+      depth += 1;
+    }
+
+    return new TraversalResult<S, M>(node, state, depth);
+  }
+
+  private M selectSamplingMove(S state) {
+    return state.getRandomMove();
+  }
+
+  // TODO: add synchronization
   private void worker(Node<S, M> root, S rootState, long deadline) {
     while (!root.hasExactPayoff() &&
-        (samplesLimit<= 0 || root.getTotalSamples() < samplesLimit) &&
+        (samplesLimit <= 0 || root.getTotalSamples() < samplesLimit) &&
         (deadline <= 0 || System.currentTimeMillis() < deadline)) {
-      S state = rootState.clone();
-      Node<S, M> node = root;
-      int depth;
-      Node<S, M> next = node.selectChildOrAddPending(state, samplesBatch);
-      while (next != Node.NO_CHILDREN && next != Node.KNOW_EXACT) {
-        node = next;
-        state.play(node.getMove());
-        next = node.selectChildOrAddPending(state, samplesBatch);
-      }
+      TraversalResult<S, M> result = traverse(root, rootState);
+      Node<S, M> node = result.node;
 
-      if (next == Node.KNOW_EXACT) {
+      if (node.hasExactPayoff()) {
+        int payoff = node.getExactPayoff();
+        while (node != null) {
+          if (node.hasExactPayoff()) {
+            node.addExactSamples(samplesBatch);
+          } else {
+            node.addSamples(samplesBatch, payoff * samplesBatch);
+          }
+          node = node.getParent();
+        }
         continue;
       }
 
-      double value = 0;
-      for (int i = 0; i < samplesBatch; i++) {
-        S position;
-        if (i < samplesBatch - 1) {
-          position = state.clone();
-        } else {
-          position = state;
-        }
-        int moves = 0;
-        do {
-          position.play(selector.select(position));
-          // sResult = (solver != null) ? solver.solve(position) : null;
-          moves += 1;
-        } while (!position.isTerminal() && sResult == null);
+      node.addPendingSamples(samplesBatch);
 
-        if (position.isTerminal()) {
-          value += Math.pow(PAYOFF_SCALE_FACTOR, moves) * position.getPayoff(0);
-        } else {
-          value += Math.pow(PAYOFF_SCALE_FACTOR, moves) * sResult.payoff;
-        }
+      int value = 0;
+      for (int i = 0; i < samplesBatch; i++) {
+        S state = i < samplesBatch - 1 ? result.state.clone() : result.state;
+        do {
+          state.play(selectSamplingMove(state));
+        } while (!state.isTerminal());
+
+        value += state.getPayoff(0);
       }
-      node.addSamples(samplesBatch, value / samplesBatch);
+      while (node != null) {
+        node.addSamples(samplesBatch, value);
+        node = node.getParent();
+      }
     }
 
   }

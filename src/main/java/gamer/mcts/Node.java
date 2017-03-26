@@ -16,6 +16,7 @@ public class Node<S extends State<S, M>, M extends Move> {
   private int player = -2;
 
   private boolean exact = false;
+  private int exactPayoff = 0;
   private int totalSamples = 0;
   private int pendingSamples = 0;
   // Sum of the payoffs in case exact = false, or a single payoff if true.
@@ -36,6 +37,10 @@ public class Node<S extends State<S, M>, M extends Move> {
     }
   }
 
+  final Node<S, M> getParent() {
+    return parent;
+  }
+
   final boolean hasChildren() {
     return children != null && children.size() > 0;
   }
@@ -44,12 +49,42 @@ public class Node<S extends State<S, M>, M extends Move> {
     return children;
   }
 
+  final void initChildren(S state) {
+    assert !hasChildren();
+    List<M> moves = state.getMoves();
+    children = new ArrayList<>(moves.size());
+    for (M move : moves) {
+      S stateClone = state.clone();
+      stateClone.play(move);
+      children.add(new Node<S, M>(this, stateClone, move));
+    }
+  }
+
   final boolean hasExactPayoff() {
     return exact;
   }
 
+  final int getExactPayoff() {
+    return exactPayoff;
+  }
+
   final int getTotalSamples() {
     return totalSamples;
+  }
+
+  final void addExactSamples(int count) {
+    totalSamples += count;
+  }
+
+  final void addPendingSamples(int count) {
+    pendingSamples += count;
+    totalSamples += count;
+  }
+
+  final void addSamples(int count, int payoffSum) {
+    assert count <= pendingSamples;
+    pendingSamples -= count;
+    totalPayoff += payoffSum;
   }
 
   M getMove() {
@@ -57,8 +92,7 @@ public class Node<S extends State<S, M>, M extends Move> {
   }
 
   double getPayoff() {
-    return exact ? totalPayoff
-                 : (double)totalPayoff / (totalSamples - pendingSamples);
+    return (double)totalPayoff / (totalSamples - pendingSamples);
   }
 
   @Override
