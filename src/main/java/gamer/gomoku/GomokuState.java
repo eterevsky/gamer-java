@@ -20,10 +20,10 @@ public final class GomokuState implements State<GomokuState, GomokuMove> {
   private int status;
 
   static class RandomSelector implements MoveSelector<GomokuState, GomokuMove> {
-    private final int board_len;
+    private final int boardLen;
 
     RandomSelector(int size) {
-      board_len = size * size;
+      boardLen = size * size;
     }
 
     @Override
@@ -34,7 +34,7 @@ public final class GomokuState implements State<GomokuState, GomokuMove> {
       int i;
       ThreadLocalRandom random = ThreadLocalRandom.current();
       do {
-        i = random.nextInt(board_len);
+        i = random.nextInt(boardLen);
       } while (state.board[i] != 0);
 
       return GomokuMove.of(i);
@@ -146,6 +146,10 @@ public final class GomokuState implements State<GomokuState, GomokuMove> {
 
   @Override public int getPayoff(int player) {
     return GameStatusInt.getPayoff(status, player);
+  }
+
+  @Override public GomokuMove getRandomMove() {
+    return getGame().getRandomMoveSelector().select(this);
   }
 
   @Override public List<GomokuMove> getMoves() {

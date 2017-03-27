@@ -10,6 +10,8 @@ import gamer.g2048.G2048;
 import gamer.g2048.Benchmark2048;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
+import gamer.mcts.BenchmarkMcts;
+import gamer.mcts.MonteCarloPlayer;
 import gamer.players.*;
 import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
@@ -75,11 +77,10 @@ class App {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
 
-    MonteCarloUct<P, M> player1 = new MonteCarloUct<>(game);
+    MonteCarloPlayer<P, M> player1 = new MonteCarloPlayer<>(game);
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(1);
-    player1.setSelector(game.getMoveSelector("random"));
 
     Match<P, M> match;
 
@@ -90,7 +91,7 @@ class App {
       player2.setTimeout(moveTime * 1000);
       player2.setMaxWorkers(cores);
       player2.setSamplesBatch(4);
-      player2.setSelector(game.getMoveSelector("neighbor"));
+      player2.setSelector(game.getMoveSelector("random"));
       match = new Match<>(startPosition, player1, player2);
     }
 
@@ -138,6 +139,7 @@ class App {
     suite.add(BenchmarkChess.class);
     suite.add(BenchmarkGomoku.class);
     suite.add(BenchmarkUct.class);
+    suite.add(BenchmarkMcts.class);
 
     suite.run();
   }

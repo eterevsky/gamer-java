@@ -11,15 +11,15 @@ public final class Gomoku implements Game<GomokuState, GomokuMove> {
   private static final Map<Integer, Gomoku> INSTANCES = new HashMap<>();
   private final int size;
   private final Limits limits;
-  private final GomokuState.RandomSelector random_selector;
-  private final GomokuState.RandomNeighborSelector random_neighbor_selector;
+  private final GomokuState.RandomSelector randomSelector;
+  private final GomokuState.RandomNeighborSelector randomNeighborSelector;
 
   private Gomoku(int size) {
     this.size = size;
     this.limits = new Limits(size);
 
-    random_selector = new GomokuState.RandomSelector(size);
-    random_neighbor_selector = new GomokuState.RandomNeighborSelector(size);
+    randomSelector = new GomokuState.RandomSelector(size);
+    randomNeighborSelector = new GomokuState.RandomNeighborSelector(size);
   }
 
   public static Gomoku getInstance(int size) {
@@ -45,8 +45,8 @@ public final class Gomoku implements Game<GomokuState, GomokuMove> {
   @Override
   public MoveSelector<GomokuState, GomokuMove> getMoveSelector(String selector) {
     switch (selector) {
-      case "random": return random_selector;
-      case "neighbor": return random_neighbor_selector;
+      case "random": return randomSelector;
+      case "neighbor": return randomNeighborSelector;
       default:
         throw new IllegalArgumentException();
     }
@@ -54,11 +54,11 @@ public final class Gomoku implements Game<GomokuState, GomokuMove> {
 
   @Override
   public GomokuState.RandomSelector getRandomMoveSelector() {
-    return random_selector;
+    return randomSelector;
   }
 
   public GomokuState.RandomNeighborSelector getRandomNeighborSelector() {
-    return random_neighbor_selector;
+    return randomNeighborSelector;
   }
 
   int getSize() {

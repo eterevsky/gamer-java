@@ -3,6 +3,7 @@ package gamer.mcts;
 import gamer.def.ComputerPlayer;
 import gamer.def.Game;
 import gamer.def.Move;
+import gamer.def.MoveSelector;
 import gamer.def.State;
 
 import java.util.ArrayList;
@@ -18,6 +19,12 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
   private long timeout = 1000;
   private long samplesLimit = 0;
   private int maxDepth = 0;
+
+  public void setSamplesBatch(int samplesBatch) {
+    this.samplesBatch = samplesBatch;
+  }
+
+  private MoveSelector<S, M> selector = null;
   private int samplesBatch = 1;
   private int workers = 1;
   private int childrenThreshold = 1;
@@ -26,6 +33,7 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
 
   public MonteCarloPlayer(Game<S, M> game) {
     nodeContext = new Node.Context<>(game);
+    selector = game.getMoveSelector("random");
   }
 
   @Override
@@ -41,7 +49,7 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
             .format(" childrenThreshold=%d", this.childrenThreshold);
 
     return String
-        .format("MonteCarloPlayer(timeout=%0.1s%s%s)", timeout / 1000.0,
+        .format("MonteCarloPlayer(timeout=%01.1f%s%s)", timeout / 1000.0,
                 batchStr, workersStr);
   }
 
@@ -122,24 +130,25 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
 
   private Node<S, M> selectChild(Node<S, M> node, S state) {
     assert node.hasChildren();
+    List<Node<S, M>> children = node.getChildren();
 
     if (state.isRandom()) {
       return node.getChild(state.getRandomMove());
     }
 
     if (node.getCompleteSamples() - samplesBatch <
-        node.getChildren().size() * samplesBatch) {
+        children.size() * samplesBatch) {
       // Has children with 0 samples. Try 4 random children before iterating
       // through them.
       Random rng = ThreadLocalRandom.current();
       for (int i = 0; i < 4; i++) {
         Node<S, M> randomChild =
-            node.getChildren().get(rng.nextInt(node.getChildren().size()));
+            children.get(rng.nextInt(children.size()));
         if (randomChild.getTotalSamples() == 0) {
           return randomChild;
         }
       }
-      for (Node<S, M> child : node.getChildren()) {
+      for (Node<S, M> child : children) {
         if (child.getTotalSamples() == 0) {
           return child;
         }
@@ -152,7 +161,7 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     double maxScore = state.getGame().getMinPayoff() - 1;
     Node<S, M> bestChild = null;
 
-    for (Node<S, M> child : node.getChildren()) {
+    for (Node<S, M> child : children) {
       double score =
           child.getBiasedScore(logTotalSamples, node.getPlayer() > 0);
 
@@ -210,9 +219,9 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
 
   private M selectSamplingMove(S state) {
     return state.getRandomMove();
+//    return selector.select(state);
   }
 
-  // TODO: add synchronization
   private void worker(Node<S, M> root, S rootState, long deadline) {
     while (!root.hasExactPayoff() &&
            (samplesLimit <= 0 || root.getTotalSamples() < samplesLimit) &&
