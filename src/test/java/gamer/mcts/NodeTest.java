@@ -5,6 +5,12 @@ import gamer.treegame.TreeGameMove;
 import gamer.treegame.TreeGameState;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -86,5 +92,50 @@ public class NodeTest {
 
     assertTrue(node1.getBiasedScore(2, false) >
                node2.getBiasedScore(2, false) + 0.001);
+  }
+
+  private void worker(
+      Node<TreeGameState, TreeGameMove> node, TreeGameState state) {
+    node.addPendingSamples(2);
+    node.addSamples(2, 0, 2);
+    node.addPendingSamples(2);
+    node.addSamples(2, 0, 2);
+    if (!node.hasChildren()) {
+      node.initChildren(state);
+    }
+    assertEquals(2, node.getChildren().size());
+    Node<TreeGameState, TreeGameMove> node1 =
+        node.getChild(TreeGameInstances.GAME0.getMove(1));
+    assertEquals(TreeGameInstances.GAME0.getMove(1), node1.getMove());
+    assertTrue(node1.hasExactPayoff());
+  }
+
+  @Test
+  public void testConcurrency() {
+    TreeGameState state0 = TreeGameInstances.GAME0.newGame();
+    Node<TreeGameState, TreeGameMove> node0 =
+        new Node<>(new Node.Context<>(TreeGameInstances.GAME0), null, state0,
+                   null);
+
+    ExecutorService executor = Executors.newFixedThreadPool(128);
+    List<Future<?>> tasks = new ArrayList<>();
+    for (int i = 0; i < 128; i++) {
+      tasks.add(executor.submit(() -> worker(node0, state0)));
+    }
+
+    for (Future<?> task : tasks) {
+      try {
+        task.get();
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    executor.shutdown();
+
+    assertTrue(node0.hasChildren());
+    assertEquals(0, node0.getPendingSamples());
+    assertEquals(512, node0.getTotalSamples());
+    assertEquals(0, node0.getPayoffSum());
+    assertEquals(512, node0.getPayoffSquaresSum());
   }
 }

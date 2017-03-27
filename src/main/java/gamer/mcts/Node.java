@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Node<S extends State<S, M>, M extends Move> {
   static class Context<S extends State<S, M>, M extends Move> {
@@ -26,18 +27,18 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   private final Context<S, M> context;
   private final Node<S, M> parent;
-  private List<Node<S, M>> children = null;
+  private AtomicReference<List<Node<S, M>>> children = new AtomicReference<>();
   private final M move;
   private final int player;
 
   private boolean exact = false;
   private int exactPayoff = 0;
-  private int totalSamples = 0;
+  private volatile int totalSamples = 0;
   private AtomicInteger pendingSamples = new AtomicInteger(0);
   // Sum of the payoffs in case exact = false, or a single payoff if true.
   // Payoff is calculated for player 0.
-  private long totalPayoff = 0;
-  private long totalPayoffSquares = 0;
+  private volatile long totalPayoff = 0;
+  private volatile long totalPayoffSquares = 0;
 
   Node(Context<S, M> context, Node<S, M> parent, S state, M move) {
     this.context = context;
@@ -64,15 +65,15 @@ public class Node<S extends State<S, M>, M extends Move> {
   }
 
   final boolean hasChildren() {
-    return children != null && children.size() > 0;
+    return getChildren() != null;
   }
 
-  final synchronized List<Node<S, M>> getChildren() {
-    return children;
+  final List<Node<S, M>> getChildren() {
+    return children.get();
   }
 
   final Node<S, M> getChild(M move) {
-    for (Node<S, M> child : children) {
+    for (Node<S, M> child : getChildren()) {
       if (child.getMove().equals(move)) {
         return child;
       }
@@ -80,15 +81,16 @@ public class Node<S extends State<S, M>, M extends Move> {
     throw new RuntimeException("Requested a child node with unknown move.");
   }
 
-  final synchronized void initChildren(S state) {
+  final void initChildren(S state) {
     if (hasChildren()) return;
     List<M> moves = state.getMoves();
-    children = new ArrayList<>(moves.size());
+    List<Node<S, M>> newChildren = new ArrayList<>(moves.size());
     for (M move : moves) {
       S stateClone = state.clone();
       stateClone.play(move);
-      children.add(new Node<S, M>(this.context, this, stateClone, move));
+      newChildren .add(new Node<S, M>(this.context, this, stateClone, move));
     }
+    children.compareAndSet(null, newChildren);
   }
 
   final boolean hasExactPayoff() {
@@ -112,12 +114,13 @@ public class Node<S extends State<S, M>, M extends Move> {
   }
 
   final long getPayoffSum() {
-    return exact ? exactPayoff * (totalSamples - pendingSamples.get()) : totalPayoff;
+    return exact ? exactPayoff * (totalSamples - pendingSamples.get())
+                 : totalPayoff;
   }
 
   final long getPayoffSquaresSum() {
-    return exact ? exactPayoff * exactPayoff * (totalSamples - pendingSamples.get())
-                 : totalPayoffSquares;
+    return exact ? exactPayoff * exactPayoff *
+                   (totalSamples - pendingSamples.get()) : totalPayoffSquares;
   }
 
   final void addExactSamples(int count) {
@@ -146,16 +149,18 @@ public class Node<S extends State<S, M>, M extends Move> {
   }
 
   double getBiasedPayoff() {
-    return exact ? exactPayoff :
-           (double) (totalPayoff + context.minPayoff * (pendingSamples.get() + 1)) /
-           (totalSamples + 1);
+    return exact ? exactPayoff : (double) (totalPayoff + context.minPayoff *
+                                                         (pendingSamples.get() +
+                                                          1)) /
+                                 (totalSamples + 1);
   }
 
   double getBiasedVariance(double mean) {
     if (exact) return 0;
     double meanSquare = (double) (totalPayoffSquares +
                                   context.minPayoff * context.minPayoff *
-                                  (pendingSamples.get() + 1)) / (totalSamples + 1);
+                                  (pendingSamples.get() + 1)) /
+                        (totalSamples + 1);
     return meanSquare - mean * mean;
   }
 
@@ -177,7 +182,7 @@ public class Node<S extends State<S, M>, M extends Move> {
     return toStringNested(state, 16);
   }
 
-  synchronized final String toStringNested(S state, int nnodes) {
+  final String toStringNested(S state, int nnodes) {
     int samplesLo = 0;
     int samplesHi = totalSamples;
 
@@ -197,8 +202,8 @@ public class Node<S extends State<S, M>, M extends Move> {
           continue;
         }
         nodesAboveThreshold++;
-        if (node.children != null) {
-          for (Node<S, M> child : node.children) {
+        if (node.hasChildren()) {
+          for (Node<S, M> child : node.getChildren()) {
             queue.add(child);
           }
         }
@@ -215,7 +220,7 @@ public class Node<S extends State<S, M>, M extends Move> {
     return toStringNested(state, 0, samplesLo);
   }
 
-  synchronized private String toStringNested(
+  private String toStringNested(
       S state, int indent, double minSamples) {
     StringBuilder builder = new StringBuilder();
     builder.append('\n');
@@ -232,9 +237,9 @@ public class Node<S extends State<S, M>, M extends Move> {
     if (pendingSamples.get() > 0) {
       builder.append(String.format(" + %d", pendingSamples.get()));
     }
-    if (children != null) {
+    if (hasChildren()) {
       List<Node<S, M>> childrenAboveThreshold = new ArrayList<>();
-      for (Node<S, M> child : children) {
+      for (Node<S, M> child : getChildren()) {
         if (child.totalSamples >= minSamples) {
           childrenAboveThreshold.add(child);
         }
