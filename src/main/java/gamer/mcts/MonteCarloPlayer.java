@@ -42,7 +42,7 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
         .format(" batch=%d", this.samplesBatch);
 
     String workersStr =
-        this.workers < 2 ? "" : String.format(" threads=%d", this.samplesBatch);
+        this.workers < 2 ? "" : String.format(" threads=%d", this.workers);
 
     String childrenThresholdStr =
         this.childrenThreshold <= this.samplesBatch ? "" : String
