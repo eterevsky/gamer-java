@@ -10,6 +10,8 @@ public final class G2048 implements Game<G2048State, G2048Move> {
   private static G2048 INSTANCE = new G2048();
   private static G2048State.RandomSelector RANDOM_SELECTOR =
       new G2048State.RandomSelector();
+  private static G2048State.UpRightSelector UPRIGHT_SELECTOR =
+      new G2048State.UpRightSelector();
   static Board BOARD = new Board(4, 4, Arrays.asList(
       ".", "2", "4", "8", "16", "32", "64", "128", "256",
       "512", "1024", "2048", "4096", "8192", "16384", "32768",
@@ -34,6 +36,8 @@ public final class G2048 implements Game<G2048State, G2048Move> {
       String selectorType) {
     if (selectorType == "random") {
       return RANDOM_SELECTOR;
+    } else if (selectorType == "upright") {
+      return UPRIGHT_SELECTOR;
     } else {
       throw new IllegalArgumentException();
     }

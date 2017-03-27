@@ -3,6 +3,7 @@ package gamer.mcts;
 import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.State;
+import gamer.g2048.G2048;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -88,7 +89,8 @@ public class Node<S extends State<S, M>, M extends Move> {
     for (M move : moves) {
       S stateClone = state.clone();
       stateClone.play(move);
-      newChildren .add(new Node<S, M>(this.context, this, stateClone, move));
+      assert move != null;
+      newChildren.add(new Node<>(this.context, this, stateClone, move));
     }
     children.compareAndSet(null, newChildren);
   }
@@ -165,10 +167,16 @@ public class Node<S extends State<S, M>, M extends Move> {
   }
 
   double getBiasedScore(double logParentSamples, boolean reverse) {
+    assert logParentSamples >= 0;
     double mean = getBiasedPayoff();
     double variance = getBiasedVariance(mean);
+    if (variance < 0) {
+      // Tough luck. This happens because of non-synchronous updates of
+      // totalPayoff, totalPayoffSquares and totalSamples
+      variance = 0;
+    }
     double coefficient = logParentSamples / (totalSamples + 1);
-    // This works only for 2-player 0-sum games.
+    // revreeThis works only for 2-player 0-sum games.
     return (reverse ? -mean : mean) + Math.sqrt(2 * variance * coefficient) +
            3 * context.payoffSpread * coefficient;
   }

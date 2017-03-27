@@ -24,6 +24,7 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     this.samplesBatch = samplesBatch;
   }
 
+  private final Game<S, M> game;
   private MoveSelector<S, M> selector = null;
   private int samplesBatch = 1;
   private int workers = 1;
@@ -32,8 +33,13 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
   private final Node.Context<S, M> nodeContext;
 
   public MonteCarloPlayer(Game<S, M> game) {
+    this.game = game;
     nodeContext = new Node.Context<>(game);
     selector = game.getMoveSelector("random");
+  }
+
+  public void setSelector(String selectorName) {
+    selector = game.getMoveSelector(selectorName);
   }
 
   @Override
@@ -133,7 +139,9 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     List<Node<S, M>> children = node.getChildren();
 
     if (state.isRandom()) {
-      return node.getChild(state.getRandomMove());
+      Node<S, M> randomNode = node.getChild(state.getRandomMove());
+      assert randomNode != null;
+      return randomNode;
     }
 
     if (node.getCompleteSamples() - samplesBatch <
@@ -161,9 +169,12 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     double maxScore = state.getGame().getMinPayoff() - 1;
     Node<S, M> bestChild = null;
 
+    assert !children.isEmpty();
+
     for (Node<S, M> child : children) {
       double score =
           child.getBiasedScore(logTotalSamples, node.getPlayer() > 0);
+      assert score >= state.getGame().getMinPayoff();
 
       if (score > maxScore) {
         maxScore = score;
@@ -195,6 +206,10 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     while (node.hasChildren() && !node.hasExactPayoff()) {
       node.addPendingSamples(samplesBatch);
       node = selectChild(node, state);
+      assert node != null;
+      assert state != null;
+      assert !state.isTerminal();
+      assert node.getMove() != null;
       state.play(node.getMove());
       depth += 1;
     }
@@ -218,8 +233,11 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
   }
 
   private M selectSamplingMove(S state) {
-    return state.getRandomMove();
-//    return selector.select(state);
+    if (state.getPlayer() < 0) {
+      return state.getRandomMove();
+    } else {
+      return selector.select(state);
+    }
   }
 
   private void worker(Node<S, M> root, S rootState, long deadline) {
