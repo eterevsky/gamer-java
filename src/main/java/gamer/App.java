@@ -81,7 +81,6 @@ class App {
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
     player1.setSamplesBatch(1);
-    player1.setSelector("upright");
 
     Match<P, M> match;
 
