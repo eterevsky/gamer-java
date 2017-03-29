@@ -11,16 +11,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class Node<S extends State<S, M>, M extends Move> {
   static class Context<S extends State<S, M>, M extends Move> {
     private final int minPayoff;
+    private final int minPayoffSquare;
     private final int maxPayoff;
     private final int payoffSpread;
 
     Context(Game<S, M> game) {
       minPayoff = game.getMinPayoff();
+      minPayoffSquare = minPayoff * minPayoff;
       maxPayoff = game.getMaxPayoff();
       payoffSpread = maxPayoff - minPayoff;
     }
@@ -28,18 +32,35 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   private final Context<S, M> context;
   private final Node<S, M> parent;
-  private AtomicReference<List<Node<S, M>>> children = new AtomicReference<>();
+  private volatile List<Node<S, M>> children = null;
   private final M move;
   private final int player;
 
   private boolean exact = false;
   private int exactPayoff = 0;
-  private volatile int totalSamples = 0;
-  private AtomicInteger pendingSamples = new AtomicInteger(0);
+
+  private AtomicInteger totalSamples = new AtomicInteger();
+  private AtomicInteger pendingSamples = new AtomicInteger();
+  // private volatile int totalSamples = 0;
+  // private volatile int pendingSamples = 0;
+
   // Sum of the payoffs in case exact = false, or a single payoff if true.
   // Payoff is calculated for player 0.
   private volatile long totalPayoff = 0;
   private volatile long totalPayoffSquares = 0;
+
+  // @SuppressWarnings("rawtypes")
+  // private static final AtomicIntegerFieldUpdater<Node> totalSamplesUpdater =
+  //      AtomicIntegerFieldUpdater.newUpdater(Node.class, "totalSamples");
+  // @SuppressWarnings("rawtypes")
+  // private static final AtomicIntegerFieldUpdater<Node> pendingSamplesUpdater =
+  //      AtomicIntegerFieldUpdater.newUpdater(Node.class, "pendingSamples");
+  // @SuppressWarnings("rawtypes")
+  // private static final AtomicLongFieldUpdater<Node> totalPayoffUpdater =
+  //      AtomicLongFieldUpdater.newUpdater(Node.class, "totalPayoff");
+  // @SuppressWarnings("rawtypes")
+  // private static final AtomicLongFieldUpdater<Node> totalPayoffSquaresUpdater =
+  //      AtomicLongFieldUpdater.newUpdater(Node.class, "totalPayoffSquares");
 
   Node(Context<S, M> context, Node<S, M> parent, S state, M move) {
     this.context = context;
@@ -66,11 +87,11 @@ public class Node<S extends State<S, M>, M extends Move> {
   }
 
   final boolean hasChildren() {
-    return getChildren() != null;
+    return children != null;
   }
 
   final List<Node<S, M>> getChildren() {
-    return children.get();
+    return children;
   }
 
   final Node<S, M> getChild(M move) {
@@ -92,7 +113,7 @@ public class Node<S extends State<S, M>, M extends Move> {
       assert move != null;
       newChildren.add(new Node<>(this.context, this, stateClone, move));
     }
-    children.compareAndSet(null, newChildren);
+    children = newChildren;
   }
 
   final boolean hasExactPayoff() {
@@ -108,37 +129,40 @@ public class Node<S extends State<S, M>, M extends Move> {
   }
 
   final int getTotalSamples() {
-    return totalSamples;
+    return totalSamples.get();
   }
 
   final int getCompleteSamples() {
-    return totalSamples - pendingSamples.get();
+    return totalSamples.get() - pendingSamples.get();
   }
 
   final long getPayoffSum() {
-    return exact ? exactPayoff * (totalSamples - pendingSamples.get())
+    return exact ? exactPayoff * (totalSamples.get() - pendingSamples.get())
                  : totalPayoff;
   }
 
   final long getPayoffSquaresSum() {
     return exact ? exactPayoff * exactPayoff *
-                   (totalSamples - pendingSamples.get()) : totalPayoffSquares;
+                   (totalSamples.get() - pendingSamples.get()) : totalPayoffSquares;
   }
 
   final void addExactSamples(int count) {
-    totalSamples += count;
+    totalSamples.addAndGet(count);
+    // totalSamplesUpdater.addAndGet(this, count);
   }
 
   final void addPendingSamples(int count) {
-    pendingSamples.getAndAdd(count);
-    totalSamples += count;
+    totalSamples.addAndGet(count);
+    pendingSamples.addAndGet(count);
   }
 
   final void addSamples(int count, int payoffSum, long payoffSquaresSum) {
     assert count <= pendingSamples.get();
-    pendingSamples.getAndAdd(-count);
     totalPayoff += payoffSum;
     totalPayoffSquares += payoffSquaresSum;
+    // totalPayoffUpdater.addAndGet(this, payoffSum);
+    // totalPayoffSquaresUpdater.addAndGet(this, payoffSquaresSum);
+    pendingSamples.addAndGet(-count);
   }
 
   M getMove() {
@@ -147,36 +171,32 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   double getPayoff() {
     return exact ? exactPayoff
-                 : (double) totalPayoff / (totalSamples - pendingSamples.get());
-  }
-
-  double getBiasedPayoff() {
-    return exact ? exactPayoff : (double) (totalPayoff + context.minPayoff *
-                                                         (pendingSamples.get() +
-                                                          1)) /
-                                 (totalSamples + 1);
-  }
-
-  double getBiasedVariance(double mean) {
-    if (exact) return 0;
-    double meanSquare = (double) (totalPayoffSquares +
-                                  context.minPayoff * context.minPayoff *
-                                  (pendingSamples.get() + 1)) /
-                        (totalSamples + 1);
-    return meanSquare - mean * mean;
+                 : (double) totalPayoff / (totalSamples.get() - pendingSamples.get());
   }
 
   double getBiasedScore(double logParentSamples, boolean reverse) {
     assert logParentSamples >= 0;
-    double mean = getBiasedPayoff();
-    double variance = getBiasedVariance(mean);
+    double coefficient = logParentSamples / (totalSamples.get() + 1);
+
+    if (exact) {
+      return (reverse ? -exactPayoff : exactPayoff) + 3 * context.payoffSpread * coefficient;
+    }
+
+    long totalPayoff = this.totalPayoff;
+    long totalPayoffSquares = this.totalPayoffSquares;
+    long totalSamples = this.totalSamples.get() + 1;
+    long pendingSamples = this.pendingSamples.get() + 1;
+
+    double mean = (double) (totalPayoff + context.minPayoff * pendingSamples ) / totalSamples;
+    double variance =
+        (double) (totalPayoffSquares + context.minPayoffSquare * pendingSamples) / totalSamples -
+             mean * mean;
+
     if (variance < 0) {
-      // Tough luck. This happens because of non-synchronous updates of
-      // totalPayoff, totalPayoffSquares and totalSamples
       variance = 0;
     }
-    double coefficient = logParentSamples / (totalSamples + 1);
-    // revreeThis works only for 2-player 0-sum games.
+
+    // reverse works only for 2-player 0-sum games.
     return (reverse ? -mean : mean) + Math.sqrt(2 * variance * coefficient) +
            3 * context.payoffSpread * coefficient;
   }
@@ -192,7 +212,7 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   final String toStringNested(S state, int nnodes) {
     int samplesLo = 0;
-    int samplesHi = totalSamples;
+    int samplesHi = totalSamples.get();
 
     while (samplesHi - samplesLo > 1) {
       int samplesMid = (samplesHi + samplesLo) / 2;
@@ -206,7 +226,7 @@ public class Node<S extends State<S, M>, M extends Move> {
         if (node == null) {
           break;
         }
-        if (node.totalSamples < samplesMid) {
+        if (node.totalSamples.get() < samplesMid) {
           continue;
         }
         nodesAboveThreshold++;
@@ -241,21 +261,21 @@ public class Node<S extends State<S, M>, M extends Move> {
       builder.append("root");
     }
     builder.append(String.format(" %s%.3f %d", exact ? "=" : "", getPayoff(),
-                                 totalSamples - pendingSamples.get()));
+                                 totalSamples.get() - pendingSamples.get()));
     if (pendingSamples.get() > 0) {
-      builder.append(String.format(" + %d", pendingSamples.get()));
+      builder.append(String.format(" + %d", pendingSamples));
     }
     if (hasChildren()) {
       List<Node<S, M>> childrenAboveThreshold = new ArrayList<>();
       for (Node<S, M> child : getChildren()) {
-        if (child.totalSamples >= minSamples) {
+        if (child.totalSamples.get() >= minSamples) {
           childrenAboveThreshold.add(child);
         }
       }
 
       Collections.sort(childrenAboveThreshold,
-                       (Node<S, M> n1, Node<S, M> n2) -> (n2.totalSamples -
-                                                          n1.totalSamples));
+                       (Node<S, M> n1, Node<S, M> n2) -> (n2.totalSamples.get() -
+                                                          n1.totalSamples.get()));
 
       for (Node<S, M> child : childrenAboveThreshold) {
         S nextState = state.clone();
