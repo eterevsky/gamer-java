@@ -23,22 +23,11 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
-  public static int gomokuSingleSame(int nsamples) {
-    int sum = 0;
-    MoveSelector<GomokuState, GomokuMove> selector =
-        Gomoku.getInstance().getRandomMoveSelector();
-    GomokuState state = Gomoku.getInstance().newGame();
-    for (int isamples = 0; isamples < nsamples; isamples++) {
-      state.reset();
-      while (!state.isTerminal()) {
-        state.play(selector.select(state));
-      }
-      sum += state.getPayoff(0);
-    }
-    return sum;
+  public static int gomokuSingle100k(int reps) {
+    return batch(100000 * reps);
   }
 
-  @Benchmark
+  //  @Benchmark
   public static int gomokuNeighbors(int nsamples) {
     int sum = 0;
     MoveSelector<GomokuState, GomokuMove> selector =
@@ -54,7 +43,7 @@ public class BenchmarkGomoku {
     return sum;
   }
 
-  @Benchmark
+//  @Benchmark
   public static double gomokuBatches(int reps) {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();
@@ -70,7 +59,7 @@ public class BenchmarkGomoku {
     return gatherResults(futures);
   }
 
-  @Benchmark
+  // @Benchmark
   public static double gomokuAtomicCounter(int reps) {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();
@@ -100,6 +89,35 @@ public class BenchmarkGomoku {
   }
 
   @Benchmark
+  public static double gomokuAtomicCounter100k(int reps) {
+    ExecutorService executor = Executors.newFixedThreadPool(CORES);
+    List<Future<Integer>> futures = new ArrayList<>();
+    final AtomicInteger counter = new AtomicInteger();
+    final GomokuState.RandomSelector selector =
+        Gomoku.getInstance().getRandomMoveSelector();
+
+    for (int ithread = 0; ithread < CORES; ithread++) {
+      futures.add(executor.submit(() -> {
+        int s = 0;
+        Random random = ThreadLocalRandom.current();
+
+        while (counter.getAndIncrement() < reps * 100000) {
+          GomokuState state = Gomoku.getInstance().newGame();
+          while (!state.isTerminal()) {
+            state.play(selector.select(state));
+          }
+          s += state.getPayoff(0);
+        }
+
+        return s;
+      }));
+    }
+
+    executor.shutdown();
+    return gatherResults(futures);
+  }
+
+  //  @Benchmark
   public static int gomokuSyncCounter(int reps) {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     List<Future<Integer>> futures = new ArrayList<>();
@@ -133,7 +151,7 @@ public class BenchmarkGomoku {
     return gatherResults(futures);
   }
 
-  @Benchmark
+//  @Benchmark
   public static int gomokuBlockingQueue(int reps) {
     ExecutorService executor = Executors.newFixedThreadPool(CORES);
     GomokuState initialState = Gomoku.getInstance().newGame();

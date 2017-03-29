@@ -11,9 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Node<S extends State<S, M>, M extends Move> {
   static class Context<S extends State<S, M>, M extends Move> {
@@ -39,28 +37,13 @@ public class Node<S extends State<S, M>, M extends Move> {
   private boolean exact = false;
   private int exactPayoff = 0;
 
-  private AtomicInteger totalSamples = new AtomicInteger();
-  private AtomicInteger pendingSamples = new AtomicInteger();
-  // private volatile int totalSamples = 0;
-  // private volatile int pendingSamples = 0;
+  private final AtomicInteger totalSamples = new AtomicInteger();
+  private final AtomicInteger pendingSamples = new AtomicInteger();
 
   // Sum of the payoffs in case exact = false, or a single payoff if true.
   // Payoff is calculated for player 0.
-  private volatile long totalPayoff = 0;
-  private volatile long totalPayoffSquares = 0;
-
-  // @SuppressWarnings("rawtypes")
-  // private static final AtomicIntegerFieldUpdater<Node> totalSamplesUpdater =
-  //      AtomicIntegerFieldUpdater.newUpdater(Node.class, "totalSamples");
-  // @SuppressWarnings("rawtypes")
-  // private static final AtomicIntegerFieldUpdater<Node> pendingSamplesUpdater =
-  //      AtomicIntegerFieldUpdater.newUpdater(Node.class, "pendingSamples");
-  // @SuppressWarnings("rawtypes")
-  // private static final AtomicLongFieldUpdater<Node> totalPayoffUpdater =
-  //      AtomicLongFieldUpdater.newUpdater(Node.class, "totalPayoff");
-  // @SuppressWarnings("rawtypes")
-  // private static final AtomicLongFieldUpdater<Node> totalPayoffSquaresUpdater =
-  //      AtomicLongFieldUpdater.newUpdater(Node.class, "totalPayoffSquares");
+  private final AtomicLong totalPayoff = new AtomicLong();
+  private final AtomicLong totalPayoffSquares = new AtomicLong();
 
   Node(Context<S, M> context, Node<S, M> parent, S state, M move) {
     this.context = context;
@@ -138,17 +121,16 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   final long getPayoffSum() {
     return exact ? exactPayoff * (totalSamples.get() - pendingSamples.get())
-                 : totalPayoff;
+                 : totalPayoff.get();
   }
 
   final long getPayoffSquaresSum() {
     return exact ? exactPayoff * exactPayoff *
-                   (totalSamples.get() - pendingSamples.get()) : totalPayoffSquares;
+                   (totalSamples.get() - pendingSamples.get()) : totalPayoffSquares.get();
   }
 
   final void addExactSamples(int count) {
     totalSamples.addAndGet(count);
-    // totalSamplesUpdater.addAndGet(this, count);
   }
 
   final void addPendingSamples(int count) {
@@ -158,10 +140,8 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   final void addSamples(int count, int payoffSum, long payoffSquaresSum) {
     assert count <= pendingSamples.get();
-    totalPayoff += payoffSum;
-    totalPayoffSquares += payoffSquaresSum;
-    // totalPayoffUpdater.addAndGet(this, payoffSum);
-    // totalPayoffSquaresUpdater.addAndGet(this, payoffSquaresSum);
+    totalPayoff.addAndGet(payoffSum);
+    totalPayoffSquares.addAndGet(payoffSquaresSum);
     pendingSamples.addAndGet(-count);
   }
 
@@ -171,21 +151,22 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   double getPayoff() {
     return exact ? exactPayoff
-                 : (double) totalPayoff / (totalSamples.get() - pendingSamples.get());
+                 : (double) totalPayoff.get() / (totalSamples.get() - pendingSamples.get());
   }
 
   double getBiasedScore(double logParentSamples, boolean reverse) {
     assert logParentSamples >= 0;
-    double coefficient = logParentSamples / (totalSamples.get() + 1);
+
+    long totalPayoff = this.totalPayoff.get();
+    long totalPayoffSquares = this.totalPayoffSquares.get();
+    long totalSamples = this.totalSamples.get() + 1;
+    long pendingSamples = this.pendingSamples.get() + 1;
+
+    double coefficient = logParentSamples / totalSamples;
 
     if (exact) {
       return (reverse ? -exactPayoff : exactPayoff) + 3 * context.payoffSpread * coefficient;
     }
-
-    long totalPayoff = this.totalPayoff;
-    long totalPayoffSquares = this.totalPayoffSquares;
-    long totalSamples = this.totalSamples.get() + 1;
-    long pendingSamples = this.pendingSamples.get() + 1;
 
     double mean = (double) (totalPayoff + context.minPayoff * pendingSamples ) / totalSamples;
     double variance =
@@ -193,7 +174,7 @@ public class Node<S extends State<S, M>, M extends Move> {
              mean * mean;
 
     if (variance < 0) {
-      variance = 0;
+      variance = context.payoffSpread * context.payoffSpread / 4.0;
     }
 
     // reverse works only for 2-player 0-sum games.

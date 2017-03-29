@@ -28,7 +28,7 @@ public class BenchmarkMcts {
     return move;
   }
 
-  @Benchmark
+//  @Benchmark
   public static GomokuMove mctsGomoku100kSamplesHalf(int reps) {
     int cores = Runtime.getRuntime().availableProcessors();
 
