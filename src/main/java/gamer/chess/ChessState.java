@@ -179,6 +179,8 @@ public final class ChessState implements State<ChessState, ChessMove> {
     return builder.toString();
   }
 
+  Board getBoard() { return board; }
+
   public byte get(int square) {
     return board.get(square);
   }

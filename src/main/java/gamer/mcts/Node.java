@@ -259,8 +259,13 @@ public class Node<S extends State<S, M>, M extends Move> {
                                                           n1.totalSamples.get()));
 
       for (Node<S, M> child : childrenAboveThreshold) {
-        S nextState = state.clone();
-        nextState.play(child.move);
+        S nextState = state;
+
+        if (move != null) {
+          nextState = state.clone();
+          nextState.play(move);
+        }
+
         builder.append(child.toStringNested(nextState, indent + 2, minSamples));
       }
     }

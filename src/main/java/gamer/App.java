@@ -3,6 +3,8 @@ package gamer;
 import gamer.benchmark.BenchmarkSuite;
 import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
+import gamer.chess.ChessSimpleEvaluator;
+import gamer.def.Evaluator;
 import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.State;
@@ -12,6 +14,7 @@ import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
 import gamer.mcts.BenchmarkMcts;
 import gamer.mcts.MonteCarloPlayer;
+import gamer.minimax.MinimaxPlayer;
 import gamer.players.*;
 import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
@@ -87,11 +90,14 @@ class App {
     if (game.getPlayersCount() == 1) {
       match = new Match<>(startPosition, player1);
     } else {
-      MonteCarloUct<P, M> player2 = new MonteCarloUct<>(game);
+//      MonteCarloUct<P, M> player2 = new MonteCarloUct<>(game);
+//      player2.setTimeout(moveTime * 1000);
+//      player2.setMaxWorkers(cores);
+//      player2.setSamplesBatch(4);
+//      player2.setSelector(game.getMoveSelector("random"));
+      MinimaxPlayer<P, M> player2 = new MinimaxPlayer<>();
       player2.setTimeout(moveTime * 1000);
-      player2.setMaxWorkers(cores);
-      player2.setSamplesBatch(4);
-      player2.setSelector(game.getMoveSelector("random"));
+      player2.setEvaluator((Evaluator)ChessSimpleEvaluator.getInstance());
       match = new Match<>(startPosition, player1, player2);
     }
 

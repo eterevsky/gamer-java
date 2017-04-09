@@ -111,12 +111,12 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     assert root.hasChildren();
     Node<S, M> bestChild = null;
     double bestValue =
-        state.getPlayer() == 0 ? state.getGame().getMinPayoff() - 1
-                               : state.getGame().getMaxPayoff() + 1;
+        state.getPlayerBool() ? state.getGame().getMinPayoff() - 1
+                              : state.getGame().getMaxPayoff() + 1;
 
     for (Node<S, M> node : root.getChildren()) {
-      if ((state.getPlayer() == 0 ? (node.getPayoff() > bestValue)
-                                  : (node.getPayoff() < bestValue))) {
+      if ((state.getPlayerBool() ? (node.getPayoff() > bestValue)
+                                 : (node.getPayoff() < bestValue))) {
         bestChild = node;
         bestValue = node.getPayoff();
       }

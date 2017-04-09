@@ -1,7 +1,7 @@
 package gamer.chess;
 
 public final class Board implements Cloneable {
-  private byte[] board = new byte[64];
+  byte[] board = new byte[64];
 
   Board() {}
 
