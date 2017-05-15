@@ -4,6 +4,7 @@ import gamer.benchmark.BenchmarkSuite;
 import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
 import gamer.chess.ChessSimpleEvaluator;
+import gamer.chess.ChessState;
 import gamer.def.Evaluator;
 import gamer.def.Game;
 import gamer.def.Move;
@@ -97,7 +98,9 @@ class App {
 //      player2.setSelector(game.getMoveSelector("random"));
       MinimaxPlayer<P, M> player2 = new MinimaxPlayer<>();
       player2.setTimeout(moveTime * 1000);
-      player2.setEvaluator((Evaluator)ChessSimpleEvaluator.getInstance());
+      if (startPosition instanceOf ChessState) {
+        player2.setEvaluator((Evaluator)ChessSimpleEvaluator.getInstance());
+      }
       match = new Match<>(startPosition, player1, player2);
     }
 

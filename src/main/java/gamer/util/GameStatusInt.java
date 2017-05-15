@@ -6,6 +6,8 @@ public final class GameStatusInt {
   private static int PAYOFF_MASK = 3;
   private static int TERMINAL_MASK = 4;
   private static int PLAYER_MASK = 8;
+  // Last move was pass (in Go)
+  private static int PASS_MASK = 16;
   public static int WIN = 2 | TERMINAL_MASK;
   public static int LOSS = TERMINAL_MASK | PLAYER_MASK;
 
@@ -34,6 +36,10 @@ public final class GameStatusInt {
     return (status & PLAYER_MASK) != 0;
   }
 
+  public static boolean getPass(int status) {
+    return (status & PASS_MASK) != 0;
+  }
+
   public static int init() {
     return PLAYER_MASK;
   }
@@ -46,6 +52,16 @@ public final class GameStatusInt {
   }
 
   public static int switchPlayer(int status) {
+    return status ^ PLAYER_MASK;
+  }
+
+  public static int switchPlayerPass(int status) {
+    status |= PASS_MASK;
+    return status ^ PLAYER_MASK;
+  }
+
+  public static int switchPlayerNoPass(int status) {
+    status &= ~PASS_MASK;
     return status ^ PLAYER_MASK;
   }
 
