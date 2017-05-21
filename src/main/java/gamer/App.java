@@ -76,7 +76,7 @@ class App {
     tournament.play();
   }
 
-  private static <G extends Game<P, M>, P extends State<P, M>, M extends Move>
+   private static <G extends Game<P, M>, P extends State<P, M>, M extends Move>
       void runGame(G game, long moveTime) {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
@@ -98,8 +98,11 @@ class App {
 //      player2.setSelector(game.getMoveSelector("random"));
       MinimaxPlayer<P, M> player2 = new MinimaxPlayer<>();
       player2.setTimeout(moveTime * 1000);
-      if (startPosition instanceOf ChessState) {
-        player2.setEvaluator((Evaluator)ChessSimpleEvaluator.getInstance());
+      if (startPosition instanceof ChessState) {
+        @SuppressWarnings("unchecked")
+        MinimaxPlayer<ChessState, ?> chessPlayer2 =
+            (MinimaxPlayer<ChessState, ?>)player2;
+        chessPlayer2.setEvaluator(ChessSimpleEvaluator.getInstance());
       }
       match = new Match<>(startPosition, player1, player2);
     }

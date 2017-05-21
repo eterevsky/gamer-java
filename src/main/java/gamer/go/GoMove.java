@@ -28,6 +28,7 @@ public final class GoMove implements Move {
     for (int i = 0; i < Go.POINTS; i++) {
       moves.add(new GoMove(i));
     }
+    return moves;
   }
 
   static GoMove pass() {
@@ -43,7 +44,7 @@ public final class GoMove implements Move {
       throw new RuntimeException(
           String.format("Wrong move: %d %d", col, row));
     }
-    return INSTANCE.get(row * size + col);
+    return INSTANCES.get(row * Go.SIZE + col);
   }
 
   static GoMove of(String moveStr) {
@@ -54,7 +55,7 @@ public final class GoMove implements Move {
     char colChar = moveStr.charAt(0);
     int col = COL_LETTER.indexOf(colChar);
     int row = Integer.parseInt(moveStr.substring(1));
-    return of(col, row - 1, size);
+    return of(col, row - 1);
   }
 
   @Override

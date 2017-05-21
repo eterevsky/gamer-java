@@ -1,14 +1,24 @@
 package gamer.go;
 
+import gamer.def.Game;
 import gamer.def.State;
+import gamer.def.MoveSelector;
+import gamer.def.TerminalPositionException;
 import gamer.util.GameStatusInt;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ThreadLocalRandom;
+
+
 public final class GoState implements State<GoState, GoMove> {
-  final byte[] board;
+  byte[] board;
   private int koPoint;
   private int status;
 
-  static class RandomSelector implements Selector {
+  static class RandomSelector implements MoveSelector<GoState, GoMove> {
     @Override
     public GoMove select(GoState state) {
       return state.getRandomMove();
@@ -21,7 +31,7 @@ public final class GoState implements State<GoState, GoMove> {
   }
 
   @Override
-  public Game<S, M> getGame() {
+  public Go getGame() {
     return Go.getInstance();
   }
 
@@ -59,7 +69,7 @@ public final class GoState implements State<GoState, GoMove> {
 
   @Override
   public GoMove getRandomMove() {
-    if (state.isTerminal())
+    if (isTerminal())
       throw new TerminalPositionException();
 
     ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -76,10 +86,11 @@ public final class GoState implements State<GoState, GoMove> {
 
   @Override
   public void play(GoMove move) {
+    throw new UnsupportedOperationException("Not implemented");
   }
 
   @Override
-  GoMove parseMove(String moveStr) {
+  public GoMove parseMove(String moveStr) {
     return GoMove.of(moveStr);
   }
 
@@ -95,7 +106,7 @@ public final class GoState implements State<GoState, GoMove> {
   }
 
   @Override
-  String toString() {
+  public String toString() {
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < board.length; i++) {
       if (board[i] != 0) {
@@ -104,7 +115,7 @@ public final class GoState implements State<GoState, GoMove> {
         builder.append((i == koPoint) ? '-' : '.');
       }
 
-      builder.append(i % size == size - 1 ? '\n' : ' ');
+      builder.append(i % Go.SIZE == Go.SIZE - 1 ? '\n' : ' ');
     }
 
     return builder.toString();
@@ -114,27 +125,32 @@ public final class GoState implements State<GoState, GoMove> {
     if (board[point] != 0 || point == koPoint) {
       return false;
     }
-    byte color = getPlayerBool() ? 1 : 2;
-    if (isAlive(i, color)) {
+    int color = getPlayerBool() ? 1 : 2;
+    int otherColor = 3 - color;
+    board[point] = (byte)color;
+    boolean alive = isAlive(point);
+    if (alive) {
+      board[point] = 0;
       return true;
     }
-    for (int j : neighbors[i]) {
-      if (!isAlive(j, 3 - color)) {
+    for (int j : Go.NEIGHBORS[point]) {
+      if (board[j] == otherColor && !isAlive(j)) {
+        board[point] = 0;
         return true;
       }
     }
+    board[point] = 0;
     return false;
   }
 
-  private boolean isAlive(int point, byte color) {
-    for (int j : neighbors[point]) {
+  private boolean isAlive(int point) {
+    for (int j : Go.NEIGHBORS[point]) {
       if (board[j] == 0) {
         return true;
       }
     }
 
-    int undoColor = board[point];
-    board[point] = color;
+    byte color = board[point];
 
     boolean[] visited = new boolean[Go.POINTS];
     Queue<Integer> queue = new ArrayDeque<>();
@@ -146,7 +162,6 @@ public final class GoState implements State<GoState, GoMove> {
       visited[p] = true;
       for (int n : Go.NEIGHBORS[p]) {
         if (board[n] == 0) {
-          board[point] = undoColor;
           return true;
         }
         if (board[n] == color) {
@@ -154,5 +169,7 @@ public final class GoState implements State<GoState, GoMove> {
         }
       }
     }
+
+    return false;
   }
 }
