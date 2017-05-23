@@ -62,3 +62,10 @@ run {
   }
   jvmArgs = ['-Dfile.encoding=utf8']
 }
+
+test {
+  testLogging.showStandardStreams = true
+  beforeTest {
+    descriptor -> logger.lifecycle("Running test: " + descriptor)
+  }
+}

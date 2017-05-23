@@ -28,7 +28,7 @@ public class MonteCarloPlayerTest {
 
     assertEquals(TreeGameInstances.GAME0.getMove(1), player.selectMove(state0));
 
-//    System.out.println(player.getReport());
+    System.out.println(player.getReport());
   }
 
   @Test

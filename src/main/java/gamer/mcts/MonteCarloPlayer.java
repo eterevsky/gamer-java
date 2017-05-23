@@ -1,6 +1,7 @@
 package gamer.mcts;
 
 import gamer.def.ComputerPlayer;
+import gamer.def.Evaluator;
 import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.MoveSelector;
@@ -26,6 +27,7 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
 
   private final Game<S, M> game;
   private MoveSelector<S, M> selector = null;
+  private Evaluator<S> evaluator = null;
   private int samplesBatch = 1;
   private int workers = 1;
   private int childrenThreshold = 1;
@@ -42,6 +44,10 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
     selector = game.getMoveSelector(selectorName);
   }
 
+  public void setEvaluator(Evaluator<S> evaluator) {
+    this.evaluator = evaluator;
+  }
+
   @Override
   public String getName() {
     String batchStr = this.samplesBatch < 2 ? "" : String
@@ -54,9 +60,11 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
         this.childrenThreshold <= this.samplesBatch ? "" : String
             .format(" childrenThreshold=%d", this.childrenThreshold);
 
+    String evaluatorStr = evaluator == null ? "" : " evaluator";
+
     return String
-        .format("MonteCarloPlayer(timeout=%01.1f%s%s)", timeout / 1000.0,
-                batchStr, workersStr);
+        .format("MonteCarloPlayer(timeout=%01.1f%s%s%s)", timeout / 1000.0,
+                batchStr, workersStr, evaluatorStr);
   }
 
   @Override
@@ -261,17 +269,22 @@ public class MonteCarloPlayer<S extends State<S, M>, M extends Move>
         continue;
       }
 
-      int value = 0;
-      long valueSq = 0;
-      for (int i = 0; i < samplesBatch; i++) {
-        S state = i < samplesBatch - 1 ? result.state.clone() : result.state;
-        do {
-          state.play(selectSamplingMove(state));
-        } while (!state.isTerminal());
+      double value = 0;
+      double valueSq = 0;
+      if (evaluator != null) {
+        value = evaluator.evaluate(result.state);
+        valueSq = value * value;
+      } else {
+        for (int i = 0; i < samplesBatch; i++) {
+          S state = i < samplesBatch - 1 ? result.state.clone() : result.state;
+          do {
+            state.play(selectSamplingMove(state));
+          } while (!state.isTerminal());
 
-        int payoff = state.getPayoff(0);
-        value += payoff;
-        valueSq += (long) payoff * payoff;
+          int payoff = state.getPayoff(0);
+          value += payoff;
+          valueSq += (long) payoff * payoff;
+        }
       }
       while (node != null) {
         node.addSamples(samplesBatch, value, valueSq);

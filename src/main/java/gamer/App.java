@@ -91,18 +91,22 @@ class App {
     if (game.getPlayersCount() == 1) {
       match = new Match<>(startPosition, player1);
     } else {
-//      MonteCarloUct<P, M> player2 = new MonteCarloUct<>(game);
-//      player2.setTimeout(moveTime * 1000);
-//      player2.setMaxWorkers(cores);
-//      player2.setSamplesBatch(4);
-//      player2.setSelector(game.getMoveSelector("random"));
-      MinimaxPlayer<P, M> player2 = new MinimaxPlayer<>();
+      MonteCarloPlayer<P, M> player2 = new MonteCarloPlayer<>(game);
       player2.setTimeout(moveTime * 1000);
+      player2.setMaxWorkers(cores);
+      // player2.setSamplesBatch(4);
+      // player2.setSelector(game.getMoveSelector("random"));
+      // MinimaxPlayer<P, M> player2 = new MinimaxPlayer<>();
+      // player2.setTimeout(moveTime * 1000);
       if (startPosition instanceof ChessState) {
         @SuppressWarnings("unchecked")
-        MinimaxPlayer<ChessState, ?> chessPlayer2 =
-            (MinimaxPlayer<ChessState, ?>)player2;
-        chessPlayer2.setEvaluator(ChessSimpleEvaluator.getInstance());
+        MonteCarloPlayer<ChessState, ?> chessPlayer1 =
+            (MonteCarloPlayer<ChessState, ?>)player1;
+        chessPlayer1.setEvaluator(ChessSimpleEvaluator.getInstance());
+        // @SuppressWarnings("unchecked")
+        // MinimaxPlayer<ChessState, ?> chessPlayer2 =
+        //     (MinimaxPlayer<ChessState, ?>)player2;
+        // chessPlayer2.setEvaluator(ChessSimpleEvaluator.getInstance());
       }
       match = new Match<>(startPosition, player1, player2);
     }

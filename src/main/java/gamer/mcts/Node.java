@@ -42,8 +42,10 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   // Sum of the payoffs in case exact = false, or a single payoff if true.
   // Payoff is calculated for player 0.
-  private final AtomicLong totalPayoff = new AtomicLong();
-  private final AtomicLong totalPayoffSquares = new AtomicLong();
+  private final AtomicLong totalPayoffBits =
+      new AtomicLong(Double.doubleToLongBits(0));
+  private final AtomicLong totalPayoffSquaresBits =
+      new AtomicLong(Double.doubleToLongBits(0));
 
   Node(Context<S, M> context, Node<S, M> parent, S state, M move) {
     this.context = context;
@@ -58,6 +60,32 @@ public class Node<S extends State<S, M>, M extends Move> {
       player = -2;
     } else {
       player = state.getPlayer();
+    }
+  }
+
+  private double getTotalPayoff() {
+    return Double.longBitsToDouble(totalPayoffBits.get());
+  }
+
+  private double getTotalPayoffSquares() {
+    return Double.longBitsToDouble(totalPayoffSquaresBits.get());
+  }
+
+  private void addToPayoff(double payoff, double payoffSquares) {
+    while (true) {
+      long currentPayoffBits = totalPayoffBits.get();
+      long newTotalPayoffBits = Double.doubleToLongBits(
+          Double.longBitsToDouble(currentPayoffBits) + payoff);
+      if (totalPayoffBits.compareAndSet(
+              currentPayoffBits, newTotalPayoffBits)) break;
+    }
+
+    while (true) {
+      long currentPayoffSquaresBits = totalPayoffSquaresBits.get();
+      long newTotalPayoffSquaresBits = Double.doubleToLongBits(
+          Double.longBitsToDouble(currentPayoffSquaresBits) + payoffSquares);
+      if (totalPayoffSquaresBits.compareAndSet(
+              currentPayoffSquaresBits, newTotalPayoffSquaresBits)) break;
     }
   }
 
@@ -119,14 +147,14 @@ public class Node<S extends State<S, M>, M extends Move> {
     return totalSamples.get() - pendingSamples.get();
   }
 
-  final long getPayoffSum() {
+  final double getPayoffSum() {
     return exact ? exactPayoff * (totalSamples.get() - pendingSamples.get())
-                 : totalPayoff.get();
+                 : getTotalPayoff();
   }
 
-  final long getPayoffSquaresSum() {
+  final double getPayoffSquaresSum() {
     return exact ? exactPayoff * exactPayoff *
-                   (totalSamples.get() - pendingSamples.get()) : totalPayoffSquares.get();
+                   (totalSamples.get() - pendingSamples.get()) : getTotalPayoffSquares();
   }
 
   final void addExactSamples(int count) {
@@ -138,10 +166,9 @@ public class Node<S extends State<S, M>, M extends Move> {
     pendingSamples.addAndGet(count);
   }
 
-  final void addSamples(int count, int payoffSum, long payoffSquaresSum) {
+  final void addSamples(int count, double payoffSum, double payoffSquaresSum) {
     assert count <= pendingSamples.get();
-    totalPayoff.addAndGet(payoffSum);
-    totalPayoffSquares.addAndGet(payoffSquaresSum);
+    addToPayoff(payoffSum, payoffSquaresSum);
     pendingSamples.addAndGet(-count);
   }
 
@@ -151,14 +178,14 @@ public class Node<S extends State<S, M>, M extends Move> {
 
   double getPayoff() {
     return exact ? exactPayoff
-                 : (double) totalPayoff.get() / (totalSamples.get() - pendingSamples.get());
+                 : getTotalPayoff() / (totalSamples.get() - pendingSamples.get());
   }
 
   double getBiasedScore(double logParentSamples, boolean reverse) {
     assert logParentSamples >= 0;
 
-    long totalPayoff = this.totalPayoff.get();
-    long totalPayoffSquares = this.totalPayoffSquares.get();
+    double totalPayoff = getTotalPayoff();
+    double totalPayoffSquares = getTotalPayoffSquares();
     long totalSamples = this.totalSamples.get() + 1;
     long pendingSamples = this.pendingSamples.get() + 1;
 
@@ -168,10 +195,12 @@ public class Node<S extends State<S, M>, M extends Move> {
       return (reverse ? -exactPayoff : exactPayoff) + 3 * context.payoffSpread * coefficient;
     }
 
-    double mean = (double) (totalPayoff + context.minPayoff * pendingSamples ) / totalSamples;
+    double mean =
+        (totalPayoff + context.minPayoff * pendingSamples) / totalSamples;
     double variance =
-        (double) (totalPayoffSquares + context.minPayoffSquare * pendingSamples) / totalSamples -
-             mean * mean;
+        (totalPayoffSquares + context.minPayoffSquare * pendingSamples) /
+            totalSamples -
+        mean * mean;
 
     if (variance < 0) {
       variance = context.payoffSpread * context.payoffSpread / 4.0;
