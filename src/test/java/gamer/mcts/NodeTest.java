@@ -133,9 +133,9 @@ public class NodeTest {
     executor.shutdown();
 
     assertTrue(node0.hasChildren());
-    assertEquals(0, node0.getPendingSamples());
-    assertEquals(512, node0.getTotalSamples());
-    assertEquals(0, node0.getPayoffSum());
-    assertEquals(512, node0.getPayoffSquaresSum());
+    assertEquals(0, node0.getPendingSamples(), 0.1);
+    assertEquals(512, node0.getTotalSamples(), 0.1);
+    assertEquals(0, node0.getPayoffSum(), 0.1);
+    assertEquals(512, node0.getPayoffSquaresSum(), 0.1);
   }
 }

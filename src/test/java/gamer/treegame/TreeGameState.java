@@ -68,7 +68,7 @@ public final class TreeGameState
 
   @Override
   public TreeGameMove parseMove(String moveStr) {
-    throw new UnsupportedOperationException();
+    return game.getMove(Integer.parseInt(moveStr));
   }
 
   @Override

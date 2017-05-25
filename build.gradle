@@ -64,8 +64,9 @@ run {
 }
 
 test {
-  testLogging.showStandardStreams = true
-  beforeTest {
-    descriptor -> logger.lifecycle("Running test: " + descriptor)
-  }
+  testLogging.showStandardStreams = false
+  //// Uncomment if a test hangs.
+  // beforeTest {
+  //   descriptor -> logger.lifecycle("Running test: " + descriptor)
+  // }
 }

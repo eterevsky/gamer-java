@@ -8,9 +8,12 @@ import gamer.def.State;
 public class MinimaxPlayer<S extends State<S, M>, M extends Move>
     implements ComputerPlayer<S, M> {
 
+  private double parentScoreCoefficient = 0.001;
+  private double childScoreCoefficient = 0.999;
+
   private long timeout = 1000;
-  private long maxSamples = 0;
-  private int maxDepth = 0;
+  private long maxSamples = Long.MAX_VALUE;
+  private int maxDepth = Integer.MAX_VALUE;
 
   private long samples = 0;
   private long deadline = 0;
@@ -31,7 +34,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
   @Override
   public void setMaxWorkers(int maxWorkers) {
     if (maxWorkers > 1) {
-      throw new RuntimeException(
+      throw new UnsupportedOperationException(
           "MinimaxPlayer doesn't support multithreading.");
     }
   }
@@ -43,7 +46,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
 
   @Override
   public void setTimeout(long timeout) {
-    this.timeout = timeout;
+    this.timeout = timeout == 0 ? Long.MAX_VALUE : timeout;
   }
 
   public void setMaxDepth(int maxDepth) {
@@ -61,20 +64,20 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
     }
     deadline = timeout > 0 ? System.currentTimeMillis() + timeout : -1;
     samples = 0;
-    int depth = 0;
     SearchResult<M> result = null;
-    while ((maxDepth <= 0 || depth < maxDepth) &&
-           (deadline <= 0 || System.currentTimeMillis() < deadline) &&
-           (maxSamples <= 0 || samples < maxSamples)) {
-      depth++;
-      SearchResult<M> newResult = search(state, depth, state.getGame().getMinPayoff(), state.getGame().getMaxPayoff());
+    for (int depth = 1;
+         depth <= maxDepth && System.currentTimeMillis() < deadline &&
+         samples < maxSamples; depth++) {
+      SearchResult<M> newResult =
+          search(state, depth, state.getGame().getMinPayoff(),
+                 state.getGame().getMaxPayoff());
       if (newResult != null) {
         result = newResult;
         lastDepth = depth;
       }
     }
 
-    selectedPayoff = result.payoff;
+    selectedPayoff = result.score;
     selectedMoveStr = state.moveToString(result.move);
     return result.move;
   }
@@ -82,65 +85,53 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
   @Override
   public String getReport() {
     return String
-        .format("%s depth: %d, samples: %d, score: %f",
-                selectedMoveStr, lastDepth, samples, selectedPayoff);
+        .format("%s depth: %d, samples: %d, score: %f", selectedMoveStr,
+                lastDepth, samples, selectedPayoff);
   }
 
-  static class SearchResult<M extends Move> {
-    private final M move;
-    private final double payoff;
-
-    SearchResult(M move, double payoff) {
-      this.move = move;
-      this.payoff = payoff;
-    }
-  }
-
-  private SearchResult<M> search(S state, int depth, double minScore, double maxScore) {
+  private SearchResult<M> search(
+      S state, int depth, double minScore, double maxScore) {
     assert state.getPlayer() == 0 || state.getPlayer() == 1;
-
-    if (state.isTerminal()) {
-      samples++;
-      return new SearchResult<>(null, state.getPayoff(0));
-    }
-
-    if (depth == 0) {
-      samples++;
-      return new SearchResult<>(null, evaluator.evaluate(state));
-    }
-
-    if (deadline > 0 && System.currentTimeMillis() > deadline ||
-        maxSamples > 0 && samples > maxSamples) {
+    if (System.currentTimeMillis() >= deadline || samples >= maxSamples) {
       return null;
     }
 
-    double bestPayoff = state.getPlayerBool() ? state.getGame().getMinPayoff()
-                                              : state.getGame().getMaxPayoff();
-    M bestMove = state.getRandomMove();
+    double currentScore = evaluator.evaluate(state);
+    samples++;
+    if (depth == 0 || state.isTerminal()) {
+      return new SearchResult<>(null, currentScore);
+    }
+
+    double bestChildScore =
+        state.getPlayerBool() ? state.getGame().getMinPayoff() - 1
+                              : state.getGame().getMaxPayoff() + 1;
+    double minChildScore = Math.max((minScore - parentScoreCoefficient * currentScore) /
+                           childScoreCoefficient, state.getGame().getMinPayoff());
+    double maxChildScore = Math.min((maxScore - parentScoreCoefficient * currentScore) /
+                           childScoreCoefficient, state.getGame().getMaxPayoff());
+    M bestMove = null;
 
     for (M move : state.getMoves()) {
       S stateClone = state.clone();
       stateClone.play(move);
-      SearchResult<M> subresult = search(stateClone, depth - 1, minScore, maxScore);
-      if (subresult == null) {
-        return null;
-      }
-      double payoff = 0.9999 * subresult.payoff;
-      if (state.getPlayerBool() ? (payoff > bestPayoff)
-                                : (payoff < bestPayoff)) {
-        bestPayoff = subresult.payoff;
+      SearchResult<M> childResult =
+          search(stateClone, depth - 1, minChildScore, maxChildScore);
+      if (childResult == null) break;
+      if (state.getPlayerBool() ? (childResult.score > bestChildScore)
+                                : (childResult.score < bestChildScore)) {
+        bestChildScore = childResult.score;
         bestMove = move;
         if (state.getPlayerBool()) {
-          if (bestPayoff > minScore) {
-            minScore = bestPayoff;
-            if (bestPayoff >= maxScore) {
+          if (bestChildScore > minChildScore) {
+            minChildScore = bestChildScore;
+            if (bestChildScore >= maxChildScore) {
               break;
             }
           }
         } else {
-          if (bestPayoff < maxScore) {
-            maxScore = bestPayoff;
-            if (bestPayoff <= minScore) {
+          if (bestChildScore < maxChildScore) {
+            maxChildScore = bestChildScore;
+            if (bestChildScore <= minChildScore) {
               break;
             }
           }
@@ -148,8 +139,19 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
       }
     }
 
-    assert bestMove != null;
+    if (bestMove == null) return null;
 
-    return new SearchResult<>(bestMove, bestPayoff);
+    return new SearchResult<>(bestMove, childScoreCoefficient * bestChildScore +
+                                        parentScoreCoefficient * currentScore);
+  }
+
+  static class SearchResult<M extends Move> {
+    private final M move;
+    private final double score;
+
+    SearchResult(M move, double score) {
+      this.move = move;
+      this.score = score;
+    }
   }
 }
