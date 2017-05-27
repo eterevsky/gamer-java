@@ -58,7 +58,7 @@ public final class ChessState implements State<ChessState, ChessMove> {
     this.board = new Board();
   }
 
-  static ChessState fromFen(String fen) {
+  public static ChessState fromFen(String fen) {
     return Fen.parse(fen);
   }
 

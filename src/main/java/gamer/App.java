@@ -5,22 +5,29 @@ import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
 import gamer.chess.ChessSimpleEvaluator;
 import gamer.chess.ChessState;
-import gamer.def.Evaluator;
 import gamer.def.Game;
 import gamer.def.Move;
 import gamer.def.State;
-import gamer.g2048.G2048;
 import gamer.g2048.Benchmark2048;
+import gamer.g2048.G2048;
 import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
 import gamer.mcts.BenchmarkMcts;
 import gamer.mcts.MonteCarloPlayer;
 import gamer.minimax.MinimaxPlayer;
-import gamer.players.*;
+import gamer.players.BenchmarkUct;
+import gamer.players.MonteCarloUct;
 import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
 import gamer.tournament.Tournament;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -76,37 +83,39 @@ class App {
     tournament.play();
   }
 
-   private static <G extends Game<P, M>, P extends State<P, M>, M extends Move>
-      void runGame(G game, long moveTime) {
+  private static <G extends Game<P, M>, P extends State<P, M>, M extends
+      Move> void runGame(
+      G game, long moveTime) {
     int cores = Runtime.getRuntime().availableProcessors();
     P startPosition = game.newGame();
 
     MonteCarloPlayer<P, M> player1 = new MonteCarloPlayer<>(game);
     player1.setTimeout(moveTime * 1000);
     player1.setMaxWorkers(cores);
-    player1.setSamplesBatch(1);
+    //    player1.setSamplesBatch(1);
 
     Match<P, M> match;
 
     if (game.getPlayersCount() == 1) {
       match = new Match<>(startPosition, player1);
-    } else {
-      MonteCarloPlayer<P, M> player2 = new MonteCarloPlayer<>(game);
+    }
+    else {
+//      MonteCarloPlayer<P, M> player2 = new MonteCarloPlayer<>(game);
+//      player2.setTimeout(moveTime * 1000);
+//      player2.setMaxWorkers(cores);
+//      player2.setSamplesBatch(4);
+//      player2.setSelector(game.getMoveSelector("random"));
+      MinimaxPlayer<P, M> player2 = new MinimaxPlayer<>();
       player2.setTimeout(moveTime * 1000);
-      player2.setMaxWorkers(cores);
-      // player2.setSamplesBatch(4);
-      // player2.setSelector(game.getMoveSelector("random"));
-      // MinimaxPlayer<P, M> player2 = new MinimaxPlayer<>();
-      // player2.setTimeout(moveTime * 1000);
       if (startPosition instanceof ChessState) {
         @SuppressWarnings("unchecked")
         MonteCarloPlayer<ChessState, ?> chessPlayer1 =
-            (MonteCarloPlayer<ChessState, ?>)player1;
+            (MonteCarloPlayer<ChessState, ?>) player1;
         chessPlayer1.setEvaluator(ChessSimpleEvaluator.getInstance());
-        // @SuppressWarnings("unchecked")
-        // MinimaxPlayer<ChessState, ?> chessPlayer2 =
-        //     (MinimaxPlayer<ChessState, ?>)player2;
-        // chessPlayer2.setEvaluator(ChessSimpleEvaluator.getInstance());
+        @SuppressWarnings("unchecked")
+        MinimaxPlayer<ChessState, ?> chessPlayer2 =
+            (MinimaxPlayer<ChessState, ?>) player2;
+        chessPlayer2.setEvaluator(ChessSimpleEvaluator.getInstance());
       }
       match = new Match<>(startPosition, player1, player2);
     }

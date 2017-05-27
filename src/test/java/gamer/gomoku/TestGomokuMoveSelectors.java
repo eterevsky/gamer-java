@@ -102,7 +102,7 @@ public class TestGomokuMoveSelectors {
       moves++;
     }
 
-    assertTrue(moves >= 9);
+    assertTrue(String.format("Expected at least 9 moves, but got: %d", moves),moves >= 9);
     assertTrue(moves <= gomoku.getSize() * gomoku.getSize());
   }
 

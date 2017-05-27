@@ -15,6 +15,9 @@ public class ChessSimpleEvaluator implements Evaluator<ChessState> {
 
   @Override
   public double evaluate(ChessState state) {
+    if (state.isTerminal()) {
+      return state.getPayoff(0);
+    }
     double score = 0;
     for (byte piece : state.getBoard().board) {
       score += PIECE_SCORE[piece];

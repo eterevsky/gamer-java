@@ -16,7 +16,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
   private int maxDepth = Integer.MAX_VALUE;
 
   private long samples = 0;
-  private long deadline = 0;
+  private long deadline = Long.MAX_VALUE;
   private double selectedPayoff = 0;
   private int lastDepth = 0;
   private String selectedMoveStr;
@@ -89,7 +89,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
                 lastDepth, samples, selectedPayoff);
   }
 
-  private SearchResult<M> search(
+  /* package */ SearchResult<M> search(
       S state, int depth, double minScore, double maxScore) {
     assert state.getPlayer() == 0 || state.getPlayer() == 1;
     if (System.currentTimeMillis() >= deadline || samples >= maxSamples) {
@@ -97,6 +97,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
     }
 
     double currentScore = evaluator.evaluate(state);
+
     samples++;
     if (depth == 0 || state.isTerminal()) {
       return new SearchResult<>(null, currentScore);
@@ -146,8 +147,8 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
   }
 
   static class SearchResult<M extends Move> {
-    private final M move;
-    private final double score;
+    final M move;
+    final double score;
 
     SearchResult(M move, double score) {
       this.move = move;
