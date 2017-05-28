@@ -170,6 +170,8 @@ public final class ChessState implements State<ChessState, ChessMove> {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
+    builder.append(Fen.toFen(this));
+    builder.append('\n');
     for (int row = 8; row >= 1; row--) {
       for (int col = 1; col <= 8; col++) {
         builder.append(" ").append(Pieces.piece2a(board.get(col, row)));

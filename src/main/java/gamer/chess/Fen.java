@@ -16,6 +16,14 @@ class Fen {
     for (int cell = 0; cell < 64; cell++) {
       int row = 7 - cell / 8;
       int col = cell % 8;
+      if (col == 0 && nempty > 0) {
+        builder.append(nempty);
+        nempty = 0;
+      }
+
+      if (col == 0 && row < 7)
+        builder.append('/');
+
       byte piece = state.get(col, row);
 
       if (piece != EMPTY && nempty > 0) {
@@ -38,14 +46,10 @@ class Fen {
         case BLACK | KING: builder.append('k'); break;
         case EMPTY: nempty++;
       }
+    }
 
-      if (col == 8 && nempty > 0) {
-        builder.append(nempty);
-        nempty = 0;
-      }
-
-      if (col == 8 && row > 1)
-        builder.append('/');
+    if (nempty > 0) {
+      builder.append(nempty);
     }
 
     builder.append(state.getPlayerBool() ? " w " : " b ");

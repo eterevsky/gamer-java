@@ -11,7 +11,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
   private double parentScoreCoefficient = 0.001;
   private double childScoreCoefficient = 0.999;
 
-  private long timeout = 1000;
+  private long timeout = 0;
   private long maxSamples = Long.MAX_VALUE;
   private int maxDepth = Integer.MAX_VALUE;
 
@@ -46,7 +46,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
 
   @Override
   public void setTimeout(long timeout) {
-    this.timeout = timeout == 0 ? Long.MAX_VALUE : timeout;
+    this.timeout = timeout <= 0 ? Long.MAX_VALUE : timeout;
   }
 
   public void setMaxDepth(int maxDepth) {
@@ -62,7 +62,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
     if (evaluator == null) {
       throw new RuntimeException("Minimax called with unspecified evaluator.");
     }
-    deadline = timeout > 0 ? System.currentTimeMillis() + timeout : -1;
+    deadline = timeout > 0 ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
     samples = 0;
     SearchResult<M> result = null;
     for (int depth = 1;
@@ -85,7 +85,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
   @Override
   public String getReport() {
     return String
-        .format("%s depth: %d, samples: %d, score: %f", selectedMoveStr,
+        .format("%s depth: %d, samples: %d, score: %f%n", selectedMoveStr,
                 lastDepth, samples, selectedPayoff);
   }
 
@@ -117,7 +117,7 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
       stateClone.play(move);
       SearchResult<M> childResult =
           search(stateClone, depth - 1, minChildScore, maxChildScore);
-      if (childResult == null) break;
+      if (childResult == null) return null;
       if (state.getPlayerBool() ? (childResult.score > bestChildScore)
                                 : (childResult.score < bestChildScore)) {
         bestChildScore = childResult.score;
