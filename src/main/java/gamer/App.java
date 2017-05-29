@@ -177,20 +177,23 @@ class App {
     mode.addOption(new Option("g", "single_game", false, "Run single game"));
     mode.addOption(new Option("t", "tournament", false, "Run tournament"));
     mode.addOption(new Option("b", "benchmark", false, "Run benchmarks"));
+    mode.addOption(
+        new Option("i", "interactive", false, "Wait for user input"));
     mode.setRequired(true);
     options.addOptionGroup(mode);
 
-    options.addOption(
-        "benchmark_time_limit", true,
-        "Time limit in seconds for a single benchmark. (Default: 30)");
+    options.addOption(new Option("gui", "Show GUI"));
+    options.addOption("benchmark_time_limit", true,
+                      "Time limit in seconds for a single benchmark. " +
+                      "(Default: 30)");
     options.addOption("game", true, "Game to be played. (Default: gomoku)");
-    options.addOption(
-        "move_time", true, "Time per move in seconds. (Default: 15)");
-    options.addOption(
-        "filter", true,
-        "Only run benchmarks with this substring in the name. (Default: '')");
-    options.addOption(
-        "benchmark_precision", true, "Benchmark precision. (Default: 0.05)");
+    options.addOption("move_time", true,
+                      "Time per move in seconds. (Default: 15)");
+    options.addOption("filter", true,
+                      "Only run benchmarks with this substring in the name. " +
+                      "(Default: '')");
+    options.addOption("benchmark_precision", true,
+                      "Benchmark precision. (Default: 0.05)");
 
     return options;
   }
@@ -229,6 +232,10 @@ class App {
       return;
     }
 
+    if (cl.hasOption("gui")) {
+      GuiApp.main();
+    }
+
     if (cl.hasOption("help")) {
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp("gamer", options, true /* autoUsage */);
@@ -238,6 +245,8 @@ class App {
       runSingleGame(cl);
     } else if (cl.hasOption("tournament")) {
       runTournament(Gomoku.getInstance());
+    } else if (cl.hasOption("interactive")) {
+      System.out.println("Doing nothing.");
     } else {
       throw new RuntimeException("Internal error.");
     }
