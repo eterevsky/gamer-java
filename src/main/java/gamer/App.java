@@ -20,6 +20,7 @@ import gamer.players.MonteCarloUct;
 import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
 import gamer.tournament.Tournament;
+import gamer.util.Version;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -173,16 +174,14 @@ class App {
     Options options = new Options();
 
     OptionGroup mode = new OptionGroup();
+    mode.addOption(new Option("gui", "Run GUI"));
     mode.addOption(new Option("h", "help", false, "Show help message"));
     mode.addOption(new Option("g", "single_game", false, "Run single game"));
     mode.addOption(new Option("t", "tournament", false, "Run tournament"));
     mode.addOption(new Option("b", "benchmark", false, "Run benchmarks"));
-    mode.addOption(
-        new Option("i", "interactive", false, "Wait for user input"));
     mode.setRequired(true);
     options.addOptionGroup(mode);
 
-    options.addOption(new Option("gui", "Show GUI"));
     options.addOption("benchmark_time_limit", true,
                       "Time limit in seconds for a single benchmark. " +
                       "(Default: 30)");
@@ -198,26 +197,8 @@ class App {
     return options;
   }
 
-  private static String getVersion() {
-    try {
-      Enumeration<URL> resources =
-          App.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
-      while (resources.hasMoreElements()) {
-        Manifest manifest = new Manifest(resources.nextElement().openStream());
-        Attributes attr = manifest.getMainAttributes();
-
-        if ("gamer.App".equals(attr.getValue("Main-Class"))) {
-          return attr.getValue("Implementation-Version");
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    return null;
-  }
-
   public static void main(String[] args) {
-    String version = getVersion();
+    String version = Version.getVersion();
     if (version != null) {
       System.out.format("gamer %s\n", version);
     }
@@ -233,10 +214,8 @@ class App {
     }
 
     if (cl.hasOption("gui")) {
-      GuiApp.main();
-    }
-
-    if (cl.hasOption("help")) {
+      GuiApp.main(args);
+    } else if (cl.hasOption("help")) {
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp("gamer", options, true /* autoUsage */);
     } else if (cl.hasOption("benchmark")) {
