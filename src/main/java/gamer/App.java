@@ -3,6 +3,8 @@ package gamer;
 import gamer.benchmark.BenchmarkSuite;
 import gamer.chess.BenchmarkChess;
 import gamer.chess.Chess;
+import gamer.chess.ChessFeatureExtractor;
+import gamer.chess.ChessMove;
 import gamer.chess.ChessSimpleEvaluator;
 import gamer.chess.ChessState;
 import gamer.def.Game;
@@ -14,6 +16,7 @@ import gamer.gomoku.BenchmarkGomoku;
 import gamer.gomoku.Gomoku;
 import gamer.mcts.BenchmarkMcts;
 import gamer.mcts.MonteCarloPlayer;
+import gamer.minimax.LinearRegressionEvaluator;
 import gamer.minimax.MinimaxPlayer;
 import gamer.players.BenchmarkUct;
 import gamer.players.MonteCarloUct;
@@ -175,6 +178,7 @@ class App {
 
     OptionGroup mode = new OptionGroup();
     mode.addOption(new Option("gui", "Run GUI"));
+    mode.addOption(new Option("train", "Train"));
     mode.addOption(new Option("h", "help", false, "Show help message"));
     mode.addOption(new Option("g", "single_game", false, "Run single game"));
     mode.addOption(new Option("t", "tournament", false, "Run tournament"));
@@ -195,6 +199,12 @@ class App {
                       "Benchmark precision. (Default: 0.05)");
 
     return options;
+  }
+
+  private static void train() {
+    LinearRegressionEvaluator<ChessState, ChessMove> evaluator =
+        new LinearRegressionEvaluator<>(Chess.getInstance(), new ChessFeatureExtractor());
+    evaluator.train();
   }
 
   public static void main(String[] args) {
@@ -218,6 +228,8 @@ class App {
     } else if (cl.hasOption("help")) {
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp("gamer", options, true /* autoUsage */);
+    } else if (cl.hasOption("train")) {
+      train();
     } else if (cl.hasOption("benchmark")) {
       runBenchmarks(cl);
     } else if (cl.hasOption("single_game")) {

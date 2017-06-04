@@ -89,6 +89,16 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
                 lastDepth, samples, selectedPayoff);
   }
 
+  static class SearchResult<M extends Move> {
+    final M move;
+    final double score;
+
+    SearchResult(M move, double score) {
+      this.move = move;
+      this.score = score;
+    }
+  }
+
   /* package */ SearchResult<M> search(
       S state, int depth, double minScore, double maxScore) {
     assert state.getPlayer() == 0 || state.getPlayer() == 1;
@@ -96,10 +106,13 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
       return null;
     }
 
-    double currentScore = evaluator.evaluate(state);
+    if (state.isTerminal()) {
+      return new SearchResult<>(null, state.getPayoff(0));
+    }
 
+    double currentScore = evaluator.evaluate(state);
     samples++;
-    if (depth == 0 || state.isTerminal()) {
+    if (depth == 0) {
       return new SearchResult<>(null, currentScore);
     }
 
@@ -144,15 +157,5 @@ public class MinimaxPlayer<S extends State<S, M>, M extends Move>
 
     return new SearchResult<>(bestMove, childScoreCoefficient * bestChildScore +
                                         parentScoreCoefficient * currentScore);
-  }
-
-  static class SearchResult<M extends Move> {
-    final M move;
-    final double score;
-
-    SearchResult(M move, double score) {
-      this.move = move;
-      this.score = score;
-    }
   }
 }
