@@ -24,20 +24,14 @@ import gamer.tournament.GameRunner;
 import gamer.tournament.Match;
 import gamer.tournament.Tournament;
 import gamer.util.Version;
-import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 class App {
   private static <G extends Game<P, M>, P extends State<P, M>,
@@ -214,7 +208,7 @@ class App {
     }
 
     Options options = initOptions();
-    CommandLineParser parser = new BasicParser();
+    CommandLineParser parser = new DefaultParser();
     CommandLine cl;
     try {
       cl = parser.parse(options, args);
@@ -236,8 +230,6 @@ class App {
       runSingleGame(cl);
     } else if (cl.hasOption("tournament")) {
       runTournament(Gomoku.getInstance());
-    } else if (cl.hasOption("interactive")) {
-      System.out.println("Doing nothing.");
     } else {
       throw new RuntimeException("Internal error.");
     }
